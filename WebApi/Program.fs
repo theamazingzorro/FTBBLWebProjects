@@ -1,4 +1,4 @@
-module WebApi.App
+module ftbbl.WebApi.App
 
 open System
 open System.IO
@@ -10,8 +10,7 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
 
-// My Imports
-open ftbbl.Handlers.HttpHandlers
+open ftbbl.Handlers
 
 // ---------------------------------
 // Web app
@@ -22,7 +21,8 @@ let webApp =
         subRoute "/api"
             ( choose [
                 GET >=> choose [
-                    route "/hello" >=> handleGetHello
+                    route "/hello" >=> HttpHandlers.handleGetHello
+                    route "/msg" >=> HttpHandlers.printMsg
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" ]
@@ -61,12 +61,15 @@ let configureApp (app : IApplicationBuilder) =
         .UseGiraffe(webApp)
 
 let configureServices (services : IServiceCollection) =
-    services.AddCors()    |> ignore
-    services.AddGiraffe() |> ignore
+    services.AddCors()
+        .AddLogging()
+        .AddGiraffe() 
+        |> ignore
 
 let configureLogging (builder : ILoggingBuilder) =
     builder.AddConsole()
-           .AddDebug() |> ignore
+           .AddDebug() 
+           |> ignore
 
 [<EntryPoint>]
 let main args =
