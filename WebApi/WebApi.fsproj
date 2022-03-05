@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -12,20 +12,16 @@
     <PackageReference Include="Ply" Version="0.3.*" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="Models\Message.fs" />
+  <ItemGroup> 
+	<Compile Include="Models\Team.fs" />
+	<Compile Include="Models\Message.fs" />
+    <Compile Include="Repos\TeamRepository.fs" />
+    <Compile Include="Handlers\TeamApiHandlers.fs" />
     <Compile Include="Handlers\HttpHandlers.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="web.config" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="WebRoot\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="WebRoot\" />
   </ItemGroup>
 </Project>

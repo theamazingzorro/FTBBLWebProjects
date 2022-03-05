@@ -1,5 +1,7 @@
 ﻿namespace ftbbl.WebApi.Tests
 
+open Microsoft.Extensions.Logging
+
 module ContextTools = 
 
     open System
@@ -15,6 +17,7 @@ module ContextTools =
     let buildMockContext () =
         let context = Substitute.For<HttpContext>()
         context.RequestServices.GetService(typeof<INegotiationConfig>).Returns(DefaultNegotiationConfig()) |> ignore
+        context.RequestServices.GetService(typeof<ILoggerFactory>).Returns(new LoggerFactory()) |> ignore
         context.RequestServices.GetService(typeof<Json.ISerializer>).Returns(Giraffe.NewtonsoftJson.Serializer(NewtonsoftJson.Serializer.DefaultSettings)) |> ignore
         context.Request.Headers.ReturnsForAnyArgs(new HeaderDictionary()) |> ignore
         context.Response.Body <- new MemoryStream()

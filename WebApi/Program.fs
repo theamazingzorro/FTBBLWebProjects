@@ -23,6 +23,7 @@ let webApp =
                 GET >=> choose [
                     route "/hello" >=> HttpHandlers.handleGetHello
                     route "/msg" >=> HttpHandlers.printMsg
+                    route "/team" >=> TeamApiHandlers.getTeams
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" ]

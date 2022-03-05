@@ -1,4 +1,4 @@
-module ftbbl.WebApi.Tests
+module ftbbl.WebApi.Tests.ExampleHandlerTest
 
 open ftbbl.WebApi.Handlers
 open ftbbl.WebApi.Models
@@ -12,7 +12,7 @@ open System.IO
 
 [<Fact>]
 let ``print msg handler prints a message from the body`` () =
-    let handler = HttpHandlers.handleGetHello
+    let handler = HttpHandlers.printMsg
 
     let message = { Text = "hello world" }
     let postData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message))
@@ -25,6 +25,6 @@ let ``print msg handler prints a message from the body`` () =
         Assert.True(response.IsSome)
         let context = response.Value
         let body = getBody context
-        Assert.Equal("""{"text":"Hello world, from Giraffe!"}""", body)
+        Assert.Equal("""hello world""", body)
     }
     
