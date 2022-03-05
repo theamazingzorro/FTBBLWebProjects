@@ -10,7 +10,7 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
 
-open ftbbl.Handlers
+open ftbbl.WebApi.Handlers
 
 // ---------------------------------
 // Web app

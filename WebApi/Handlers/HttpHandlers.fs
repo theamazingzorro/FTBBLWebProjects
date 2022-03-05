@@ -1,4 +1,4 @@
-﻿namespace ftbbl.Handlers
+﻿namespace ftbbl.WebApi.Handlers
 
 open Microsoft.Extensions.Logging
 
@@ -6,7 +6,7 @@ module HttpHandlers =
 
     open Microsoft.AspNetCore.Http
     open Giraffe
-    open ftbbl.Models
+    open ftbbl.WebApi.Models
 
     let handleGetHello =
         fun (next : HttpFunc) (ctx : HttpContext) ->

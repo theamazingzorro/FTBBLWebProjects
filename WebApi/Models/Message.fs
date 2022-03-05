@@ -1,4 +1,4 @@
-﻿namespace ftbbl.Models
+﻿namespace ftbbl.WebApi.Models
 
 [<CLIMutable>]
 type Message =
