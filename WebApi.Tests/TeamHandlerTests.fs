@@ -12,12 +12,12 @@ open System.IO
 
 [<Fact>]
 let ``getTeams returns a list of teams`` () =
-    let expectedData: List<Team> = [
+    let expectedData: Team list = [
             { Name="Team 1"; Race="Lizardmen"; Coach="Theamazingzorro"; IsActive=true }
             { Name="Team 2"; Race="Necromantic"; Coach="Danean"; IsActive=true }
         ]
 
-    let teamRepoMock = 
+    let teamRepoMock() = 
         expectedData
 
     let handler = TeamApiHandlers.getTeams teamRepoMock 
