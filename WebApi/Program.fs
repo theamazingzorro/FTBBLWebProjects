@@ -21,8 +21,8 @@ let webApp =
         subRoute "/api"
             ( choose [
                 GET >=> choose [
-                    route "/team" >=> TeamApiHandlers.getTeamsHandler
-                    routef "/team/%i" TeamApiHandlers.getSingleTeamHandler
+                    routex "/team(/?)" >=> TeamApiHandlers.getTeamsHandler
+                    routef "/team/%i/" TeamApiHandlers.getSingleTeamHandler
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" 
