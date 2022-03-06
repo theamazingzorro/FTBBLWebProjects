@@ -12,22 +12,25 @@ open System.IO
 
 [<Fact>]
 let ``getTeams returns a list of teams`` () =
-    let handler = TeamApiHandlers.getTeams
+    let expectedData: List<Team> = [
+            { Name="Team 1"; Race="Lizardmen"; Coach="Theamazingzorro"; IsActive=true }
+            { Name="Team 2"; Race="Necromantic"; Coach="Danean"; IsActive=true }
+        ]
+
+    let teamRepoMock = 
+        expectedData
+
+    let handler = TeamApiHandlers.getTeams teamRepoMock 
     
     let context = buildMockContext()
 
     task {
         let! response = handler next context
         Assert.True(response.IsSome)
-        let context = response.Value
-        let body = getBody context
 
+        let body = getBody (response.Value)
+            
         let data = JsonConvert.DeserializeObject<List<Team>>(body)
-
-        let expectedData: List<Team> = [
-            {Name="The Government"; Race="Lizardmen"; Coach="Theamazingzorro"; IsActive=true}
-            {Name="Scooby Snacks"; Race="Necromantic"; Coach="Danean"; IsActive=true}
-        ]
 
         Assert.Equal<List<Team>>(data, expectedData)
     }

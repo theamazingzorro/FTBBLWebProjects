@@ -8,6 +8,6 @@ module TeamRepository =
             {Name="Scooby Snacks"; Race="Necromantic"; Coach="Danean"; IsActive=true}
         ]
 
-    let getAll: List<Team> = 
+    let getAll = 
         List.where (fun x -> x.IsActive) _teams
         
