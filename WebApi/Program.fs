@@ -21,8 +21,6 @@ let webApp =
         subRoute "/api"
             ( choose [
                 GET >=> choose [
-                    route "/hello" >=> HttpHandlers.handleGetHello
-                    route "/msg" >=> HttpHandlers.printMsg
                     route "/team" >=> TeamApiHandlers.getTeamsHandler
                 ]
             ])

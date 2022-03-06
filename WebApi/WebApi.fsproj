@@ -17,10 +17,8 @@
 
   <ItemGroup> 
 	<Compile Include="Models\Team.fs" />
-	<Compile Include="Models\Message.fs" />
     <Compile Include="Repos\TeamRepository.fs" />
     <Compile Include="Handlers\TeamApiHandlers.fs" />
-    <Compile Include="Handlers\HttpHandlers.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

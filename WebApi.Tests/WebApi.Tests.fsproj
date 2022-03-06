@@ -10,7 +10,6 @@
   <ItemGroup>
     <Compile Include="ContextTools.fs" />
     <Compile Include="TeamHandlerTests.fs" />
-    <Compile Include="ExampleHandlerTest.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
