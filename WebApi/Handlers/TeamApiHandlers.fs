@@ -24,3 +24,18 @@ module TeamApiHandlers =
 
     let getTeamsHandler : HttpHandler = 
         getTeams TeamRepository.getAll
+
+
+    let getTeam (id : int) =
+        fun (getTeamById : int -> Team) (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = ctx.GetLogger logName
+                logger.LogInformation $"Getting Team: id={id}"
+                
+                let team = getTeamById(id)
+
+                return! json team next ctx
+            }
+
+    let getSingleTeamHandler id =
+        getTeam id TeamRepository.getById

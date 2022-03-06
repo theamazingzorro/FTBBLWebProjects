@@ -5,9 +5,7 @@ open ftbbl.WebApi.Models
 open ftbbl.WebApi.Tests.ContextTools
 
 open Xunit
-open System.Text
 open Newtonsoft.Json
-open System.IO
 
 
 [<Fact>]
@@ -32,6 +30,29 @@ let ``getTeams returns a list of teams`` () =
             
         let data = JsonConvert.DeserializeObject<List<Team>>(body)
 
-        Assert.Equal<List<Team>>(data, expectedData)
+        Assert.Equal<List<Team>>(expectedData, data)
     }
     
+[<Fact>]
+let ``getTeam returns a single team with the given id`` () =
+    let testTeam = { Name="Team 1"; Race="Lizardmen"; Coach="Theamazingzorro"; IsActive=true }
+            
+
+    let teamRepoMock(id: int) = 
+        Assert.Equal(1, id)
+        testTeam
+
+    let handler = TeamApiHandlers.getTeam 1 teamRepoMock 
+    
+    let context = buildMockContext()
+
+    task {
+        let! response = handler next context
+        Assert.True(response.IsSome)
+
+        let body = getBody (response.Value)
+            
+        let data = JsonConvert.DeserializeObject<Team>(body)
+
+        Assert.Equal(testTeam, data)
+    }
