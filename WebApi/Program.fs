@@ -22,7 +22,7 @@ let webApp =
             ( choose [
                 GET >=> choose [
                     route "/team" >=> TeamApiHandlers.getTeamsHandler
-                    routef "/team/%i" (fun id -> TeamApiHandlers.getSingleTeamHandler id)
+                    routef "/team/%i" TeamApiHandlers.getSingleTeamHandler
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" 
