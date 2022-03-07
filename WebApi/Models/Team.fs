@@ -1,9 +1,12 @@
 ﻿namespace ftbbl.WebApi.Models
 
+open NPoco
+
 [<CLIMutable>]
 type Team =
     {
         Name : string
-        Race: string
+        [<Column("race_id")>]
+        Race: int
         Coach: string
     }
