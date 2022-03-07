@@ -24,6 +24,12 @@ let webApp =
                     routex "/team(/?)" >=> TeamApiHandlers.getTeamsHandler
                     routef "/team/%i/" TeamApiHandlers.getSingleTeamHandler
                 ]
+                POST >=> choose [
+                ]
+                PUT >=> choose [
+                ]
+                DELETE >=> choose [
+                ]
             ])
         setStatusCode 404 >=> text "Not Found" 
     ]

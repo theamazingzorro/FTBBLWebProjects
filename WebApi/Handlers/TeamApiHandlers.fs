@@ -37,5 +37,5 @@ module TeamApiHandlers =
                 return! json team next ctx
             }
 
-    let getSingleTeamHandler id =
+    let getSingleTeamHandler (id:int) : HttpHandler =
         getTeam id TeamRepository.getById

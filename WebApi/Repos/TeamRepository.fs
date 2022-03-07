@@ -1,13 +1,10 @@
 ﻿namespace ftbbl.WebApi.Repositories
 
-open System.Configuration
-open Microsoft.AspNetCore.Builder
-
-
-
 module TeamRepository = 
     open ftbbl.WebApi.Models
 
+    open Microsoft.AspNetCore.Builder
+    open System
     open MySql.Data.MySqlClient
     open NPoco
 
@@ -30,7 +27,11 @@ module TeamRepository =
 
         use db = new Database(connection)
 
-        db.Single<Team>("select * from Team where is_active=1 and id=@0", id)
+        try 
+            db.Single<Team>("select * from Team where is_active=1 and id=@0", id)
+        with
+            :? InvalidOperationException -> {Name=""; Race=""; Coach=""; IsActive=false}
+        
         
         
         
