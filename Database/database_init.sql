@@ -1,6 +1,6 @@
 create database if not exists ftbbl;
-
 use ftbbl;
+
 create table if not exists Team(
    id INT NOT NULL AUTO_INCREMENT,
    name VARCHAR(40) NOT NULL,

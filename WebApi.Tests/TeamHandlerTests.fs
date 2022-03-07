@@ -11,14 +11,14 @@ open Newtonsoft.Json
 [<Fact>]
 let ``getTeams returns a list of teams`` () =
     let testTeams: Team list = [
-            { Name="Team 1"; Race="Lizardmen"; Coach="Coach 1"; IsActive=true }
-            { Name="Team 2"; Race="Necromantic"; Coach="Coach 2"; IsActive=true }
+            { Name="Team 1"; Race="Lizardmen"; Coach="Coach 1" }
+            { Name="Team 2"; Race="Necromantic"; Coach="Coach 2" }
         ]
 
-    let teamRepoMock() = 
+    let getAllTeamsMock() = 
         testTeams
 
-    let handler = TeamApiHandlers.getTeams teamRepoMock 
+    let handler = TeamApiHandlers.getTeams getAllTeamsMock 
     let context = buildMockContext()
 
     task {
@@ -35,13 +35,13 @@ let ``getTeams returns a list of teams`` () =
     
 [<Fact>]
 let ``getTeam returns a single team with the given id`` () =
-    let testTeam = { Name="Team 1"; Race="Lizardmen"; Coach="Coach 1"; IsActive=true }
+    let testTeam = { Name="Team 1"; Race="Lizardmen"; Coach="Coach 1" }
          
-    let teamRepoMock(id: int) = 
+    let getTeamByIdMock(id: int) = 
         Assert.Equal(1, id)
         testTeam
 
-    let handler = TeamApiHandlers.getTeam 1 teamRepoMock 
+    let handler = TeamApiHandlers.getTeam 1 getTeamByIdMock 
     let context = buildMockContext()
 
     task {

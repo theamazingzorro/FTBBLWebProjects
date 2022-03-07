@@ -9,12 +9,13 @@ module TeamApiHandlers =
     open ftbbl.WebApi.Models
     open ftbbl.WebApi.Repositories
 
-    let logName = "fttbl.Handlers.TeamApiHandlers"
+    let private getLogger (ctx : HttpContext) = 
+        ctx.GetLogger "fttbl.Handlers.TeamApiHandlers"
 
     let getTeams =
         fun (getTeams : unit -> Team list) (next : HttpFunc) (ctx : HttpContext) ->
             task {
-                let logger = ctx.GetLogger logName
+                let logger = getLogger ctx
                 logger.LogInformation $"Getting Teams"
                 
                 let teams = getTeams()
@@ -29,7 +30,7 @@ module TeamApiHandlers =
     let getTeam (id : int) =
         fun (getTeamById : int -> Team) (next : HttpFunc) (ctx : HttpContext) ->
             task {
-                let logger = ctx.GetLogger logName
+                let logger = getLogger ctx
                 logger.LogInformation $"Getting Team: id={id}"
                 
                 let team = getTeamById(id)

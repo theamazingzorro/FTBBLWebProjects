@@ -30,7 +30,7 @@ module TeamRepository =
         try 
             db.Single<Team>("select * from Team where is_active=1 and id=@0", id)
         with
-            :? InvalidOperationException -> {Name=""; Race=""; Coach=""; IsActive=false}
+            :? InvalidOperationException -> { Name=""; Race=""; Coach="" }
         
         
         
