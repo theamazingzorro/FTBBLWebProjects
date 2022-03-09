@@ -1,6 +1,5 @@
 module Page.ListTeams exposing (Model, Msg, init, update, view)
 
-import Browser
 import Error
 import Html exposing (..)
 import Html.Attributes exposing (..)

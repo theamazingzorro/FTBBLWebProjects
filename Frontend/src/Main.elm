@@ -1,13 +1,12 @@
 module Main exposing (main)
 
-import Browser
+import Browser exposing (Document, UrlRequest)
+import Browser.Navigation as Nav
+import Html exposing (..)
 import Page.ListTeams as ListTeams
 import Route exposing (Route)
 import Url exposing (Url)
-import Browser.Navigation as Nav
-import Html exposing (..)
-import Browser exposing (UrlRequest)
-import Browser exposing (Document)
+
 
 type alias Model =
     { route : Route
@@ -15,12 +14,13 @@ type alias Model =
     , navKey : Nav.Key
     }
 
-type Page   
+
+type Page
     = NotFoundPage
     | ListPage ListTeams.Model
 
 
-type Msg 
+type Msg
     = LinkClicked UrlRequest
     | UrlChanged Url
     | ListPageMsg ListTeams.Msg
@@ -98,11 +98,11 @@ update msg model =
 
         ( UrlChanged url, _ ) ->
             let
-                newRoute = 
+                newRoute =
                     Route.parseUrl url
             in
-                ( { model | route = newRoute }, Cmd.none )
-                    |> initCurrentPage
+            ( { model | route = newRoute }, Cmd.none )
+                |> initCurrentPage
 
         ( ListPageMsg subMsg, ListPage pageModel ) ->
             let
