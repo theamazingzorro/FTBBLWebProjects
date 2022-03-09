@@ -8,7 +8,7 @@ import Race exposing (Race, raceDecoder)
 type alias Team =
     { id : TeamId
     , name : String
-    , race : Int
+    , race : Race
     , coach : String
     }
 
@@ -16,11 +16,14 @@ type alias Team =
 type alias TeamId =
     Int
 
+
 teamIdFromInt : Int -> TeamId
 teamIdFromInt i = i 
 
+
 teamIdToInt : TeamId -> Int
 teamIdToInt i = i 
+
 
 teamsDecoder : Decoder (List Team)
 teamsDecoder =
@@ -32,7 +35,7 @@ teamDecoder =
     Decode.succeed Team
         |> required "id" teamIdDecoder
         |> required "name" string
-        |> required "race" int
+        |> required "race" raceDecoder
         |> required "coach" string
 
 

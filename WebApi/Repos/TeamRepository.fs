@@ -17,7 +17,11 @@ module TeamRepository =
 
         use db = new Database(connection)
 
-        db.Fetch<Team>("select * from Team where is_active=1")
+        db.Fetch<Team>("""
+                SELECT * FROM Team
+                JOIN Race ON Team.race_id=Race.id
+                WHERE is_active=1
+                """)
             |> List.ofSeq
 
 
@@ -28,9 +32,13 @@ module TeamRepository =
         use db = new Database(connection)
 
         try 
-            db.Single<Team>("select * from Team where is_active=1 and id=@0", id)
+            db.Single<Team>("""
+                SELECT * FROM Team
+                JOIN Race ON Team.race_id=Race.id
+                WHERE is_active=1
+                AND Team.id=@0""", id)
         with
-            :? InvalidOperationException -> { Id=0; Name=""; Race=0; Coach="" }
+            :? InvalidOperationException -> { Id=0; Name=""; Race={Id=0; Name=""}; Coach="" }
         
         
         

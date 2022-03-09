@@ -1,10 +1,9 @@
 ﻿namespace ftbbl.WebApi.Models
 
+
 [<CLIMutable>]
-type Team =
+type Race =
     {
         Id : int
         Name : string
-        Race: Race
-        Coach: string
     }

@@ -107,7 +107,7 @@ viewTeam team =
         [ td []
             [ text team.name ]
         , td []
-            [ text (String.fromInt team.race) ]
+            [ text team.race.name ]
         , td []
             [ text team.coach ]
         ]
