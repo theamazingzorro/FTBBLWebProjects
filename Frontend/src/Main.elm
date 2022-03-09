@@ -2,117 +2,122 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Http
+import RemoteData exposing (WebData)
+import Team exposing (Team, teamsDecoder)
+import Url exposing (Protocol(..))
 import Html.Events exposing (onClick)
+import Error
 import Browser
-import Html.Events exposing (onInput)
 
 
-type alias User =
-    { name : String
-    , email : String
-    , password : String
-    , loggedIn : Bool
-    }
-
-initial : User
-initial = 
-    { name = ""
-    , email = ""
-    , password = ""
-    , loggedIn = False
+type alias Model =
+    { teams : WebData (List Team)
     }
 
 
 type Msg
-    = SaveName String
-    | SaveEmail String
-    | SavePassword String
-    | Signup
+    = FetchTeams
+    | TeamsReceived (WebData (List Team))
 
 
-update : Msg -> User -> User
-update message user =
-    case message of
-        SaveName newName ->
-            { user | name = newName }
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( { teams = RemoteData.Loading }, getTeamsRequest )
+
+
+getTeamsRequest : Cmd Msg
+getTeamsRequest =
+    Http.get
+        { url = "https://localhost:17317/api/team"
+        , expect =
+            Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
+        }
+
+
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg model =
+    case msg of
+        FetchTeams ->
+            ( { model | teams = RemoteData.Loading }, getTeamsRequest )
+
+        TeamsReceived response ->
+            ( { model | teams = response }, Cmd.none )
+
+
+view : Model -> Html Msg
+view model =
+    div []
+        [ button [ onClick FetchTeams ]
+            [ text "Refresh Teams" ]
+        , viewTeamsOrError model
+        ]
         
-        SaveEmail newEmail ->
-            { user | email = newEmail }
 
-        SavePassword newPass ->
-            { user | password = newPass }
-        
-        Signup ->
-            { user | loggedIn = True }
+viewTeamsOrError : Model -> Html Msg
+viewTeamsOrError model =
+    case model.teams of
+        RemoteData.NotAsked ->
+            text ""
 
+        RemoteData.Loading ->
+            h3 [] [ text "Loading..." ]
 
-view : User -> Html Msg
-view user =
-    div [ class "container" ]
-        [ div [ class "row" ]
-            [ div [ class "col-md-6 col-md-offset-3" ]
-                [ h1 [ class "text-center" ] [ text "Sign up" ]
-                , Html.form []
-                    [ div [ class "form-group" ]
-                        [ label
-                            [ class "control-label"
-                            , for "name"
-                            ]
-                            [ text "Name" ]
-                        , input
-                            [ class "form-control"
-                            , id "name"
-                            , type_ "text"
-                            , onInput SaveName
-                            ]
-                            []
-                        ]
-                    , div [ class "form-group" ]
-                        [ label
-                            [ class "control-label"
-                            , for "email"
-                            ]
-                            [ text "Email" ]
-                        , input
-                            [ class "form-control"
-                            , id "email"
-                            , type_ "email"
-                            , onInput SaveEmail
-                            ]
-                            []
-                        ]
-                    , div [ class "form-group" ]
-                        [ label
-                            [ class "control-label"
-                            , for "password"
-                            ]
-                            [ text "Password" ]
-                        , input
-                            [ class "form-control"
-                            , id "password"
-                            , type_ "password"
-                            , onInput SavePassword
-                            ]
-                            []
-                        ]
-                    , div [ class "text-center" ]
-                        [ button
-                            [ class "btn btn-lg btn-primary"
-                            , type_ "submit"
-                            , onClick Signup
-                            ]
-                            [ text "Create my account" ]
-                        ]
-                    ]
-                ]
-            ]
+        RemoteData.Success teams ->
+            viewTeams teams
+
+        RemoteData.Failure httpError ->
+            viewError (Error.buildErrorMessage httpError)
+
+viewError : String -> Html Msg
+viewError errorMessage =
+    let
+        errorHeading =
+            "Couldn't fetch data at this time."
+    in
+    div []
+        [ h3 [] [ text errorHeading ]
+        , text ("Error: " ++ errorMessage)
         ]
 
 
-main : Program () User Msg
+viewTeams : List Team -> Html Msg
+viewTeams teams =
+    div []
+        [ h3 [] [ text "Teams" ]
+        , table []
+            ( viewTableHeader :: List.map viewTeam teams)
+        ]
+
+viewTableHeader : Html Msg
+viewTableHeader =
+    tr []
+        [ th []
+            [ text "Name" ]
+        , th []
+            [ text "Race" ]
+        , th []
+            [ text "Coach" ]
+        ]
+
+
+viewTeam : Team -> Html Msg
+viewTeam team =
+    tr []
+        [ td []
+            [ text team.name ]
+        , td []
+            [ text (String.fromInt team.race) ]
+        , td []
+            [ text team.coach ]
+        ]
+
+
+main : Program () Model Msg
 main =
-    Browser.sandbox
-        { init = initial
+    Browser.element
+        { init = init
         , view = view
         , update = update
+        , subscriptions = \_ -> Sub.none
         }

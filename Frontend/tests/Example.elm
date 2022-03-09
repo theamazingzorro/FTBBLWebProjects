@@ -7,10 +7,11 @@ import Test exposing (..)
 suite : Test
 suite =
     test "two plus two equals 4" <|
-        \_ -> 
+        \_ ->
             (2 + 2)
-            |> Expect.equal 4
-        
+                |> Expect.equal 4
+
+
 additionTests : Test
 additionTests =
     describe "Addition"
@@ -19,6 +20,7 @@ additionTests =
         , test "three plus four equals seven" <|
             \_ -> (3 + 4) |> Expect.equal 7
         ]
+
 
 comparisonTests : Test
 comparisonTests =

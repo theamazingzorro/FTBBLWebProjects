@@ -11,8 +11,8 @@ open Newtonsoft.Json
 [<Fact>]
 let ``getTeams returns a list of teams`` () =
     let testTeams: Team list = [
-            { Name="Team 1"; Race=6; Coach="Coach 1" }
-            { Name="Team 2"; Race=17; Coach="Coach 2" }
+            { Id = 1; Name="Team 1"; Race=6; Coach="Coach 1" }
+            { Id = 2; Name="Team 2"; Race=17; Coach="Coach 2" }
         ]
 
     let getAllTeamsMock() = 
@@ -35,7 +35,7 @@ let ``getTeams returns a list of teams`` () =
     
 [<Fact>]
 let ``getTeam returns a single team with the given id`` () =
-    let testTeam = { Name="Team 1"; Race=6; Coach="Coach 1" }
+    let testTeam = { Id = 1; Name="Team 1"; Race=6; Coach="Coach 1" }
          
     let getTeamByIdMock(id: int) = 
         Assert.Equal(1, id)
