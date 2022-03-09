@@ -1,14 +1,14 @@
 module Main exposing (..)
 
+import Browser
+import Error
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Http
 import RemoteData exposing (WebData)
 import Team exposing (Team, teamsDecoder)
 import Url exposing (Protocol(..))
-import Html.Events exposing (onClick)
-import Error
-import Browser
 
 
 type alias Model =
@@ -35,7 +35,7 @@ getTeamsRequest =
         }
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FetchTeams ->
@@ -52,7 +52,7 @@ view model =
             [ text "Refresh Teams" ]
         , viewTeamsOrError model
         ]
-        
+
 
 viewTeamsOrError : Model -> Html Msg
 viewTeamsOrError model =
@@ -68,6 +68,7 @@ viewTeamsOrError model =
 
         RemoteData.Failure httpError ->
             viewError (Error.buildErrorMessage httpError)
+
 
 viewError : String -> Html Msg
 viewError errorMessage =
@@ -86,8 +87,9 @@ viewTeams teams =
     div []
         [ h3 [] [ text "Teams" ]
         , table []
-            ( viewTableHeader :: List.map viewTeam teams)
+            (viewTableHeader :: List.map viewTeam teams)
         ]
+
 
 viewTableHeader : Html Msg
 viewTableHeader =

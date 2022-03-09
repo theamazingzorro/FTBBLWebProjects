@@ -13,11 +13,16 @@ type alias Race =
 type alias RaceId =
     Int
 
-raceIdFromInt: Int -> RaceId
-raceIdFromInt i = i
+
+raceIdFromInt : Int -> RaceId
+raceIdFromInt i =
+    i
+
 
 raceIdToInt : RaceId -> Int
-raceIdToInt i = i
+raceIdToInt i =
+    i
+
 
 raceDecoder : Decoder Race
 raceDecoder =

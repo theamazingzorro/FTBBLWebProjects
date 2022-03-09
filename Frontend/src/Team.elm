@@ -1,7 +1,7 @@
 module Team exposing (..)
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
-import Json.Decode.Pipeline exposing (required, requiredAt)
+import Json.Decode.Pipeline exposing (required)
 import Race exposing (Race, raceDecoder)
 
 
@@ -18,11 +18,13 @@ type alias TeamId =
 
 
 teamIdFromInt : Int -> TeamId
-teamIdFromInt i = i 
+teamIdFromInt i =
+    i
 
 
 teamIdToInt : TeamId -> Int
-teamIdToInt i = i 
+teamIdToInt i =
+    i
 
 
 teamsDecoder : Decoder (List Team)
