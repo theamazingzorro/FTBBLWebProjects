@@ -1,125 +1,129 @@
-module Main exposing (..)
+module Main exposing (main)
 
 import Browser
-import Error
+import Page.ListTeams as ListTeams
+import Route exposing (Route)
+import Url exposing (Url)
+import Browser.Navigation as Nav
 import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
-import Http
-import RemoteData exposing (WebData)
-import Team exposing (Team, teamsDecoder)
-import Url exposing (Protocol(..))
-
+import Browser exposing (UrlRequest)
+import Browser exposing (Document)
 
 type alias Model =
-    { teams : WebData (List Team)
+    { route : Route
+    , page : Page
+    , navKey : Nav.Key
+    }
+
+type Page   
+    = NotFoundPage
+    | ListPage ListTeams.Model
+
+
+type Msg 
+    = LinkClicked UrlRequest
+    | UrlChanged Url
+    | ListPageMsg ListTeams.Msg
+
+
+init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
+init _ url navKey =
+    let
+        model =
+            { route = Route.parseUrl url
+            , page = NotFoundPage
+            , navKey = navKey
+            }
+    in
+    initCurrentPage ( model, Cmd.none )
+
+
+initCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+initCurrentPage ( model, existingCmds ) =
+    let
+        ( currentPage, mappedPageCmds ) =
+            case model.route of
+                Route.NotFound ->
+                    ( NotFoundPage, Cmd.none )
+
+                Route.Teams ->
+                    let
+                        ( pageModel, pageCmds ) =
+                            ListTeams.init
+                    in
+                    ( ListPage pageModel, Cmd.map ListPageMsg pageCmds )
+    in
+    ( { model | page = currentPage }
+    , Cmd.batch [ existingCmds, mappedPageCmds ]
+    )
+
+
+view : Model -> Document Msg
+view model =
+    { title = "FTBBL"
+    , body = [ currentView model ]
     }
 
 
-type Msg
-    = FetchTeams
-    | TeamsReceived (WebData (List Team))
+currentView : Model -> Html Msg
+currentView model =
+    case model.page of
+        NotFoundPage ->
+            notFoundView
+
+        ListPage pageModel ->
+            ListTeams.view pageModel
+                |> Html.map ListPageMsg
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( { teams = RemoteData.Loading }, getTeamsRequest )
-
-
-getTeamsRequest : Cmd Msg
-getTeamsRequest =
-    Http.get
-        { url = "https://localhost:17317/api/team"
-        , expect =
-            Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
-        }
+notFoundView : Html msg
+notFoundView =
+    h3 [] [ text "Oops! The page you requested was not found!" ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        FetchTeams ->
-            ( { model | teams = RemoteData.Loading }, getTeamsRequest )
+    case ( msg, model.page ) of
+        ( LinkClicked urlRequest, _ ) ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model
+                    , Nav.pushUrl model.navKey <| Url.toString url
+                    )
 
-        TeamsReceived response ->
-            ( { model | teams = response }, Cmd.none )
+                Browser.External url ->
+                    ( model
+                    , Nav.load url
+                    )
 
+        ( UrlChanged url, _ ) ->
+            let
+                newRoute = 
+                    Route.parseUrl url
+            in
+                ( { model | route = newRoute }, Cmd.none )
+                    |> initCurrentPage
 
-view : Model -> Html Msg
-view model =
-    div []
-        [ button [ onClick FetchTeams ]
-            [ text "Refresh Teams" ]
-        , viewTeamsOrError model
-        ]
+        ( ListPageMsg subMsg, ListPage pageModel ) ->
+            let
+                ( updatedPageModel, updatedCmd ) =
+                    ListTeams.update subMsg pageModel
+            in
+            ( { model | page = ListPage updatedPageModel }
+            , Cmd.map ListPageMsg updatedCmd
+            )
 
-
-viewTeamsOrError : Model -> Html Msg
-viewTeamsOrError model =
-    case model.teams of
-        RemoteData.NotAsked ->
-            text ""
-
-        RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
-
-        RemoteData.Success teams ->
-            viewTeams teams
-
-        RemoteData.Failure httpError ->
-            viewError (Error.buildErrorMessage httpError)
-
-
-viewError : String -> Html Msg
-viewError errorMessage =
-    let
-        errorHeading =
-            "Couldn't fetch data at this time."
-    in
-    div []
-        [ h3 [] [ text errorHeading ]
-        , text ("Error: " ++ errorMessage)
-        ]
-
-
-viewTeams : List Team -> Html Msg
-viewTeams teams =
-    div []
-        [ h3 [] [ text "Teams" ]
-        , table []
-            (viewTableHeader :: List.map viewTeam teams)
-        ]
-
-
-viewTableHeader : Html Msg
-viewTableHeader =
-    tr []
-        [ th []
-            [ text "Name" ]
-        , th []
-            [ text "Race" ]
-        , th []
-            [ text "Coach" ]
-        ]
-
-
-viewTeam : Team -> Html Msg
-viewTeam team =
-    tr []
-        [ td []
-            [ text team.name ]
-        , td []
-            [ text team.race.name ]
-        , td []
-            [ text team.coach ]
-        ]
+        ( _, _ ) ->
+            ( model, Cmd.none )
 
 
 main : Program () Model Msg
 main =
-    Browser.element
+    Browser.application
         { init = init
         , view = view
         , update = update
         , subscriptions = \_ -> Sub.none
+        , onUrlRequest = LinkClicked
+        , onUrlChange = UrlChanged
         }
