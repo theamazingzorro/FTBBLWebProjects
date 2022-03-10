@@ -1,15 +1,17 @@
-module Team exposing (..)
+module Model.Team exposing (..)
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (required)
-import Race exposing (Race, raceDecoder)
+import Model.Race exposing (Race, raceDecoder)
+import Model.Coach exposing (Coach, coachDecoder)
 
 
 type alias Team =
     { id : TeamId
     , name : String
     , race : Race
-    , coach : String
+    , coach : Coach
+    , elo : Int
     }
 
 
@@ -38,7 +40,8 @@ teamDecoder =
         |> required "id" teamIdDecoder
         |> required "name" string
         |> required "race" raceDecoder
-        |> required "coach" string
+        |> required "coach" coachDecoder
+        |> required "elo" int
 
 
 teamIdDecoder : Decoder TeamId

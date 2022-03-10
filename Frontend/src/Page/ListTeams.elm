@@ -6,7 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import RemoteData exposing (WebData)
-import Team exposing (Team, teamsDecoder)
+import Model.Team exposing (Team, teamsDecoder)
 import Url exposing (Protocol(..))
 
 
@@ -99,6 +99,8 @@ viewTableHeader =
             [ text "Race" ]
         , th []
             [ text "Coach" ]
+        , th []
+            [ text "Elo" ]
         ]
 
 
@@ -110,5 +112,7 @@ viewTeam team =
         , td []
             [ text team.race.name ]
         , td []
-            [ text team.coach ]
+            [ text team.coach.name ]
+        , td []
+            [ text <| String.fromInt team.elo ]
         ]

@@ -39,12 +39,23 @@ INSERT INTO Race(name, is_active)
     WHERE NOT EXISTS (SELECT 1 FROM Race);
 
 
+create table if not exists Coach(
+	id INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(40) NOT NULL UNIQUE,
+    elo INT NOT NULL,
+    is_active BOOL NOT NULL,
+    PRIMARY KEY ( id )
+);
+
+
 create table if not exists Team(
    id INT NOT NULL AUTO_INCREMENT,
    name VARCHAR(40) NOT NULL UNIQUE,
    race_id INT NOT NULL,
-   coach VARCHAR(40) NOT NULL,
+   coach_id INT NOT NULL,
+   elo INT NOT NULL,
    is_active BOOL NOT NULL,
    FOREIGN KEY ( race_id ) REFERENCES Race(id),
+   FOREIGN KEY ( coach_id ) REFERENCES Coach(id),
    PRIMARY KEY ( id )
 );

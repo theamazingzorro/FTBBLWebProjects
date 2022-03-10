@@ -1,7 +1,7 @@
 module ftbbl.WebApi.Tests.TeamHandlerTest
 
 open ftbbl.WebApi.Handlers
-open ftbbl.WebApi.Models
+open ftbbl.WebApi.Models.Team
 open ftbbl.WebApi.Tests.ContextTools
 
 open Xunit
@@ -11,8 +11,8 @@ open Newtonsoft.Json
 [<Fact>]
 let ``getTeams returns a list of teams`` () =
     let testTeams: Team list = [
-            { Id = 1; Name="Team 1"; Race={Id=7; Name="Lizardmen"}; Coach="Coach 1" }
-            { Id = 2; Name="Team 2"; Race={Id=17; Name="Necromantic"}; Coach="Coach 2" }
+            { Id = 1; Name="Team 1"; Race={Id=7; Name="Lizardmen"}; Coach={Id=1; Name="Theamazingzorro"; Elo=1000}; Elo=1000 }
+            { Id = 2; Name="Team 2"; Race={Id=17; Name="Necromantic"}; Coach={Id=1; Name="Danean"; Elo=1000}; Elo=1000 }
         ]
 
     let getAllTeamsMock() = 
@@ -35,13 +35,13 @@ let ``getTeams returns a list of teams`` () =
     
 [<Fact>]
 let ``getTeam returns a single team with the given id`` () =
-    let testTeam = { Id = 1; Name="Team 1"; Race={Id=7; Name="Lizardmen"}; Coach="Coach 1" }
+    let testTeam = { Id = 1; Name="Team 1"; Race={Id=7; Name="Lizardmen"}; Coach={Id=1; Name="Theamazingzorro"; Elo=1000}; Elo=1000 }
          
-    let getTeamByIdMock(id: int) = 
+    let getTeamByIdMock (id: int) = 
         Assert.Equal(1, id)
         testTeam
 
-    let handler = TeamApiHandlers.getTeam 1 getTeamByIdMock 
+    let handler = TeamApiHandlers.getTeam getTeamByIdMock 1
     let context = buildMockContext()
 
     task {

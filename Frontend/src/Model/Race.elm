@@ -1,4 +1,4 @@
-module Race exposing (..)
+module Model.Race exposing (..)
 
 import Json.Decode as Decode exposing (Decoder, int, string)
 import Json.Decode.Pipeline exposing (required)

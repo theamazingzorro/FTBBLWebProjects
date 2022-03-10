@@ -6,7 +6,7 @@ module TeamApiHandlers =
 
     open Microsoft.AspNetCore.Http
     open Giraffe
-    open ftbbl.WebApi.Models
+    open ftbbl.WebApi.Models.Team
     open ftbbl.WebApi.Repositories
 
     let private getLogger (ctx : HttpContext) = 
@@ -27,8 +27,8 @@ module TeamApiHandlers =
         getTeams TeamRepository.getAll
 
 
-    let getTeam (id : int) =
-        fun (getTeamById : int -> Team) (next : HttpFunc) (ctx : HttpContext) ->
+    let getTeam (getTeamById : int -> Team) (id : int) =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
             task {
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Team: id={id}"
@@ -38,5 +38,5 @@ module TeamApiHandlers =
                 return! json team next ctx
             }
 
-    let getSingleTeamHandler (id:int) : HttpHandler =
-        getTeam id TeamRepository.getById
+    let getSingleTeamHandler : (int -> HttpHandler) =
+        getTeam TeamRepository.getById

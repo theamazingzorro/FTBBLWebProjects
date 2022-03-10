@@ -1,7 +1,7 @@
 ﻿namespace ftbbl.WebApi.Repositories
 
 module TeamRepository = 
-    open ftbbl.WebApi.Models
+    open ftbbl.WebApi.Models.Team
 
     open Microsoft.AspNetCore.Builder
     open System
@@ -20,7 +20,8 @@ module TeamRepository =
         db.Fetch<Team>("""
                 SELECT * FROM Team
                 JOIN Race ON Team.race_id=Race.id
-                WHERE is_active=1
+                JOIN Coach ON Team.coach_id=Coach.id
+                WHERE Team.is_active
                 """)
             |> List.ofSeq
 
@@ -35,10 +36,11 @@ module TeamRepository =
             db.Single<Team>("""
                 SELECT * FROM Team
                 JOIN Race ON Team.race_id=Race.id
-                WHERE is_active=1
+                JOIN Coach ON Team.coach_id=Coach.id
+                WHERE Team.is_active
                 AND Team.id=@0""", id)
         with
-            :? InvalidOperationException -> { Id=0; Name=""; Race={Id=0; Name=""}; Coach="" }
+            :? InvalidOperationException -> { Id=0; Name=""; Race={Id=0; Name=""}; Coach={Id=0; Name=""; Elo=0}; Elo=0 }
         
         
         
