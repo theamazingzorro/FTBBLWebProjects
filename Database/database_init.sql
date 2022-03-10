@@ -3,12 +3,13 @@ use ftbbl;
 
 create table if not exists Race(
 	id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(40) NOT NULL,
+    name VARCHAR(40) NOT NULL UNIQUE,
+    is_active BOOL NOT NULL,
     PRIMARY KEY ( id )
 );
 
-INSERT INTO Race(name)
-    SELECT t.name
+INSERT INTO Race(name, is_active)
+    SELECT t.name, true
     FROM (
 		SELECT "Amazon" AS name UNION ALL
 		SELECT "Bretonnian" AS name UNION ALL
@@ -40,7 +41,7 @@ INSERT INTO Race(name)
 
 create table if not exists Team(
    id INT NOT NULL AUTO_INCREMENT,
-   name VARCHAR(40) NOT NULL,
+   name VARCHAR(40) NOT NULL UNIQUE,
    race_id INT NOT NULL,
    coach VARCHAR(40) NOT NULL,
    is_active BOOL NOT NULL,
