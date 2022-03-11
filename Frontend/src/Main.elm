@@ -7,8 +7,12 @@ import Html exposing (..)
 import Html.Attributes exposing (class)
 import Page.ListCoaches as ListCoaches
 import Page.ListTeams as ListTeams
-import Route exposing (Route)
+import Route exposing (Route(..))
 import Url exposing (Url)
+
+
+
+-- Types --
 
 
 type alias Model =
@@ -31,6 +35,10 @@ type Msg
     | HeaderMsg Header.Msg
     | TeamsPageMsg ListTeams.Msg
     | CoachesPageMsg ListCoaches.Msg
+
+
+
+-- Init --
 
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -58,22 +66,27 @@ initCurrentPage ( model, existingCmds ) =
                     ( NotFoundPage, Cmd.none )
 
                 Route.Teams ->
-                    let
-                        ( pageModel, pageCmds ) =
-                            ListTeams.init
-                    in
-                    ( TeamsPage pageModel, Cmd.map TeamsPageMsg pageCmds )
+                    initPage ListTeams.init TeamsPage TeamsPageMsg
 
                 Route.Coaches ->
-                    let
-                        ( pageModel, pageCmds ) =
-                            ListCoaches.init
-                    in
-                    ( CoachesPage pageModel, Cmd.map CoachesPageMsg pageCmds )
+                    initPage ListCoaches.init CoachesPage CoachesPageMsg
     in
     ( { model | page = currentPage }
     , Cmd.batch [ existingCmds, mappedPageCmds ]
     )
+
+
+initPage : ( subModel, Cmd subMsg ) -> (subModel -> Page) -> (subMsg -> Msg) -> ( Page, Cmd Msg )
+initPage initFunc pageWrap msgWrap =
+    let
+        ( newModel, newCmds ) =
+            initFunc
+    in
+    ( pageWrap newModel, Cmd.map msgWrap newCmds )
+
+
+
+-- View --
 
 
 view : Model -> Document Msg
@@ -119,6 +132,10 @@ notFoundView =
     h3 [] [ text "Oops! The page you requested was not found!" ]
 
 
+
+-- Update --
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.page ) of
@@ -152,25 +169,26 @@ update msg model =
             )
 
         ( TeamsPageMsg subMsg, TeamsPage pageModel ) ->
-            let
-                ( updatedPageModel, updatedCmd ) =
-                    ListTeams.update subMsg pageModel
-            in
-            ( { model | page = TeamsPage updatedPageModel }
-            , Cmd.map TeamsPageMsg updatedCmd
-            )
+            ListTeams.update subMsg pageModel
+                |> updateWith TeamsPage TeamsPageMsg model
 
         ( CoachesPageMsg subMsg, CoachesPage pageModel ) ->
-            let
-                ( updatedPageModel, updatedCmd ) =
-                    ListCoaches.update subMsg pageModel
-            in
-            ( { model | page = CoachesPage updatedPageModel }
-            , Cmd.map CoachesPageMsg updatedCmd
-            )
+            ListCoaches.update subMsg pageModel
+                |> updateWith CoachesPage CoachesPageMsg model
 
         ( _, _ ) ->
             ( model, Cmd.none )
+
+
+updateWith : (subModel -> Page) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
+updateWith toModel toMsg model ( subModel, subCmd ) =
+    ( { model | page = toModel subModel }
+    , Cmd.map toMsg subCmd
+    )
+
+
+
+-- Main --
 
 
 main : Program () Model Msg
