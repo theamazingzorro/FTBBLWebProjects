@@ -16,8 +16,10 @@
   </ItemGroup>
 
   <ItemGroup> 
-	<Compile Include="Models\TeamModels.fs" />
+	<Compile Include="Models\TeamModels.fs" /> 
+	<Compile Include="Repos\CoachRepository.fs" />
     <Compile Include="Repos\TeamRepository.fs" />
+    <Compile Include="Handlers\CoachApiHandlers.fs" />
     <Compile Include="Handlers\TeamApiHandlers.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

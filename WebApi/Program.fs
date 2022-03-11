@@ -22,7 +22,12 @@ let webApp =
             ( choose [
                 GET >=> choose [
                     routex "/team(/?)" >=> TeamApiHandlers.getTeamsHandler
+                    routef "/team/%i" TeamApiHandlers.getSingleTeamHandler
                     routef "/team/%i/" TeamApiHandlers.getSingleTeamHandler
+
+                    routex "/coach(/?)" >=> CoachApiHandlers.getCoachesHandler
+                    routef "/coach/%i" CoachApiHandlers.getSingleCoachHandler
+                    routef "/coach/%i/" CoachApiHandlers.getSingleCoachHandler
                 ]
                 POST >=> choose [
                 ]

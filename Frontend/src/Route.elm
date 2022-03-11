@@ -1,3 +1,4 @@
+
 module Route exposing (Route(..), parseUrl)
 
 import Url exposing (Url)
@@ -6,6 +7,7 @@ import Url.Parser exposing (..)
 
 type Route
     = NotFound
+    | Coaches
     | Teams
 
 
@@ -24,4 +26,5 @@ matchRoute =
     oneOf
         [ map Teams top
         , map Teams <| s "teams"
+        , map Coaches <| s "coaches"
         ]

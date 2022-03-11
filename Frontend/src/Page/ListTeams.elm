@@ -8,6 +8,7 @@ import Http
 import RemoteData exposing (WebData)
 import Model.Team exposing (Team, teamsDecoder)
 import Url exposing (Protocol(..))
+import Api
 
 
 type alias Model =
@@ -27,11 +28,8 @@ init =
 
 getTeamsRequest : Cmd Msg
 getTeamsRequest =
-    Http.get
-        { url = "https://localhost:17317/api/team"
-        , expect =
-            Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
-        }
+    Api.getRequest "team" 
+        <| Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -85,22 +83,26 @@ viewTeams : List Team -> Html Msg
 viewTeams teams =
     div []
         [ h3 [] [ text "Teams" ]
-        , table []
-            (viewTableHeader :: List.map viewTeam teams)
+        , table [ class "table table-striped table-hover" ]
+            [ viewTableHeader  
+            , tbody [] 
+                <| List.map viewTeam teams 
+            ]
         ]
-
 
 viewTableHeader : Html Msg
 viewTableHeader =
-    tr []
-        [ th []
-            [ text "Name" ]
-        , th []
-            [ text "Race" ]
-        , th []
-            [ text "Coach" ]
-        , th []
-            [ text "Elo" ]
+    thead []
+        [ tr []
+            [ th [ scope "col" ]
+                [ text "Name" ]
+            , th [ scope "col" ]
+                [ text "Race" ]
+            , th [ scope "col" ]
+                [ text "Coach" ]
+            , th [ scope "col" ]
+                [ text "Elo" ]
+            ]
         ]
 
 

@@ -4,8 +4,11 @@ import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Page.ListTeams as ListTeams
+import Page.ListCoaches as ListCoaches
 import Route exposing (Route)
 import Url exposing (Url)
+import Html.Attributes exposing (class)
+import Model.Coach exposing (Coach)
 
 
 type alias Model =
@@ -17,13 +20,15 @@ type alias Model =
 
 type Page
     = NotFoundPage
-    | ListPage ListTeams.Model
+    | TeamsPage ListTeams.Model
+    | CoachesPage ListCoaches.Model
 
 
 type Msg
     = LinkClicked UrlRequest
     | UrlChanged Url
-    | ListPageMsg ListTeams.Msg
+    | TeamsPageMsg ListTeams.Msg
+    | CoachesPageMsg ListCoaches.Msg
 
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -51,7 +56,15 @@ initCurrentPage ( model, existingCmds ) =
                         ( pageModel, pageCmds ) =
                             ListTeams.init
                     in
-                    ( ListPage pageModel, Cmd.map ListPageMsg pageCmds )
+                    ( TeamsPage pageModel, Cmd.map TeamsPageMsg pageCmds )
+
+                Route.Coaches ->
+                    let
+                        ( pageModel, pageCmds ) =
+                            ListCoaches.init
+                    in
+                    ( CoachesPage pageModel, Cmd.map CoachesPageMsg pageCmds )
+
     in
     ( { model | page = currentPage }
     , Cmd.batch [ existingCmds, mappedPageCmds ]
@@ -61,7 +74,10 @@ initCurrentPage ( model, existingCmds ) =
 view : Model -> Document Msg
 view model =
     { title = "FTBBL"
-    , body = [ currentView model ]
+    , body = 
+        [ div [class "container"] 
+            [ currentView model ] 
+        ]
     }
 
 
@@ -71,9 +87,13 @@ currentView model =
         NotFoundPage ->
             notFoundView
 
-        ListPage pageModel ->
+        TeamsPage pageModel ->
             ListTeams.view pageModel
-                |> Html.map ListPageMsg
+                |> Html.map TeamsPageMsg
+
+        CoachesPage pageModel ->
+            ListCoaches.view pageModel
+                |> Html.map CoachesPageMsg
 
 
 notFoundView : Html msg
@@ -104,13 +124,22 @@ update msg model =
             ( { model | route = newRoute }, Cmd.none )
                 |> initCurrentPage
 
-        ( ListPageMsg subMsg, ListPage pageModel ) ->
+        ( TeamsPageMsg subMsg, TeamsPage pageModel ) ->
             let
                 ( updatedPageModel, updatedCmd ) =
                     ListTeams.update subMsg pageModel
             in
-            ( { model | page = ListPage updatedPageModel }
-            , Cmd.map ListPageMsg updatedCmd
+            ( { model | page = TeamsPage updatedPageModel }
+            , Cmd.map TeamsPageMsg updatedCmd
+            )
+
+        ( CoachesPageMsg subMsg, CoachesPage pageModel ) ->
+            let
+                ( updatedPageModel, updatedCmd ) =
+                    ListCoaches.update subMsg pageModel
+            in
+            ( { model | page = CoachesPage updatedPageModel }
+            , Cmd.map CoachesPageMsg updatedCmd
             )
 
         ( _, _ ) ->
