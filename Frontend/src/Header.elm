@@ -12,18 +12,18 @@ type Msg
 
 
 init : ( Model, Cmd Msg )
-init = 
-    ( {}, Cmd.none)
+init =
+    ( {}, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        None -> 
+        None ->
             ( model, Cmd.none )
 
 
 view : Model -> Html Msg
-view model = 
+view model =
     div []
-        [ text "test"]
+        [ text "test" ]

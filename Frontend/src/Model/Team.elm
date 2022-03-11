@@ -2,8 +2,8 @@ module Model.Team exposing (..)
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (required)
-import Model.Race exposing (Race, raceDecoder)
 import Model.Coach exposing (Coach, coachDecoder)
+import Model.Race exposing (Race, raceDecoder)
 
 
 type alias Team =

@@ -1,20 +1,19 @@
 module Page.ListCoaches exposing (Model, Msg, init, update, view)
 
-
-import RemoteData exposing (WebData)
+import Api
+import Error
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Model.Coach exposing (Coach)
-import Api
 import Http
-import Model.Coach exposing (coachsDecoder)
-import Error
+import Model.Coach exposing (Coach, coachsDecoder)
+import RemoteData exposing (WebData)
 
 
 type alias Model =
-    { coaches : WebData (List Coach) 
+    { coaches : WebData (List Coach)
     }
+
 
 type Msg
     = FetchCoaches
@@ -22,15 +21,14 @@ type Msg
 
 
 init : ( Model, Cmd Msg )
-init = 
+init =
     ( { coaches = RemoteData.Loading }, getCoachesRequest )
 
 
 getCoachesRequest : Cmd Msg
 getCoachesRequest =
-    Api.getRequest "coach"
-        <| Http.expectJson (RemoteData.fromResult >> CoachesRecieved) coachsDecoder
-
+    Api.getRequest "coach" <|
+        Http.expectJson (RemoteData.fromResult >> CoachesRecieved) coachsDecoder
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -44,7 +42,7 @@ update msg model =
 
 
 view : Model -> Html Msg
-view model = 
+view model =
     div []
         [ button [ onClick FetchCoaches ]
             [ text "Refresh Coaches" ]
@@ -85,9 +83,9 @@ viewCoaches coaches =
     div []
         [ h3 [] [ text "Coaches" ]
         , table [ class "table table-striped table-hover" ]
-            [ viewTableHeader  
-            , tbody [] 
-                <| List.map viewCoach coaches 
+            [ viewTableHeader
+            , tbody [] <|
+                List.map viewCoach coaches
             ]
         ]
 

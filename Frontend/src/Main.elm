@@ -2,14 +2,13 @@ module Main exposing (main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav
-import Html exposing (..)
-import Page.ListTeams as ListTeams
-import Page.ListCoaches as ListCoaches
 import Header
+import Html exposing (..)
+import Html.Attributes exposing (class)
+import Page.ListCoaches as ListCoaches
+import Page.ListTeams as ListTeams
 import Route exposing (Route)
 import Url exposing (Url)
-import Html.Attributes exposing (class)
-import Model.Coach exposing (Coach)
 
 
 type alias Model =
@@ -37,7 +36,7 @@ type Msg
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url navKey =
     let
-        (navModel, navCommand) = 
+        ( navModel, navCommand ) =
             Header.init
 
         model =
@@ -71,7 +70,6 @@ initCurrentPage ( model, existingCmds ) =
                             ListCoaches.init
                     in
                     ( CoachesPage pageModel, Cmd.map CoachesPageMsg pageCmds )
-
     in
     ( { model | page = currentPage }
     , Cmd.batch [ existingCmds, mappedPageCmds ]
@@ -81,17 +79,17 @@ initCurrentPage ( model, existingCmds ) =
 view : Model -> Document Msg
 view model =
     { title = "FTBBL"
-    , body = 
-        [ div [ class "container" ] 
+    , body =
+        [ div [ class "container" ]
             [ navView model
-            , currentView model 
-            ] 
+            , currentView model
+            ]
         ]
     }
 
 
 navView : Model -> Html Msg
-navView model = 
+navView model =
     case model.page of
         NotFoundPage ->
             div [] []
@@ -99,7 +97,6 @@ navView model =
         _ ->
             Header.view model.headerModel
                 |> Html.map HeaderMsg
-
 
 
 currentView : Model -> Html Msg
@@ -145,7 +142,7 @@ update msg model =
             ( { model | route = newRoute }, Cmd.none )
                 |> initCurrentPage
 
-        ( HeaderMsg subMsg, _) ->
+        ( HeaderMsg subMsg, _ ) ->
             let
                 ( newModel, newCmd ) =
                     Header.update subMsg model.headerModel
@@ -153,7 +150,6 @@ update msg model =
             ( { model | headerModel = newModel }
             , Cmd.map HeaderMsg newCmd
             )
-
 
         ( TeamsPageMsg subMsg, TeamsPage pageModel ) ->
             let

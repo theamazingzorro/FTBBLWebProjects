@@ -1,14 +1,14 @@
 module Page.ListTeams exposing (Model, Msg, init, update, view)
 
+import Api
 import Error
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
-import RemoteData exposing (WebData)
 import Model.Team exposing (Team, teamsDecoder)
+import RemoteData exposing (WebData)
 import Url exposing (Protocol(..))
-import Api
 
 
 type alias Model =
@@ -28,8 +28,8 @@ init =
 
 getTeamsRequest : Cmd Msg
 getTeamsRequest =
-    Api.getRequest "team" 
-        <| Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
+    Api.getRequest "team" <|
+        Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -84,11 +84,12 @@ viewTeams teams =
     div []
         [ h3 [] [ text "Teams" ]
         , table [ class "table table-striped table-hover" ]
-            [ viewTableHeader  
-            , tbody [] 
-                <| List.map viewTeam teams 
+            [ viewTableHeader
+            , tbody [] <|
+                List.map viewTeam teams
             ]
         ]
+
 
 viewTableHeader : Html Msg
 viewTableHeader =
