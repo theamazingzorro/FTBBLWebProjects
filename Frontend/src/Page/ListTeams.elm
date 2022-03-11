@@ -11,6 +11,10 @@ import RemoteData exposing (WebData)
 import Url exposing (Protocol(..))
 
 
+
+-- Types --
+
+
 type alias Model =
     { teams : WebData (List Team)
     }
@@ -21,15 +25,17 @@ type Msg
     | TeamsReceived (WebData (List Team))
 
 
+
+-- Init --
+
+
 init : ( Model, Cmd Msg )
 init =
     ( { teams = RemoteData.Loading }, getTeamsRequest )
 
 
-getTeamsRequest : Cmd Msg
-getTeamsRequest =
-    Api.getRequest "team" <|
-        Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
+
+-- Update --
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -40,6 +46,20 @@ update msg model =
 
         TeamsReceived response ->
             ( { model | teams = response }, Cmd.none )
+
+
+
+-- Common Helpers --
+
+
+getTeamsRequest : Cmd Msg
+getTeamsRequest =
+    Api.getRequest "team" <|
+        Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
+
+
+
+-- View --
 
 
 view : Model -> Html Msg

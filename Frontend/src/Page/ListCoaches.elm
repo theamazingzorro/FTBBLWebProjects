@@ -10,6 +10,10 @@ import Model.Coach exposing (Coach, coachsDecoder)
 import RemoteData exposing (WebData)
 
 
+
+-- Types --
+
+
 type alias Model =
     { coaches : WebData (List Coach)
     }
@@ -20,15 +24,17 @@ type Msg
     | CoachesRecieved (WebData (List Coach))
 
 
+
+-- Init --
+
+
 init : ( Model, Cmd Msg )
 init =
     ( { coaches = RemoteData.Loading }, getCoachesRequest )
 
 
-getCoachesRequest : Cmd Msg
-getCoachesRequest =
-    Api.getRequest "coach" <|
-        Http.expectJson (RemoteData.fromResult >> CoachesRecieved) coachsDecoder
+
+-- Update --
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -39,6 +45,20 @@ update msg model =
 
         CoachesRecieved response ->
             ( { model | coaches = response }, Cmd.none )
+
+
+
+-- Common Helpers --
+
+
+getCoachesRequest : Cmd Msg
+getCoachesRequest =
+    Api.getRequest "coach" <|
+        Http.expectJson (RemoteData.fromResult >> CoachesRecieved) coachsDecoder
+
+
+
+-- View --
 
 
 view : Model -> Html Msg

@@ -86,53 +86,6 @@ initPage initFunc pageWrap msgWrap =
 
 
 
--- View --
-
-
-view : Model -> Document Msg
-view model =
-    { title = "FTBBL"
-    , body =
-        [ div [ class "container" ]
-            [ navView model
-            , currentView model
-            ]
-        ]
-    }
-
-
-navView : Model -> Html Msg
-navView model =
-    case model.page of
-        NotFoundPage ->
-            div [] []
-
-        _ ->
-            Header.view model.headerModel
-                |> Html.map HeaderMsg
-
-
-currentView : Model -> Html Msg
-currentView model =
-    case model.page of
-        NotFoundPage ->
-            notFoundView
-
-        TeamsPage pageModel ->
-            ListTeams.view pageModel
-                |> Html.map TeamsPageMsg
-
-        CoachesPage pageModel ->
-            ListCoaches.view pageModel
-                |> Html.map CoachesPageMsg
-
-
-notFoundView : Html msg
-notFoundView =
-    h3 [] [ text "Oops! The page you requested was not found!" ]
-
-
-
 -- Update --
 
 
@@ -185,6 +138,53 @@ updateWith toModel toMsg model ( subModel, subCmd ) =
     ( { model | page = toModel subModel }
     , Cmd.map toMsg subCmd
     )
+
+
+
+-- View --
+
+
+view : Model -> Document Msg
+view model =
+    { title = "FTBBL"
+    , body =
+        [ div [ class "container" ]
+            [ navView model
+            , currentView model
+            ]
+        ]
+    }
+
+
+navView : Model -> Html Msg
+navView model =
+    case model.page of
+        NotFoundPage ->
+            div [] []
+
+        _ ->
+            Header.view model.headerModel
+                |> Html.map HeaderMsg
+
+
+currentView : Model -> Html Msg
+currentView model =
+    case model.page of
+        NotFoundPage ->
+            notFoundView
+
+        TeamsPage pageModel ->
+            ListTeams.view pageModel
+                |> Html.map TeamsPageMsg
+
+        CoachesPage pageModel ->
+            ListCoaches.view pageModel
+                |> Html.map CoachesPageMsg
+
+
+notFoundView : Html msg
+notFoundView =
+    h3 [] [ text "Oops! The page you requested was not found!" ]
 
 
 
