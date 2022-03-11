@@ -5,6 +5,7 @@ import Browser.Navigation as Nav
 import Html exposing (..)
 import Page.ListTeams as ListTeams
 import Page.ListCoaches as ListCoaches
+import Header
 import Route exposing (Route)
 import Url exposing (Url)
 import Html.Attributes exposing (class)
@@ -13,6 +14,7 @@ import Model.Coach exposing (Coach)
 
 type alias Model =
     { route : Route
+    , headerModel : Header.Model
     , page : Page
     , navKey : Nav.Key
     }
@@ -27,6 +29,7 @@ type Page
 type Msg
     = LinkClicked UrlRequest
     | UrlChanged Url
+    | HeaderMsg Header.Msg
     | TeamsPageMsg ListTeams.Msg
     | CoachesPageMsg ListCoaches.Msg
 
@@ -34,13 +37,17 @@ type Msg
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url navKey =
     let
+        (navModel, navCommand) = 
+            Header.init
+
         model =
             { route = Route.parseUrl url
+            , headerModel = navModel
             , page = NotFoundPage
             , navKey = navKey
             }
     in
-    initCurrentPage ( model, Cmd.none )
+    initCurrentPage ( model, Cmd.map HeaderMsg navCommand )
 
 
 initCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -75,10 +82,24 @@ view : Model -> Document Msg
 view model =
     { title = "FTBBL"
     , body = 
-        [ div [class "container"] 
-            [ currentView model ] 
+        [ div [ class "container" ] 
+            [ navView model
+            , currentView model 
+            ] 
         ]
     }
+
+
+navView : Model -> Html Msg
+navView model = 
+    case model.page of
+        NotFoundPage ->
+            div [] []
+
+        _ ->
+            Header.view model.headerModel
+                |> Html.map HeaderMsg
+
 
 
 currentView : Model -> Html Msg
@@ -123,6 +144,16 @@ update msg model =
             in
             ( { model | route = newRoute }, Cmd.none )
                 |> initCurrentPage
+
+        ( HeaderMsg subMsg, _) ->
+            let
+                ( newModel, newCmd ) =
+                    Header.update subMsg model.headerModel
+            in
+            ( { model | headerModel = newModel }
+            , Cmd.map HeaderMsg newCmd
+            )
+
 
         ( TeamsPageMsg subMsg, TeamsPage pageModel ) ->
             let
