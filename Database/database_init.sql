@@ -1,15 +1,15 @@
-create database if not exists ftbbl;
-use ftbbl;
+CREATE DATABASE IF NOT EXISTS ftbbl;
+USE ftbbl;
 
-create table if not exists Race(
+CREATE TABLE IF NOT EXISTS Race(
 	id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(40) NOT NULL UNIQUE,
+	name VARCHAR(40) NOT NULL UNIQUE,
     is_active BOOL NOT NULL,
     PRIMARY KEY ( id )
 );
 
 INSERT INTO Race(name, is_active)
-    SELECT t.name, true
+	SELECT t.name, true
     FROM (
 		SELECT "Amazon" AS name UNION ALL
 		SELECT "Bretonnian" AS name UNION ALL
@@ -39,7 +39,7 @@ INSERT INTO Race(name, is_active)
     WHERE NOT EXISTS (SELECT 1 FROM Race);
 
 
-create table if not exists Coach(
+CREATE TABLE IF NOT EXISTS Coach(
 	id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(40) NOT NULL UNIQUE,
     elo INT NOT NULL,
@@ -48,7 +48,7 @@ create table if not exists Coach(
 );
 
 
-create table if not exists Team(
+CREATE TABLE IF NOT EXISTS Team(
    id INT NOT NULL AUTO_INCREMENT,
    name VARCHAR(40) NOT NULL UNIQUE,
    race_id INT NOT NULL,

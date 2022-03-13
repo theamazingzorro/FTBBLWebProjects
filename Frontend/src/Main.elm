@@ -124,12 +124,15 @@ update msg model =
         ( TeamsPageMsg subMsg, TeamsPage pageModel ) ->
             ListTeams.update subMsg pageModel
                 |> updateWith TeamsPage TeamsPageMsg model
+        
+        ( TeamsPageMsg _, _ ) ->
+            ( model, Cmd.none )
 
         ( CoachesPageMsg subMsg, CoachesPage pageModel ) ->
             ListCoaches.update subMsg pageModel
                 |> updateWith CoachesPage CoachesPageMsg model
 
-        ( _, _ ) ->
+        ( CoachesPageMsg _, _ ) ->
             ( model, Cmd.none )
 
 

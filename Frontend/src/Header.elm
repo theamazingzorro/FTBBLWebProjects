@@ -40,6 +40,6 @@ update msg model =
 
 
 view : Model -> Html Msg
-view model =
+view _ =
     div []
         [ text "test" ]

@@ -83,7 +83,7 @@ viewCoachesOrError model =
             viewCoaches coaches
 
         RemoteData.Failure httpError ->
-            viewError (Error.buildErrorMessage httpError)
+            viewError <| Error.buildErrorMessage httpError
 
 
 viewError : String -> Html Msg
@@ -94,7 +94,7 @@ viewError errorMessage =
     in
     div []
         [ h3 [] [ text errorHeading ]
-        , text ("Error: " ++ errorMessage)
+        , text <| "Error: " ++ errorMessage
         ]
 
 
