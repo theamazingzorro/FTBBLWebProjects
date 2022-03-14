@@ -45,7 +45,7 @@ init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url navKey =
     let
         ( navModel, navCommand ) =
-            Header.init
+            Header.init navKey
 
         model =
             { route = Route.parseUrl url
