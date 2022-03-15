@@ -68,7 +68,7 @@ toggleBarButton =
            , attribute "data-toggle" "collapse"
            , attribute "data-target" "#navbarNav"
            ] 
-           [ span [ class "nav-bar-toggler-icon" ] [] ]
+           [ span [ class "navbar-toggler-icon" ] [] ]
 
 
 linkElement : String -> Msg -> Html Msg
