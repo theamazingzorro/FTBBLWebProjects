@@ -36,4 +36,31 @@ module CoachRepository =
                 WHERE Coach.is_active
                 AND Coach.id=@0""", id)
         with
-            :? InvalidOperationException -> { Id=0; Name=""; Elo=0 }
+            :? InvalidOperationException -> { Id=0; Name=""; Elo=0; IsActive=false }
+
+
+    let save (coach : Coach) =
+        use connection = new MySqlConnection(connStr)
+        connection.Open()
+
+        use db = new Database(connection)
+
+        db.Save<Coach>(coach)
+
+
+    let deleteById (id : int) =
+        use connection = new MySqlConnection(connStr)
+        connection.Open()
+
+        use db = new Database(connection)
+
+        db.DeleteWhere<Coach>("Coach.id=@0", id)
+
+
+    let update (coach : Coach) =
+        use connection = new MySqlConnection(connStr)
+        connection.Open()
+
+        use db = new Database(connection)
+
+        db.Save<Coach>(coach)

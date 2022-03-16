@@ -34,3 +34,50 @@ module TeamApiHandlers =
 
                 return! json team next ctx
             }
+
+
+    let postTeam : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+
+                let! team = ctx.BindJsonAsync<Team>()
+                let team = { team with Elo = 1000; IsActive = true }
+
+                logger.LogInformation $"Saving Team: name={team.Name}"
+                
+                TeamRepository.save(team)
+
+                return! json team next ctx
+            }
+
+
+    let deleteTeam (id : int) : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+                
+                logger.LogInformation $"Deleting Team: id={id}"
+                let res = TeamRepository.deleteById(id)
+
+                logger.LogInformation $"{res} rows effected."
+
+                return! json {| Deleted = res > 0 |} next ctx
+            }
+
+
+    let updateTeam : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+
+                let! team = ctx.BindJsonAsync<Team>()
+                logger.LogInformation $"Updating Team: id={team.Id}"
+
+                let original = TeamRepository.getById team.Id
+                let team = { team with IsActive = original.IsActive }
+
+                TeamRepository.update team
+
+                return! json team next ctx
+            }

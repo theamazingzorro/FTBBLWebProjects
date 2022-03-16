@@ -36,4 +36,47 @@ module CoachApiHandlers =
             }
 
 
+    let postCoach : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
 
+                let! coach = ctx.BindJsonAsync<Coach>()
+                let coach = { coach with Elo = 1000; IsActive = true }
+
+                logger.LogInformation $"Saving Coach: name={coach.Name}"
+                
+                CoachRepository.save(coach)
+
+                return! json coach next ctx
+            }
+
+
+    let deleteCoach (id : int) : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+                
+                logger.LogInformation $"Deleting Coach: id={id}"
+                let res = CoachRepository.deleteById(id)
+                logger.LogInformation $"{res} rows effected."
+
+                return! json {| Deleted = res > 0 |} next ctx
+            }
+
+
+    let updateCoach : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+
+                let! coach = ctx.BindJsonAsync<Coach>()
+                logger.LogInformation $"Updating Coach: id={coach.Id}"
+
+                let original = CoachRepository.getById coach.Id
+                let coach = { coach with IsActive = original.IsActive }
+
+                CoachRepository.update coach
+
+                return! json coach next ctx
+            }

@@ -30,10 +30,21 @@ let webApp =
                     routef "/coach/%i/" CoachApiHandlers.getCoach
                 ]
                 POST >=> choose [
+                    routex "/team(/?)" >=> TeamApiHandlers.postTeam
+
+                    routex "/coach(/?)" >=> CoachApiHandlers.postCoach
                 ]
                 PUT >=> choose [
+                    routex "/team(/?)" >=> TeamApiHandlers.updateTeam
+
+                    routex "/coach(/?)" >=> CoachApiHandlers.updateCoach
                 ]
                 DELETE >=> choose [
+                    routef "/team/%i" TeamApiHandlers.deleteTeam
+                    routef "/team/%i/" TeamApiHandlers.deleteTeam
+
+                    routef "/coach/%i" CoachApiHandlers.deleteCoach
+                    routef "/coach/%i/" CoachApiHandlers.deleteCoach
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" 
