@@ -12,31 +12,28 @@ module CoachApiHandlers =
     let private getLogger (ctx : HttpContext) = 
         ctx.GetLogger "fttbl.Handlers.CoachApiHandlers"
 
-    let getCoaches =
-        fun (getCoaches : unit -> Coach list) (next : HttpFunc) (ctx : HttpContext) ->
+    let getCoaches : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
             task {
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Coaches"
                 
-                let coachs = getCoaches()
+                let coachs = CoachRepository.getAll()
 
                 return! json coachs next ctx
             }
 
-    let getCoachesHandler : HttpHandler = 
-        getCoaches CoachRepository.getAll
 
-
-    let getCoach (getCoachById : int -> Coach) (id : int) =
+    let getCoach (id : int) : HttpHandler =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Coach: id={id}"
                 
-                let coach = getCoachById(id)
+                let coach = CoachRepository.getById id
 
                 return! json coach next ctx
             }
 
-    let getSingleCoachHandler : (int -> HttpHandler) =
-        getCoach CoachRepository.getById
+
+

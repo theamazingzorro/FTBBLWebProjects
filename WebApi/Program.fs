@@ -21,13 +21,13 @@ let webApp =
         subRoute "/api"
             ( choose [
                 GET >=> choose [
-                    routex "/team(/?)" >=> TeamApiHandlers.getTeamsHandler
-                    routef "/team/%i" TeamApiHandlers.getSingleTeamHandler
-                    routef "/team/%i/" TeamApiHandlers.getSingleTeamHandler
+                    routex "/team(/?)" >=> TeamApiHandlers.getTeams
+                    routef "/team/%i" TeamApiHandlers.getTeam
+                    routef "/team/%i/" TeamApiHandlers.getTeam
 
-                    routex "/coach(/?)" >=> CoachApiHandlers.getCoachesHandler
-                    routef "/coach/%i" CoachApiHandlers.getSingleCoachHandler
-                    routef "/coach/%i/" CoachApiHandlers.getSingleCoachHandler
+                    routex "/coach(/?)" >=> CoachApiHandlers.getCoaches
+                    routef "/coach/%i" CoachApiHandlers.getCoach
+                    routef "/coach/%i/" CoachApiHandlers.getCoach
                 ]
                 POST >=> choose [
                 ]

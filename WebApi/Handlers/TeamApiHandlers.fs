@@ -12,31 +12,25 @@ module TeamApiHandlers =
     let private getLogger (ctx : HttpContext) = 
         ctx.GetLogger "fttbl.Handlers.TeamApiHandlers"
 
-    let getTeams =
-        fun (getTeams : unit -> Team list) (next : HttpFunc) (ctx : HttpContext) ->
+    let getTeams : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
             task {
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Teams"
                 
-                let teams = getTeams()
+                let teams = TeamRepository.getAll()
 
                 return! json teams next ctx
             }
 
-    let getTeamsHandler : HttpHandler = 
-        getTeams TeamRepository.getAll
 
-
-    let getTeam (getTeamById : int -> Team) (id : int) =
+    let getTeam (id : int) : HttpHandler =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Team: id={id}"
                 
-                let team = getTeamById(id)
+                let team = TeamRepository.getById id
 
                 return! json team next ctx
             }
-
-    let getSingleTeamHandler : (int -> HttpHandler) =
-        getTeam TeamRepository.getById
