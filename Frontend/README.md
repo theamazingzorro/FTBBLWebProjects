@@ -1,11 +1,11 @@
-https://elmprogramming.com/fetching-data-using-get.html
+to run:
 
-npm install -g 
-    - elm-test
-    - elm-format
-    - elm-live
-    - elm
-    - uglify-js
+npm install -g the following: 
+- `elm-test`
+- `elm-format`
+- `elm-live`
+- `elm`
+- `uglify-js`
 
 then run 
 elm install
