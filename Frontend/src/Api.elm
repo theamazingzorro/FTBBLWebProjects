@@ -4,8 +4,10 @@ import Http exposing (Expect)
 
 
 type Endpoint
-    = Team
-    | Coach
+    = Teams
+    | Team Int
+    | Coaches
+    | Coach Int
 
 
 baseUrl : String
@@ -16,11 +18,17 @@ baseUrl =
 stringOf : Endpoint -> String
 stringOf endpoint =
     case endpoint of
-        Team ->
+        Teams ->
             "team"
 
-        Coach ->
+        Team index ->
+            "team/" ++ String.fromInt index
+
+        Coaches ->
             "coach"
+
+        Coach index ->
+            "coach/" ++ String.fromInt index
 
 
 getRequest : Endpoint -> Expect msg -> Cmd msg
