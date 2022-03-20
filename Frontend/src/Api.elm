@@ -1,6 +1,11 @@
-module Api exposing (getRequest)
+module Api exposing (Endpoint(..), getRequest)
 
 import Http exposing (Expect)
+
+
+type Endpoint
+    = Team
+    | Coach
 
 
 baseUrl : String
@@ -8,9 +13,19 @@ baseUrl =
     "https://localhost:17317/api/"
 
 
-getRequest : String -> Expect msg -> Cmd msg
+stringOf : Endpoint -> String
+stringOf endpoint =
+    case endpoint of
+        Team ->
+            "team"
+
+        Coach ->
+            "coach"
+
+
+getRequest : Endpoint -> Expect msg -> Cmd msg
 getRequest endpoint expect =
     Http.get
-        { url = baseUrl ++ endpoint
+        { url = baseUrl ++ stringOf endpoint
         , expect = expect
         }

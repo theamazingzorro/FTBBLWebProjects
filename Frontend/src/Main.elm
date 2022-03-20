@@ -124,7 +124,7 @@ update msg model =
         ( TeamsPageMsg subMsg, TeamsPage pageModel ) ->
             ListTeams.update subMsg pageModel
                 |> updateWith TeamsPage TeamsPageMsg model
-        
+
         ( TeamsPageMsg _, _ ) ->
             ( model, Cmd.none )
 

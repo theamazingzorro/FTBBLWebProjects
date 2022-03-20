@@ -54,7 +54,7 @@ update msg model =
 
 getTeamsRequest : Cmd Msg
 getTeamsRequest =
-    Api.getRequest "team" <|
+    Api.getRequest Api.Team <|
         Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
 
 

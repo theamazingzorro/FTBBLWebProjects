@@ -25,7 +25,7 @@ matchRoute : Parser (Route -> a) a
 matchRoute =
     oneOf
         [ map Teams top
-        , map Teams <| s "teams" 
+        , map Teams <| s "teams"
         , map Coaches <| s "coaches"
         ]
 

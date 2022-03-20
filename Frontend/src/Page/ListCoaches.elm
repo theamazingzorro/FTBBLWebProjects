@@ -53,7 +53,7 @@ update msg model =
 
 getCoachesRequest : Cmd Msg
 getCoachesRequest =
-    Api.getRequest "coach" <|
+    Api.getRequest Api.Coach <|
         Http.expectJson (RemoteData.fromResult >> CoachesRecieved) coachsDecoder
 
 
