@@ -156,7 +156,7 @@ viewCoach coach =
             [ text coach.name ]
         , td []
             [ text <| String.fromInt coach.elo ]
-        , td [width 175]
+        , td [ width 175 ]
             [ viewEditButton coach, viewDeleteButton coach ]
         ]
 
@@ -165,7 +165,7 @@ viewDeleteButton : Coach -> Html msg
 viewDeleteButton _ =
     button
         [ class "btn btn-danger"
-        , style "margin-left" "6px" 
+        , style "margin-left" "6px"
         ]
         [ text "Delete" ]
 
@@ -174,6 +174,6 @@ viewEditButton : Coach -> Html msg
 viewEditButton _ =
     button
         [ class "btn btn-secondary"
-        , style "margin-left" "6px" 
+        , style "margin-left" "6px"
         ]
         [ text "Edit" ]

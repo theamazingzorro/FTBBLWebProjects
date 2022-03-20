@@ -7,6 +7,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class)
 import Page.ListCoaches as ListCoaches
 import Page.ListTeams as ListTeams
+import Page.AddCoach as AddCoach
 import Route exposing (Route(..))
 import Url exposing (Url)
 
@@ -27,6 +28,7 @@ type Page
     = NotFoundPage
     | TeamsPage ListTeams.Model
     | CoachesPage ListCoaches.Model
+    | AddCoachPage AddCoach.Model
 
 
 type Msg
@@ -35,6 +37,7 @@ type Msg
     | HeaderMsg Header.Msg
     | TeamsPageMsg ListTeams.Msg
     | CoachesPageMsg ListCoaches.Msg
+    | AddCoachPageMsg AddCoach.Msg
 
 
 
@@ -70,6 +73,9 @@ initCurrentPage ( model, existingCmds ) =
 
                 Route.Coaches ->
                     initPage ListCoaches.init CoachesPage CoachesPageMsg
+
+                Route.AddCoach ->
+                    initPage AddCoach.init AddCoachPage AddCoachPageMsg
     in
     ( { model | page = currentPage }
     , Cmd.batch [ existingCmds, mappedPageCmds ]
@@ -135,6 +141,13 @@ update msg model =
         ( CoachesPageMsg _, _ ) ->
             ( model, Cmd.none )
 
+        ( AddCoachPageMsg subMsg, AddCoachPage pageModel ) ->
+            AddCoach.update subMsg pageModel
+                |> updateWith AddCoachPage AddCoachPageMsg model
+
+        ( AddCoachPageMsg _, _ ) ->
+            ( model, Cmd.none )
+
 
 updateWith : (subModel -> Page) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
 updateWith toModel toMsg model ( subModel, subCmd ) =
@@ -161,13 +174,9 @@ view model =
 
 navView : Model -> Html Msg
 navView model =
-    case model.page of
-        NotFoundPage ->
-            div [] []
-
-        _ ->
-            Header.view model.headerModel
-                |> Html.map HeaderMsg
+    Header.view model.headerModel
+        |> Html.map HeaderMsg
+            
 
 
 currentView : Model -> Html Msg
@@ -183,6 +192,10 @@ currentView model =
         CoachesPage pageModel ->
             ListCoaches.view pageModel
                 |> Html.map CoachesPageMsg
+
+        AddCoachPage pageModel ->
+            AddCoach.view pageModel
+                |> Html.map AddCoachPageMsg
 
 
 notFoundView : Html msg

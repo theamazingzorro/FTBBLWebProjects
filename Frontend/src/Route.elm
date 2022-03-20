@@ -8,6 +8,7 @@ import Url.Parser exposing (..)
 type Route
     = NotFound
     | Coaches
+    | AddCoach
     | Teams
 
 
@@ -25,8 +26,9 @@ matchRoute : Parser (Route -> a) a
 matchRoute =
     oneOf
         [ map Teams top
-        , map Teams <| s "teams"
-        , map Coaches <| s "coaches"
+        , map Teams <| oneOf [ s "Teams", s "teams" ]
+        , map Coaches <| oneOf [ s "Coaches", s "coaches" ]
+        , map AddCoach <| oneOf [ s "AddCoaches", s "addcoaches" ]
         ]
 
 
@@ -40,10 +42,13 @@ routeToString : Route -> String
 routeToString route =
     case route of
         NotFound ->
-            "/not-found"
+            "/NotFound"
 
         Teams ->
-            "/teams"
+            "/Teams"
 
         Coaches ->
-            "/coaches"
+            "/Coaches"
+
+        AddCoach ->
+            "/AddCoaches"
