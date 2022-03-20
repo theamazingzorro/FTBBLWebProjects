@@ -64,9 +64,19 @@ getCoachesRequest =
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ onClick FetchCoaches ]
-            [ text "Refresh Coaches" ]
+        [ div [ class "row", style "padding-bottom" "6px" ] [ viewRefreshButton ]
         , viewCoachesOrError model
+        ]
+
+
+viewRefreshButton : Html Msg
+viewRefreshButton =
+    div [ class "col" ]
+        [ button
+            [ onClick FetchCoaches
+            , class "btn btn-sm btn-secondary float-end"
+            ]
+            [ text "Refresh Coaches" ]
         ]
 
 
@@ -101,12 +111,27 @@ viewError errorMessage =
 viewCoaches : List Coach -> Html Msg
 viewCoaches coaches =
     div []
-        [ h3 [] [ text "Coaches" ]
+        [ viewHeader
         , table [ class "table table-striped table-hover" ]
             [ viewTableHeader
             , tbody [] <|
                 List.map viewCoach coaches
             ]
+        ]
+
+
+viewHeader : Html Msg
+viewHeader =
+    div [ class "row" ]
+        [ div [ class "col" ] [ h3 [] [ text "Coaches" ] ]
+        , div [ class "col" ] [ viewToolBar ]
+        ]
+
+
+viewToolBar : Html Msg
+viewToolBar =
+    div [ class "btn-group float-end" ]
+        [ button [ class "btn btn-success" ] [ text "Add Coach" ]
         ]
 
 
@@ -118,6 +143,8 @@ viewTableHeader =
                 [ text "Name" ]
             , th [ scope "col" ]
                 [ text "Elo" ]
+            , th [ scope "col" ]
+                [ text "" ]
             ]
         ]
 
@@ -129,4 +156,24 @@ viewCoach coach =
             [ text coach.name ]
         , td []
             [ text <| String.fromInt coach.elo ]
+        , td [width 175]
+            [ viewEditButton coach, viewDeleteButton coach ]
         ]
+
+
+viewDeleteButton : Coach -> Html msg
+viewDeleteButton _ =
+    button
+        [ class "btn btn-danger"
+        , style "margin-left" "6px" 
+        ]
+        [ text "Delete" ]
+
+
+viewEditButton : Coach -> Html msg
+viewEditButton _ =
+    button
+        [ class "btn btn-secondary"
+        , style "margin-left" "6px" 
+        ]
+        [ text "Edit" ]
