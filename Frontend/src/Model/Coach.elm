@@ -2,6 +2,7 @@ module Model.Coach exposing (..)
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (required)
+import Json.Encode as Encode
 
 
 type alias Coach =
@@ -41,3 +42,25 @@ coachDecoder =
 coachIdDecoder : Decoder CoachId
 coachIdDecoder =
     Decode.map coachIdFromInt int
+
+
+coachEncoder : Coach -> Encode.Value
+coachEncoder coach =
+    Encode.object
+        [ ( "id", encodeId coach.id )
+        , ( "name", Encode.string coach.name )
+        , ( "elo", Encode.int coach.elo )
+        ]
+
+
+newCoachEncoder : Coach -> Encode.Value
+newCoachEncoder coach =
+    Encode.object
+        [ ( "name", Encode.string coach.name )
+        , ( "elo", Encode.int coach.elo )
+        ]
+
+
+encodeId : CoachId -> Encode.Value
+encodeId coachId =
+    Encode.int coachId

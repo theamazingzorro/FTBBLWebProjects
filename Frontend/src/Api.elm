@@ -1,6 +1,6 @@
-module Api exposing (Endpoint(..), getRequest)
+module Api exposing (Endpoint(..), getRequest, postRequest)
 
-import Http exposing (Expect)
+import Http exposing (Body, Expect)
 
 
 type Endpoint
@@ -35,5 +35,14 @@ getRequest : Endpoint -> Expect msg -> Cmd msg
 getRequest endpoint expect =
     Http.get
         { url = baseUrl ++ stringOf endpoint
+        , expect = expect
+        }
+
+
+postRequest : Endpoint -> Body -> Expect msg -> Cmd msg
+postRequest endpoint body expect =
+    Http.post
+        { url = baseUrl ++ stringOf endpoint
+        , body = body
         , expect = expect
         }
