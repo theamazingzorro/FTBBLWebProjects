@@ -2,6 +2,7 @@ module Page.AddCoach exposing (Model, Msg, init, update, view)
 
 import Api
 import Error exposing (buildErrorMessage)
+import Fcss
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
@@ -66,7 +67,8 @@ update msg model =
 submitCoach : Coach -> Cmd Msg
 submitCoach coach =
     Api.postRequest Api.Coaches
-        (Http.jsonBody (newCoachEncoder coach)) <|
+        (Http.jsonBody (newCoachEncoder coach))
+    <|
         Http.expectJson CoachSubmitted coachDecoder
 
 
@@ -88,7 +90,7 @@ viewError : Maybe String -> Html msg
 viewError maybeError =
     case maybeError of
         Just error ->
-            div [ style "color" "#d00"]
+            div [ Fcss.errorMessage ]
                 [ h3 [] [ text "Couldn't save a coach at this time." ]
                 , text ("Error: " ++ error)
                 , br [] []
@@ -101,21 +103,20 @@ viewError maybeError =
 viewForm : Coach -> Html Msg
 viewForm coach =
     div []
-        [ div [ class "mb-3" ]
+        [ div [ Fcss.formEntry ]
             [ label
-                [ class "form-label"
-                , for "nameInput"
-                ]
+                (Fcss.formLabel "nameInput")
                 [ text "Name" ]
             , input
-                [ class "form-control"
-                , id "nameInput"
-                , onInput NameChanged
-                , value coach.name
-                ] []
+                (Fcss.formInput "nameInput"
+                    [ onInput NameChanged
+                    , value coach.name
+                    ]
+                )
+                []
             ]
         , button
-            [ class "btn btn-primary"
+            [ Fcss.submitButton
             , onClick Submit
             ]
             [ text "Add" ]

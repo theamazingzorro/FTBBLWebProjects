@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav
+import Fcss
 import Header
 import Html exposing (..)
 import Html.Attributes exposing (class)
@@ -164,7 +165,7 @@ view : Model -> Document Msg
 view model =
     { title = "FTBBL"
     , body =
-        [ div [ class "container" ]
+        [ div [ Fcss.mainContainer ]
             [ navView model
             , currentView model
             ]

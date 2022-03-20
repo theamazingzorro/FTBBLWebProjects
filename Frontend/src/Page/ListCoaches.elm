@@ -3,6 +3,7 @@ module Page.ListCoaches exposing (Model, Msg, init, update, view)
 import Api
 import Browser.Navigation as Nav
 import Error
+import Fcss
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -71,17 +72,17 @@ getCoachesRequest =
 view : Model -> Html Msg
 view model =
     div []
-        [ div [ class "row", style "padding-bottom" "6px" ] [ viewRefreshButton ]
+        [ div Fcss.row [ viewRefreshButton ]
         , viewCoachesOrError model
         ]
 
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    div [ class "col" ]
+    div [ Fcss.col ]
         [ button
             [ onClick FetchCoaches
-            , class "btn btn-sm btn-secondary float-end"
+            , Fcss.refreshButton
             ]
             [ text "Refresh Coaches" ]
         ]
@@ -109,7 +110,7 @@ viewError errorMessage =
         errorHeading =
             "Couldn't fetch data at this time."
     in
-    div []
+    div [ Fcss.errorMessage ]
         [ h3 [] [ text errorHeading ]
         , text <| "Error: " ++ errorMessage
         ]
@@ -119,7 +120,7 @@ viewCoaches : List Coach -> Html Msg
 viewCoaches coaches =
     div []
         [ viewHeader
-        , table [ class "table table-striped table-hover" ]
+        , table [ Fcss.table ]
             [ viewTableHeader
             , tbody [] <|
                 List.map viewCoach coaches
@@ -129,17 +130,17 @@ viewCoaches coaches =
 
 viewHeader : Html Msg
 viewHeader =
-    div [ class "row" ]
-        [ div [ class "col" ] [ h3 [] [ text "Coaches" ] ]
-        , div [ class "col" ] [ viewToolBar ]
+    div Fcss.row
+        [ div [ Fcss.col ] [ h3 [] [ text "Coaches" ] ]
+        , div [ Fcss.col ] [ viewToolBar ]
         ]
 
 
 viewToolBar : Html Msg
 viewToolBar =
-    div [ class "btn-group float-end" ]
+    div [ Fcss.rightSideButtons ]
         [ button
-            [ class "btn btn-success"
+            [ Fcss.addButton
             , onClick AddCoachButtonClick
             ]
             [ text "Add Coach" ]
@@ -167,7 +168,7 @@ viewCoach coach =
             [ text coach.name ]
         , td []
             [ text <| String.fromInt coach.elo ]
-        , td [ width 175 ]
+        , td [ Fcss.tableButtonColumn ]
             [ viewEditButton coach, viewDeleteButton coach ]
         ]
 
@@ -175,16 +176,12 @@ viewCoach coach =
 viewDeleteButton : Coach -> Html msg
 viewDeleteButton _ =
     button
-        [ class "btn btn-danger"
-        , style "margin-left" "6px"
-        ]
+        Fcss.deleteButton
         [ text "Delete" ]
 
 
 viewEditButton : Coach -> Html msg
 viewEditButton _ =
     button
-        [ class "btn btn-secondary"
-        , style "margin-left" "6px"
-        ]
+        Fcss.editButton
         [ text "Edit" ]

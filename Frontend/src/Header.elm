@@ -1,6 +1,7 @@
 module Header exposing (Model, Msg, init, update, view)
 
 import Browser.Navigation as Nav
+import Fcss
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -50,11 +51,11 @@ update msg model =
 
 view : Model -> Html Msg
 view _ =
-    nav [ class "navbar navbar-expand-lg navbar-light bg-light" ]
-        [ a [ class "navbar-brand" ] [ text "FTBBL" ]
+    nav [ Fcss.mainNavBar ]
+        [ a [ Fcss.navBarBrand ] [ text "FTBBL" ]
         , toggleBarButton
-        , div [ class "collapse navbar-collapse", id "navbarNav" ]
-            [ ul [ class "navbar-nav" ]
+        , div [ Fcss.navBarCollapsable, id "navbarNav" ]
+            [ ul [ Fcss.navBarLinkList ]
                 [ linkElement "Teams" TeamIndexClicked
                 , linkElement "Coaches" CoachIndexClicked
                 ]
@@ -75,7 +76,11 @@ toggleBarButton =
 
 linkElement : String -> Msg -> Html Msg
 linkElement title msg =
-    li [ class "nav-item" ]
-        [ a [ class "nav-link", onClick msg, href "#" ]
+    li [ Fcss.navItem ]
+        [ a
+            [ Fcss.navLink
+            , onClick msg
+            , href "#"
+            ]
             [ text title ]
         ]
