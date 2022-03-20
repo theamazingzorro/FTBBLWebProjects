@@ -5,9 +5,9 @@ import Browser.Navigation as Nav
 import Header
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Page.AddCoach as AddCoach
 import Page.ListCoaches as ListCoaches
 import Page.ListTeams as ListTeams
-import Page.AddCoach as AddCoach
 import Route exposing (Route(..))
 import Url exposing (Url)
 
@@ -72,7 +72,7 @@ initCurrentPage ( model, existingCmds ) =
                     initPage ListTeams.init TeamsPage TeamsPageMsg
 
                 Route.Coaches ->
-                    initPage ListCoaches.init CoachesPage CoachesPageMsg
+                    initPage (ListCoaches.init model.navKey) CoachesPage CoachesPageMsg
 
                 Route.AddCoach ->
                     initPage AddCoach.init AddCoachPage AddCoachPageMsg
@@ -176,7 +176,6 @@ navView : Model -> Html Msg
 navView model =
     Header.view model.headerModel
         |> Html.map HeaderMsg
-            
 
 
 currentView : Model -> Html Msg

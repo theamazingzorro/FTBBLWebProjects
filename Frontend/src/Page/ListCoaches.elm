@@ -1,6 +1,7 @@
 module Page.ListCoaches exposing (Model, Msg, init, update, view)
 
 import Api
+import Browser.Navigation as Nav
 import Error
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -8,6 +9,7 @@ import Html.Events exposing (onClick)
 import Http
 import Model.Coach exposing (Coach, coachsDecoder)
 import RemoteData exposing (WebData)
+import Route exposing (Route(..), pushUrl)
 
 
 
@@ -16,21 +18,23 @@ import RemoteData exposing (WebData)
 
 type alias Model =
     { coaches : WebData (List Coach)
+    , navkey : Nav.Key
     }
 
 
 type Msg
     = FetchCoaches
     | CoachesRecieved (WebData (List Coach))
+    | AddCoachButtonClick
 
 
 
 -- Init --
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( { coaches = RemoteData.Loading }, getCoachesRequest )
+init : Nav.Key -> ( Model, Cmd Msg )
+init navkey =
+    ( { coaches = RemoteData.Loading, navkey = navkey }, getCoachesRequest )
 
 
 
@@ -45,6 +49,9 @@ update msg model =
 
         CoachesRecieved response ->
             ( { model | coaches = response }, Cmd.none )
+
+        AddCoachButtonClick ->
+            ( model, pushUrl AddCoach model.navkey )
 
 
 
@@ -131,7 +138,11 @@ viewHeader =
 viewToolBar : Html Msg
 viewToolBar =
     div [ class "btn-group float-end" ]
-        [ button [ class "btn btn-success" ] [ text "Add Coach" ]
+        [ button
+            [ class "btn btn-success"
+            , onClick AddCoachButtonClick
+            ]
+            [ text "Add Coach" ]
         ]
 
 
