@@ -7,7 +7,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Model.Coach exposing (Coach, coachDecoder, newCoachEncoder)
+import Model.Coach exposing (Coach, coachDecoder, defaultCoach, newCoachEncoder)
 
 
 
@@ -32,12 +32,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( { coach = initialCoach, submitError = Nothing }, Cmd.none )
-
-
-initialCoach : Coach
-initialCoach =
-    { id = 0, name = "", elo = 1000 }
+    ( { coach = defaultCoach, submitError = Nothing }, Cmd.none )
 
 
 
@@ -58,7 +53,7 @@ update msg model =
             ( model, submitCoach model.coach )
 
         CoachSubmitted (Ok _) ->
-            ( { model | coach = initialCoach, submitError = Nothing }, Cmd.none )
+            ( { model | coach = defaultCoach, submitError = Nothing }, Cmd.none )
 
         CoachSubmitted (Err err) ->
             ( { model | submitError = Just (buildErrorMessage err) }, Cmd.none )

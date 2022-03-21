@@ -1,8 +1,12 @@
-module Model.Coach exposing (..)
+module Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder, coachsDecoder, defaultCoach, newCoachEncoder)
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
+
+
+
+-- Types --
 
 
 type alias Coach =
@@ -12,18 +16,24 @@ type alias Coach =
     }
 
 
-type alias CoachId =
-    Int
+type CoachId
+    = CoachId Int
 
 
-coachIdFromInt : Int -> CoachId
-coachIdFromInt i =
-    i
+
+-- Default --
 
 
-coachIdToInt : CoachId -> Int
-coachIdToInt i =
-    i
+defaultCoach : Coach
+defaultCoach =
+    { id = CoachId 0
+    , name = ""
+    , elo = 1000
+    }
+
+
+
+-- Decoders --
 
 
 coachsDecoder : Decoder (List Coach)
@@ -41,7 +51,11 @@ coachDecoder =
 
 coachIdDecoder : Decoder CoachId
 coachIdDecoder =
-    Decode.map coachIdFromInt int
+    Decode.map CoachId int
+
+
+
+-- Encoders --
 
 
 coachEncoder : Coach -> Encode.Value
@@ -62,5 +76,5 @@ newCoachEncoder coach =
 
 
 encodeId : CoachId -> Encode.Value
-encodeId coachId =
-    Encode.int coachId
+encodeId (CoachId id) =
+    Encode.int id

@@ -5,7 +5,6 @@ import Browser.Navigation as Nav
 import Fcss
 import Header
 import Html exposing (..)
-import Html.Attributes exposing (class)
 import Page.AddCoach as AddCoach
 import Page.ListCoaches as ListCoaches
 import Page.ListTeams as ListTeams

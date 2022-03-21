@@ -1,9 +1,13 @@
-module Model.Team exposing (..)
+module Model.Team exposing (Team, TeamId, defaultTeam, teamsDecoder)
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (required)
-import Model.Coach exposing (Coach, coachDecoder)
-import Model.Race exposing (Race, raceDecoder)
+import Model.Coach exposing (Coach, coachDecoder, defaultCoach)
+import Model.Race exposing (Race, defaultRace, raceDecoder)
+
+
+
+-- Types --
 
 
 type alias Team =
@@ -15,18 +19,26 @@ type alias Team =
     }
 
 
-type alias TeamId =
-    Int
+type TeamId
+    = TeamId Int
 
 
-teamIdFromInt : Int -> TeamId
-teamIdFromInt i =
-    i
+
+-- Default --
 
 
-teamIdToInt : TeamId -> Int
-teamIdToInt i =
-    i
+defaultTeam : Team
+defaultTeam =
+    { id = TeamId 0
+    , name = ""
+    , race = defaultRace
+    , coach = defaultCoach
+    , elo = 1000
+    }
+
+
+
+-- Decoders --
 
 
 teamsDecoder : Decoder (List Team)
@@ -46,4 +58,4 @@ teamDecoder =
 
 teamIdDecoder : Decoder TeamId
 teamIdDecoder =
-    Decode.map teamIdFromInt int
+    Decode.map TeamId int

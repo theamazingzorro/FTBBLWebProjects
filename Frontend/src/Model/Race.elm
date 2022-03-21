@@ -1,7 +1,11 @@
-module Model.Race exposing (..)
+module Model.Race exposing (Race, RaceId, defaultRace, raceDecoder)
 
 import Json.Decode as Decode exposing (Decoder, int, string)
 import Json.Decode.Pipeline exposing (required)
+
+
+
+-- Types --
 
 
 type alias Race =
@@ -10,18 +14,23 @@ type alias Race =
     }
 
 
-type alias RaceId =
-    Int
+type RaceId
+    = RaceId Int
 
 
-raceIdFromInt : Int -> RaceId
-raceIdFromInt i =
-    i
+
+-- Default --
 
 
-raceIdToInt : RaceId -> Int
-raceIdToInt i =
-    i
+defaultRace : Race
+defaultRace =
+    { id = RaceId 0
+    , name = ""
+    }
+
+
+
+-- Decoders --
 
 
 raceDecoder : Decoder Race
@@ -33,4 +42,4 @@ raceDecoder =
 
 raceIdDecoder : Decoder RaceId
 raceIdDecoder =
-    Decode.map raceIdFromInt int
+    Decode.map RaceId int
