@@ -1,13 +1,14 @@
-module Api exposing (Endpoint(..), getRequest, postRequest)
+module Api exposing (Endpoint(..), deleteRequest, getRequest, postRequest)
 
 import Http exposing (Body, Expect)
+import Model.Coach exposing (CoachId, idToString)
 
 
 type Endpoint
     = Teams
     | Team Int
     | Coaches
-    | Coach Int
+    | Coach CoachId
 
 
 baseUrl : String
@@ -28,13 +29,18 @@ stringOf endpoint =
             "coach"
 
         Coach index ->
-            "coach/" ++ String.fromInt index
+            "coach/" ++ idToString index
+
+
+urlOf : Endpoint -> String
+urlOf endpoint =
+    baseUrl ++ stringOf endpoint
 
 
 getRequest : Endpoint -> Expect msg -> Cmd msg
 getRequest endpoint expect =
     Http.get
-        { url = baseUrl ++ stringOf endpoint
+        { url = urlOf endpoint
         , expect = expect
         }
 
@@ -42,7 +48,20 @@ getRequest endpoint expect =
 postRequest : Endpoint -> Body -> Expect msg -> Cmd msg
 postRequest endpoint body expect =
     Http.post
-        { url = baseUrl ++ stringOf endpoint
+        { url = urlOf endpoint
         , body = body
         , expect = expect
+        }
+
+
+deleteRequest : Endpoint -> Expect msg -> Cmd msg
+deleteRequest endpoint expect =
+    Http.request
+        { method = "DELETE"
+        , headers = []
+        , url = urlOf endpoint
+        , body = Http.emptyBody
+        , expect = expect
+        , timeout = Nothing
+        , tracker = Nothing
         }

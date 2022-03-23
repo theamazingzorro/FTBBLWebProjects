@@ -1,4 +1,4 @@
-module Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder, coachsDecoder, defaultCoach, newCoachEncoder)
+module Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder, coachsDecoder, defaultCoach, idToString, newCoachEncoder)
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (required)
@@ -18,6 +18,15 @@ type alias Coach =
 
 type CoachId
     = CoachId Int
+
+
+
+-- ToString --
+
+
+idToString : CoachId -> String
+idToString (CoachId id) =
+    String.fromInt id
 
 
 

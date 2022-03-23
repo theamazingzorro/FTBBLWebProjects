@@ -8,9 +8,12 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
-import Model.Coach exposing (Coach, coachsDecoder)
+import Model.Coach exposing (Coach, CoachId, coachsDecoder)
+import Model.DeleteResponse exposing (DeleteResponse)
 import RemoteData exposing (WebData)
 import Route exposing (Route(..), pushUrl)
+import Model.DeleteResponse exposing (deleteResponseDecoder)
+import Error exposing (buildErrorMessage)
 
 
 
@@ -20,6 +23,7 @@ import Route exposing (Route(..), pushUrl)
 type alias Model =
     { coaches : WebData (List Coach)
     , navkey : Nav.Key
+    , deleteError : Maybe String
     }
 
 
@@ -27,6 +31,8 @@ type Msg
     = FetchCoaches
     | CoachesRecieved (WebData (List Coach))
     | AddCoachButtonClick
+    | DeleteCoachButtonClick CoachId
+    | CoachDeleted (Result Http.Error DeleteResponse)
 
 
 
@@ -35,7 +41,12 @@ type Msg
 
 init : Nav.Key -> ( Model, Cmd Msg )
 init navkey =
-    ( { coaches = RemoteData.Loading, navkey = navkey }, getCoachesRequest )
+    ( 
+        { coaches = RemoteData.Loading
+        , navkey = navkey
+        , deleteError=Nothing 
+        }
+    , getCoachesRequest )
 
 
 
@@ -54,7 +65,19 @@ update msg model =
         AddCoachButtonClick ->
             ( model, pushUrl AddCoach model.navkey )
 
+        DeleteCoachButtonClick id ->
+            ( model, deleteCoachRequest id )
 
+        CoachDeleted (Ok res) ->
+            ( { model | deleteError = buildDeleteError res }, getCoachesRequest)
+
+        CoachDeleted (Err err) ->
+            ( {model | deleteError = Just (buildErrorMessage err)}, Cmd.none)
+
+
+buildDeleteError : DeleteResponse -> Maybe String
+buildDeleteError res =
+    if res.deleted then Nothing else Just "Delete Failed. Coach not found."
 
 -- Common Helpers --
 
@@ -65,6 +88,10 @@ getCoachesRequest =
         Http.expectJson (RemoteData.fromResult >> CoachesRecieved) coachsDecoder
 
 
+deleteCoachRequest : CoachId -> Cmd Msg
+deleteCoachRequest id =
+    Api.deleteRequest (Api.Coach id) <|
+        Http.expectJson CoachDeleted deleteResponseDecoder
 
 -- View --
 
@@ -173,14 +200,14 @@ viewCoach coach =
         ]
 
 
-viewDeleteButton : Coach -> Html msg
-viewDeleteButton _ =
+viewDeleteButton : Coach -> Html Msg
+viewDeleteButton coach =
     button
-        Fcss.deleteButton
+        ( onClick (DeleteCoachButtonClick coach.id) :: Fcss.deleteButton )
         [ text "Delete" ]
 
 
-viewEditButton : Coach -> Html msg
+viewEditButton : Coach -> Html Msg
 viewEditButton _ =
     button
         Fcss.editButton
