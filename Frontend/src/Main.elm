@@ -6,6 +6,7 @@ import Fcss
 import Header
 import Html exposing (..)
 import Page.AddCoach as AddCoach
+import Page.EditCoach as EditCoach
 import Page.ListCoaches as ListCoaches
 import Page.ListTeams as ListTeams
 import Route exposing (Route(..))
@@ -29,6 +30,7 @@ type Page
     | TeamsPage ListTeams.Model
     | CoachesPage ListCoaches.Model
     | AddCoachPage AddCoach.Model
+    | EditCoachPage EditCoach.Model
 
 
 type Msg
@@ -38,6 +40,7 @@ type Msg
     | TeamsPageMsg ListTeams.Msg
     | CoachesPageMsg ListCoaches.Msg
     | AddCoachPageMsg AddCoach.Msg
+    | EditCoachPageMsg EditCoach.Msg
 
 
 
@@ -76,6 +79,9 @@ initCurrentPage ( model, existingCmds ) =
 
                 Route.AddCoach ->
                     initPage AddCoach.init AddCoachPage AddCoachPageMsg
+
+                Route.EditCoach id ->
+                    initPage (EditCoach.init id) EditCoachPage EditCoachPageMsg
     in
     ( { model | page = currentPage }
     , Cmd.batch [ existingCmds, mappedPageCmds ]
@@ -148,6 +154,13 @@ update msg model =
         ( AddCoachPageMsg _, _ ) ->
             ( model, Cmd.none )
 
+        ( EditCoachPageMsg subMsg, EditCoachPage pageModel ) ->
+            EditCoach.update subMsg pageModel
+                |> updateWith EditCoachPage EditCoachPageMsg model
+
+        ( EditCoachPageMsg _, _ ) ->
+            ( model, Cmd.none )
+
 
 updateWith : (subModel -> Page) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
 updateWith toModel toMsg model ( subModel, subCmd ) =
@@ -195,6 +208,10 @@ currentView model =
         AddCoachPage pageModel ->
             AddCoach.view pageModel
                 |> Html.map AddCoachPageMsg
+
+        EditCoachPage pageModel ->
+            EditCoach.view pageModel
+                |> Html.map EditCoachPageMsg
 
 
 notFoundView : Html msg

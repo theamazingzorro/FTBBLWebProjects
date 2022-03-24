@@ -2,18 +2,16 @@ module Page.ListCoaches exposing (Model, Msg, init, update, view)
 
 import Api
 import Browser.Navigation as Nav
-import Error
+import Error exposing (buildErrorMessage)
 import Fcss
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Model.Coach exposing (Coach, CoachId, coachsDecoder)
-import Model.DeleteResponse exposing (DeleteResponse)
+import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (Route(..), pushUrl)
-import Model.DeleteResponse exposing (deleteResponseDecoder)
-import Error exposing (buildErrorMessage)
 
 
 
@@ -32,6 +30,7 @@ type Msg
     | CoachesRecieved (WebData (List Coach))
     | AddCoachButtonClick
     | DeleteCoachButtonClick CoachId
+    | EditCoachButtonClick CoachId
     | CoachDeleted (Result Http.Error DeleteResponse)
 
 
@@ -41,12 +40,12 @@ type Msg
 
 init : Nav.Key -> ( Model, Cmd Msg )
 init navkey =
-    ( 
-        { coaches = RemoteData.Loading
-        , navkey = navkey
-        , deleteError=Nothing 
-        }
-    , getCoachesRequest )
+    ( { coaches = RemoteData.Loading
+      , navkey = navkey
+      , deleteError = Nothing
+      }
+    , getCoachesRequest
+    )
 
 
 
@@ -65,19 +64,28 @@ update msg model =
         AddCoachButtonClick ->
             ( model, pushUrl AddCoach model.navkey )
 
+        EditCoachButtonClick id ->
+            ( model, pushUrl (EditCoach id) model.navkey )
+
         DeleteCoachButtonClick id ->
             ( model, deleteCoachRequest id )
 
         CoachDeleted (Ok res) ->
-            ( { model | deleteError = buildDeleteError res }, getCoachesRequest)
+            ( { model | deleteError = buildDeleteError res }, getCoachesRequest )
 
         CoachDeleted (Err err) ->
-            ( {model | deleteError = Just (buildErrorMessage err)}, Cmd.none)
+            ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
 
 
 buildDeleteError : DeleteResponse -> Maybe String
 buildDeleteError res =
-    if res.deleted then Nothing else Just "Delete Failed. Coach not found."
+    if res.deleted then
+        Nothing
+
+    else
+        Just "Delete Failed. Coach not found."
+
+
 
 -- Common Helpers --
 
@@ -92,6 +100,8 @@ deleteCoachRequest : CoachId -> Cmd Msg
 deleteCoachRequest id =
     Api.deleteRequest (Api.Coach id) <|
         Http.expectJson CoachDeleted deleteResponseDecoder
+
+
 
 -- View --
 
@@ -203,12 +213,12 @@ viewCoach coach =
 viewDeleteButton : Coach -> Html Msg
 viewDeleteButton coach =
     button
-        ( onClick (DeleteCoachButtonClick coach.id) :: Fcss.deleteButton )
+        (onClick (DeleteCoachButtonClick coach.id) :: Fcss.deleteButton)
         [ text "Delete" ]
 
 
 viewEditButton : Coach -> Html Msg
-viewEditButton _ =
+viewEditButton coach =
     button
-        Fcss.editButton
+        (onClick (EditCoachButtonClick coach.id) :: Fcss.editButton)
         [ text "Edit" ]

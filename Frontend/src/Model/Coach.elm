@@ -1,8 +1,9 @@
-module Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder, coachsDecoder, defaultCoach, idToString, newCoachEncoder)
+module Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder, coachsDecoder, defaultCoach, idParser, idToString, newCoachEncoder)
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
+import Url.Parser exposing (Parser, custom)
 
 
 
@@ -87,3 +88,14 @@ newCoachEncoder coach =
 encodeId : CoachId -> Encode.Value
 encodeId (CoachId id) =
     Encode.int id
+
+
+
+-- Parsers --
+
+
+idParser : Parser (CoachId -> a) a
+idParser =
+    custom "POSTID" <|
+        \postId ->
+            Maybe.map CoachId (String.toInt postId)

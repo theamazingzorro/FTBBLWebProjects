@@ -1,4 +1,4 @@
-module Api exposing (Endpoint(..), deleteRequest, getRequest, postRequest)
+module Api exposing (Endpoint(..), deleteRequest, getRequest, postRequest, putRequest)
 
 import Http exposing (Body, Expect)
 import Model.Coach exposing (CoachId, idToString)
@@ -61,6 +61,19 @@ deleteRequest endpoint expect =
         , headers = []
         , url = urlOf endpoint
         , body = Http.emptyBody
+        , expect = expect
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+putRequest : Endpoint -> Body -> Expect msg -> Cmd msg
+putRequest endpoint body expect =
+    Http.request
+        { method = "PUT"
+        , headers = []
+        , url = urlOf endpoint
+        , body = body
         , expect = expect
         , timeout = Nothing
         , tracker = Nothing
