@@ -19,7 +19,6 @@ module CoachRepository =
 
         db.Fetch<Coach>("""
                 SELECT * FROM Coach
-                WHERE Coach.is_active
                 """)
             |> List.ofSeq
 
@@ -33,10 +32,9 @@ module CoachRepository =
         try 
             db.Single<Coach>("""
                 SELECT * FROM Coach
-                WHERE Coach.is_active
-                AND Coach.id=@0""", id)
+                WHERE Coach.id=@0""", id)
         with
-            :? InvalidOperationException -> { Id=0; Name=""; Elo=0; IsActive=false }
+            :? InvalidOperationException -> { Id=0; Name=""; Elo=0 }
 
 
     let save (coach : Coach) =

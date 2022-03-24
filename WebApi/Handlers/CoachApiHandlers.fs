@@ -42,7 +42,7 @@ module CoachApiHandlers =
                 let logger = getLogger ctx
 
                 let! coach = ctx.BindJsonAsync<Coach>()
-                let coach = { coach with Elo = 1000; IsActive = true }
+                let coach = { coach with Elo = 1000 }
 
                 logger.LogInformation $"Saving Coach: name={coach.Name}"
                 
@@ -72,9 +72,6 @@ module CoachApiHandlers =
 
                 let! coach = ctx.BindJsonAsync<Coach>()
                 logger.LogInformation $"Updating Coach: id={coach.Id}"
-
-                let original = CoachRepository.getById coach.Id
-                let coach = { coach with IsActive = original.IsActive }
 
                 CoachRepository.update coach
 

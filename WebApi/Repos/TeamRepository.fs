@@ -21,7 +21,6 @@ module TeamRepository =
                 SELECT * FROM Team
                 JOIN Race ON Team.race_id=Race.id
                 JOIN Coach ON Team.coach_id=Coach.id
-                WHERE Team.is_active
                 """)
             |> List.ofSeq
 
@@ -37,10 +36,9 @@ module TeamRepository =
                 SELECT * FROM Team
                 JOIN Race ON Team.race_id=Race.id
                 JOIN Coach ON Team.coach_id=Coach.id
-                WHERE Team.is_active
-                AND Team.id=@0""", id)
+                WHERE Team.id=@0""", id)
         with
-            :? InvalidOperationException -> { Id=0; Name=""; Race={Id=0; Name=""; IsActive=false}; Coach={Id=0; Name=""; Elo=0; IsActive=false}; Elo=0; IsActive=false }
+            :? InvalidOperationException -> { Id=0; Name=""; Race={Id=0; Name="";}; Coach={Id=0; Name=""; Elo=0}; Elo=0 }
         
 
     let save (team : Team) =

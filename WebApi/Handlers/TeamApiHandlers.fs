@@ -42,7 +42,7 @@ module TeamApiHandlers =
                 let logger = getLogger ctx
 
                 let! team = ctx.BindJsonAsync<Team>()
-                let team = { team with Elo = 1000; IsActive = true }
+                let team = { team with Elo = 1000 }
 
                 logger.LogInformation $"Saving Team: name={team.Name}"
                 
@@ -73,9 +73,6 @@ module TeamApiHandlers =
 
                 let! team = ctx.BindJsonAsync<Team>()
                 logger.LogInformation $"Updating Team: id={team.Id}"
-
-                let original = TeamRepository.getById team.Id
-                let team = { team with IsActive = original.IsActive }
 
                 TeamRepository.update team
 

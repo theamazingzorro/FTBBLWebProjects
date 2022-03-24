@@ -16,7 +16,9 @@
   </ItemGroup>
 
   <ItemGroup> 
-	<Compile Include="Models\TeamModels.fs" /> 
+	<Compile Include="Models\Race.fs" /> 
+	<Compile Include="Models\Coach.fs" /> 
+	<Compile Include="Models\Team.fs" /> 
 	<Compile Include="Repos\CoachRepository.fs" />
     <Compile Include="Repos\TeamRepository.fs" />
     <Compile Include="Handlers\CoachApiHandlers.fs" />
