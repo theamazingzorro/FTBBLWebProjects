@@ -66,15 +66,15 @@ module TeamApiHandlers =
             }
 
 
-    let updateTeam : HttpHandler =
+    let updateTeam (id : int) : HttpHandler =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {
                 let logger = getLogger ctx
 
                 let! team = ctx.BindJsonAsync<Team>()
-                logger.LogInformation $"Updating Team: id={team.Id}"
+                logger.LogInformation $"Updating Team: id={id}"
 
-                TeamRepository.update team
+                TeamRepository.update { team with Id = id }
 
                 return! json team next ctx
             }

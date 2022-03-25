@@ -35,9 +35,11 @@ let webApp =
                     routex "/coach(/?)" >=> CoachApiHandlers.postCoach
                 ]
                 PUT >=> choose [
-                    routex "/team(/?)" >=> TeamApiHandlers.updateTeam
+                    routef "/team/%i" TeamApiHandlers.updateTeam
+                    routef "/team/%i/" TeamApiHandlers.updateTeam
 
-                    routex "/coach(/?)" >=> CoachApiHandlers.updateCoach
+                    routef "/coach/%i" CoachApiHandlers.updateCoach
+                    routef "/coach/%i/" CoachApiHandlers.updateCoach
                 ]
                 DELETE >=> choose [
                     routef "/team/%i" TeamApiHandlers.deleteTeam

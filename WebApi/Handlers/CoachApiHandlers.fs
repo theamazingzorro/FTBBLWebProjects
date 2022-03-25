@@ -65,15 +65,15 @@ module CoachApiHandlers =
             }
 
 
-    let updateCoach : HttpHandler =
+    let updateCoach (id : int) : HttpHandler =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {
                 let logger = getLogger ctx
 
                 let! coach = ctx.BindJsonAsync<Coach>()
-                logger.LogInformation $"Updating Coach: id={coach.Id}"
+                logger.LogInformation $"Updating Coach: id={id}"
 
-                CoachRepository.update coach
+                CoachRepository.update { coach with Id = id }
 
                 return! json coach next ctx
             }

@@ -81,7 +81,7 @@ initCurrentPage ( model, existingCmds ) =
                     initPage AddCoach.init AddCoachPage AddCoachPageMsg
 
                 Route.EditCoach id ->
-                    initPage (EditCoach.init id) EditCoachPage EditCoachPageMsg
+                    initPage (EditCoach.init model.navKey id) EditCoachPage EditCoachPageMsg
     in
     ( { model | page = currentPage }
     , Cmd.batch [ existingCmds, mappedPageCmds ]

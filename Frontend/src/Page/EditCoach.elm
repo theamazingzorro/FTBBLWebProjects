@@ -1,8 +1,16 @@
 module Page.EditCoach exposing (Model, Msg, init, update, view)
 
+import Api
+import Error exposing (buildErrorMessage)
+import Fcss
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Model.Coach exposing (CoachId, idToString)
+import Html.Events exposing (onClick, onInput)
+import Http
+import Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder, idToString)
+import RemoteData exposing (WebData)
+import Browser.Navigation as Nav
+import Route exposing (pushUrl)
 
 
 
@@ -10,21 +18,33 @@ import Model.Coach exposing (CoachId, idToString)
 
 
 type alias Model =
-    { id : CoachId
+    { navkey : Nav.Key
+    , id : CoachId
+    , coach : WebData Coach
+    , saveError : Maybe String
     }
 
 
 type Msg
-    = None
+    = CoachReceived (WebData Coach)
+    | NameChanged String
+    | Submit
+    | CoachSubmitted (Result Http.Error Coach)
 
 
 
 -- Init --
 
 
-init : CoachId -> ( Model, Cmd Msg )
-init id =
-    ( { id = id }, Cmd.none )
+init : Nav.Key -> CoachId -> ( Model, Cmd Msg )
+init navkey id =
+    ( { navkey = navkey
+      , id = id
+      , coach = RemoteData.Loading
+      , saveError = Nothing
+      }
+    , getCoachRequest id
+    )
 
 
 
@@ -34,8 +54,58 @@ init id =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        None ->
-            ( model, Cmd.none )
+        CoachReceived response ->
+            ( { model | coach = response }, Cmd.none )
+
+        NameChanged newName ->
+            ( { model | coach = rename model.coach newName }, Cmd.none )
+
+        Submit ->
+            trySaveCoach model
+
+        CoachSubmitted (Ok _) ->
+            ( { model | saveError = Nothing }, pushUrl Route.Coaches model.navkey )
+
+        CoachSubmitted (Err err) ->
+            ( { model | saveError = Just (buildErrorMessage err) }, Cmd.none )
+
+
+rename : WebData Coach -> String -> WebData Coach
+rename coach newName =
+    case coach of
+        RemoteData.Success oldCoach ->
+            RemoteData.Success { oldCoach | name = newName }
+
+        _ ->
+            coach
+
+
+trySaveCoach : Model -> ( Model, Cmd Msg )
+trySaveCoach model =
+    case model.coach of
+        RemoteData.Success coach ->
+            ( { model | saveError = Nothing }, saveCoach coach )
+
+        _ ->
+            ( { model | saveError = Just "Cannot submit data, please refresh page and try again." }, Cmd.none )
+
+
+
+-- Common Helpers --
+
+
+getCoachRequest : CoachId -> Cmd Msg
+getCoachRequest id =
+    Api.getRequest (Api.Coach id) <|
+        Http.expectJson (RemoteData.fromResult >> CoachReceived) coachDecoder
+
+
+saveCoach : Coach -> Cmd Msg
+saveCoach coach =
+    Api.putRequest (Api.Coach coach.id)
+        (Http.jsonBody (coachEncoder coach))
+    <|
+        Http.expectJson CoachSubmitted coachDecoder
 
 
 
@@ -44,4 +114,93 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [] [ text <| idToString model.id ]
+    div [] 
+        [ h3 [] [ text "Edit Coach" ]
+        , br [] []
+        , viewSaveError model.saveError
+        , viewCoachOrError model 
+        ]
+
+
+viewCoachOrError : Model -> Html Msg
+viewCoachOrError model =
+    case model.coach of
+        RemoteData.NotAsked ->
+            text ""
+
+        RemoteData.Loading ->
+            h3 [] [ text "Loading..." ]
+
+        RemoteData.Success coach ->
+            viewCoach coach
+
+        RemoteData.Failure httpError ->
+            viewLoadError <| Error.buildErrorMessage httpError
+
+viewSaveError : Maybe String -> Html msg
+viewSaveError maybeError =
+    case maybeError of
+        Just error ->
+            div [ Fcss.errorMessage ]
+                [ h3 [] [ text "Couldn't save a coach at this time." ]
+                , text ("Error: " ++ error)
+                , br [] []
+                ]
+
+        Nothing ->
+            text ""
+
+viewLoadError : String -> Html Msg
+viewLoadError errorMessage =
+    let
+        errorHeading =
+            "Couldn't fetch data at this time."
+    in
+    div [ Fcss.errorMessage ]
+        [ h3 [] [ text errorHeading ]
+        , text <| "Error: " ++ errorMessage
+        ]
+
+
+viewCoach : Coach -> Html Msg
+viewCoach coach =
+    div []
+        [ viewNameField coach.name
+        , viewStaticField "eloField" "Elo" <| String.fromInt coach.elo
+        , button
+            [ Fcss.submitButton
+            , onClick Submit
+            ]
+            [ text "Save" ]
+        ]
+
+
+viewNameField : String -> Html Msg
+viewNameField name =
+    div [ Fcss.formEntry ]
+            [ label
+                (Fcss.formLabel "nameInput")
+                [ text "Name" ]
+            , input
+                (Fcss.formInput "nameInput"
+                    [ onInput NameChanged
+                    , value name
+                    ]
+                )
+                []
+            ]
+
+viewStaticField : String -> String -> String -> Html msg
+viewStaticField id lblText entry =
+    div [ Fcss.formEntry ]
+        [ label
+            (Fcss.formLabel id)
+            [ text lblText ]
+        , input
+            (Fcss.formInput id
+                [ readonly True
+                , value entry
+                ]
+            )
+            []
+        ]
