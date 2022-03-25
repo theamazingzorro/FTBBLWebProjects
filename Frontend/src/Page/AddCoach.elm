@@ -2,12 +2,13 @@ module Page.AddCoach exposing (Model, Msg, init, update, view)
 
 import Api
 import Error exposing (buildErrorMessage)
-import Fcss
+import Custom.Attributes
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Coach exposing (Coach, coachDecoder, defaultCoach, newCoachEncoder)
+import Custom.Events exposing (onEnter)
 
 
 
@@ -85,7 +86,7 @@ viewError : Maybe String -> Html msg
 viewError maybeError =
     case maybeError of
         Just error ->
-            div [ Fcss.errorMessage ]
+            div [ Custom.Attributes.errorMessage ]
                 [ h3 [] [ text "Couldn't save a coach at this time." ]
                 , text ("Error: " ++ error)
                 , br [] []
@@ -98,20 +99,21 @@ viewError maybeError =
 viewForm : Coach -> Html Msg
 viewForm coach =
     div []
-        [ div [ Fcss.formEntry ]
+        [ div [ Custom.Attributes.formEntry ]
             [ label
-                (Fcss.formLabel "nameInput")
+                (Custom.Attributes.formLabel "nameInput")
                 [ text "Name" ]
             , input
-                (Fcss.formInput "nameInput"
+                (Custom.Attributes.formInput "nameInput"
                     [ onInput NameChanged
+                    , onEnter Submit
                     , value coach.name
                     ]
                 )
                 []
             ]
         , button
-            [ Fcss.submitButton
+            [ Custom.Attributes.submitButton
             , onClick Submit
             ]
             [ text "Add" ]

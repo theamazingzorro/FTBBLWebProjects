@@ -2,7 +2,7 @@ module Page.ListTeams exposing (Model, Msg, init, update, view)
 
 import Api
 import Error
-import Fcss
+import Custom.Attributes
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -66,17 +66,17 @@ getTeamsRequest =
 view : Model -> Html Msg
 view model =
     div []
-        [ div Fcss.row [ viewRefreshButton ]
+        [ div Custom.Attributes.row [ viewRefreshButton ]
         , viewTeamsOrError model
         ]
 
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    div [ Fcss.col ]
+    div [ Custom.Attributes.col ]
         [ button
             [ onClick FetchTeams
-            , Fcss.refreshButton
+            , Custom.Attributes.refreshButton
             ]
             [ text "Refresh Teams" ]
         ]
@@ -104,7 +104,7 @@ viewError errorMessage =
         errorHeading =
             "Couldn't fetch data at this time."
     in
-    div [ Fcss.errorMessage ]
+    div [ Custom.Attributes.errorMessage ]
         [ h3 [] [ text errorHeading ]
         , text <| "Error: " ++ errorMessage
         ]
@@ -114,7 +114,7 @@ viewTeams : List Team -> Html Msg
 viewTeams teams =
     div []
         [ h3 [] [ text "Teams" ]
-        , table [ Fcss.table ]
+        , table [ Custom.Attributes.table ]
             [ viewTableHeader
             , tbody [] <|
                 List.map viewTeam teams

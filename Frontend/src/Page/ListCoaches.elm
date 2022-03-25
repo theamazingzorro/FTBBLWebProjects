@@ -3,7 +3,7 @@ module Page.ListCoaches exposing (Model, Msg, init, update, view)
 import Api
 import Browser.Navigation as Nav
 import Error exposing (buildErrorMessage)
-import Fcss
+import Custom.Attributes
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -109,17 +109,17 @@ deleteCoachRequest id =
 view : Model -> Html Msg
 view model =
     div []
-        [ div Fcss.row [ viewRefreshButton ]
+        [ div Custom.Attributes.row [ viewRefreshButton ]
         , viewCoachesOrError model
         ]
 
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    div [ Fcss.col ]
+    div [ Custom.Attributes.col ]
         [ button
             [ onClick FetchCoaches
-            , Fcss.refreshButton
+            , Custom.Attributes.refreshButton
             ]
             [ text "Refresh Coaches" ]
         ]
@@ -147,7 +147,7 @@ viewError errorMessage =
         errorHeading =
             "Couldn't fetch data at this time."
     in
-    div [ Fcss.errorMessage ]
+    div [ Custom.Attributes.errorMessage ]
         [ h3 [] [ text errorHeading ]
         , text <| "Error: " ++ errorMessage
         ]
@@ -157,7 +157,7 @@ viewCoaches : List Coach -> Html Msg
 viewCoaches coaches =
     div []
         [ viewHeader
-        , table [ Fcss.table ]
+        , table [ Custom.Attributes.table ]
             [ viewTableHeader
             , tbody [] <|
                 List.map viewCoach coaches
@@ -167,17 +167,17 @@ viewCoaches coaches =
 
 viewHeader : Html Msg
 viewHeader =
-    div Fcss.row
-        [ div [ Fcss.col ] [ h3 [] [ text "Coaches" ] ]
-        , div [ Fcss.col ] [ viewToolBar ]
+    div Custom.Attributes.row
+        [ div [ Custom.Attributes.col ] [ h3 [] [ text "Coaches" ] ]
+        , div [ Custom.Attributes.col ] [ viewToolBar ]
         ]
 
 
 viewToolBar : Html Msg
 viewToolBar =
-    div [ Fcss.rightSideButtons ]
+    div [ Custom.Attributes.rightSideButtons ]
         [ button
-            [ Fcss.addButton
+            [ Custom.Attributes.addButton
             , onClick AddCoachButtonClick
             ]
             [ text "Add Coach" ]
@@ -205,7 +205,7 @@ viewCoach coach =
             [ text coach.name ]
         , td []
             [ text <| String.fromInt coach.elo ]
-        , td [ Fcss.tableButtonColumn ]
+        , td [ Custom.Attributes.tableButtonColumn ]
             [ viewEditButton coach, viewDeleteButton coach ]
         ]
 
@@ -213,12 +213,12 @@ viewCoach coach =
 viewDeleteButton : Coach -> Html Msg
 viewDeleteButton coach =
     button
-        (onClick (DeleteCoachButtonClick coach.id) :: Fcss.deleteButton)
+        (onClick (DeleteCoachButtonClick coach.id) :: Custom.Attributes.deleteButton)
         [ text "Delete" ]
 
 
 viewEditButton : Coach -> Html Msg
 viewEditButton coach =
     button
-        (onClick (EditCoachButtonClick coach.id) :: Fcss.editButton)
+        (onClick (EditCoachButtonClick coach.id) :: Custom.Attributes.editButton)
         [ text "Edit" ]

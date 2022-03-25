@@ -1,4 +1,4 @@
-module Fcss exposing (..)
+module Custom.Attributes exposing (..)
 
 import Html exposing (Attribute)
 import Html.Attributes exposing (..)

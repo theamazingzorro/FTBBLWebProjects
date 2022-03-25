@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav
-import Fcss
+import Custom.Attributes
 import Header
 import Html exposing (..)
 import Page.AddCoach as AddCoach
@@ -177,7 +177,7 @@ view : Model -> Document Msg
 view model =
     { title = "FTBBL"
     , body =
-        [ div [ Fcss.mainContainer ]
+        [ div [ Custom.Attributes.mainContainer ]
             [ navView model
             , currentView model
             ]

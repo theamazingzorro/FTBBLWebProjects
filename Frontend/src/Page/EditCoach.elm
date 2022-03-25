@@ -1,16 +1,17 @@
 module Page.EditCoach exposing (Model, Msg, init, update, view)
 
 import Api
+import Browser.Navigation as Nav
 import Error exposing (buildErrorMessage)
-import Fcss
+import Custom.Attributes
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder, idToString)
+import Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder)
 import RemoteData exposing (WebData)
-import Browser.Navigation as Nav
 import Route exposing (pushUrl)
+import Custom.Events exposing (onEnter)
 
 
 
@@ -114,11 +115,11 @@ saveCoach coach =
 
 view : Model -> Html Msg
 view model =
-    div [] 
+    div []
         [ h3 [] [ text "Edit Coach" ]
         , br [] []
         , viewSaveError model.saveError
-        , viewCoachOrError model 
+        , viewCoachOrError model
         ]
 
 
@@ -137,11 +138,12 @@ viewCoachOrError model =
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
 
+
 viewSaveError : Maybe String -> Html msg
 viewSaveError maybeError =
     case maybeError of
         Just error ->
-            div [ Fcss.errorMessage ]
+            div [ Custom.Attributes.errorMessage ]
                 [ h3 [] [ text "Couldn't save a coach at this time." ]
                 , text ("Error: " ++ error)
                 , br [] []
@@ -150,13 +152,14 @@ viewSaveError maybeError =
         Nothing ->
             text ""
 
+
 viewLoadError : String -> Html Msg
 viewLoadError errorMessage =
     let
         errorHeading =
             "Couldn't fetch data at this time."
     in
-    div [ Fcss.errorMessage ]
+    div [ Custom.Attributes.errorMessage ]
         [ h3 [] [ text errorHeading ]
         , text <| "Error: " ++ errorMessage
         ]
@@ -168,7 +171,7 @@ viewCoach coach =
         [ viewNameField coach.name
         , viewStaticField "eloField" "Elo" <| String.fromInt coach.elo
         , button
-            [ Fcss.submitButton
+            [ Custom.Attributes.submitButton
             , onClick Submit
             ]
             [ text "Save" ]
@@ -177,27 +180,29 @@ viewCoach coach =
 
 viewNameField : String -> Html Msg
 viewNameField name =
-    div [ Fcss.formEntry ]
-            [ label
-                (Fcss.formLabel "nameInput")
-                [ text "Name" ]
-            , input
-                (Fcss.formInput "nameInput"
-                    [ onInput NameChanged
-                    , value name
-                    ]
-                )
-                []
-            ]
+    div [ Custom.Attributes.formEntry ]
+        [ label
+            (Custom.Attributes.formLabel "nameInput")
+            [ text "Name" ]
+        , input
+            (Custom.Attributes.formInput "nameInput"
+                [ onInput NameChanged
+                , onEnter Submit
+                , value name
+                ]
+            )
+            []
+        ]
+
 
 viewStaticField : String -> String -> String -> Html msg
 viewStaticField id lblText entry =
-    div [ Fcss.formEntry ]
+    div [ Custom.Attributes.formEntry ]
         [ label
-            (Fcss.formLabel id)
+            (Custom.Attributes.formLabel id)
             [ text lblText ]
         , input
-            (Fcss.formInput id
+            (Custom.Attributes.formInput id
                 [ readonly True
                 , value entry
                 ]
