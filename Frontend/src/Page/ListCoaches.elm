@@ -2,8 +2,8 @@ module Page.ListCoaches exposing (Model, Msg, init, update, view)
 
 import Api
 import Browser.Navigation as Nav
-import Error exposing (buildErrorMessage)
 import Custom.Attributes
+import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)

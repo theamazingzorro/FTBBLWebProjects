@@ -2,8 +2,9 @@ module Page.EditCoach exposing (Model, Msg, init, update, view)
 
 import Api
 import Browser.Navigation as Nav
-import Error exposing (buildErrorMessage)
 import Custom.Attributes
+import Custom.Events exposing (onEnter)
+import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
@@ -11,7 +12,6 @@ import Http
 import Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
-import Custom.Events exposing (onEnter)
 
 
 

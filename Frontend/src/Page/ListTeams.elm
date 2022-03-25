@@ -1,8 +1,8 @@
 module Page.ListTeams exposing (Model, Msg, init, update, view)
 
 import Api
-import Error
 import Custom.Attributes
+import Error
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
