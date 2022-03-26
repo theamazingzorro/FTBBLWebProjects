@@ -20,6 +20,7 @@ type alias Model =
 type Msg
     = TeamIndexClicked
     | CoachIndexClicked
+    | HomeClicked
 
 
 
@@ -44,6 +45,9 @@ update msg model =
         CoachIndexClicked ->
             ( model, pushUrl Route.Coaches model.navkey )
 
+        HomeClicked ->
+            ( model, pushUrl Route.Home model.navkey )
+
 
 
 -- View --
@@ -52,7 +56,11 @@ update msg model =
 view : Model -> Html Msg
 view _ =
     nav [ Custom.Attributes.mainNavBar ]
-        [ a [ Custom.Attributes.navBarBrand ] [ text "FTBBL" ]
+        [ a
+            [ Custom.Attributes.navBarBrand
+            , onClick HomeClicked
+            ]
+            [ text "FTBBL" ]
         , toggleBarButton
         , div [ Custom.Attributes.navBarCollapsable, id "navbarNav" ]
             [ ul [ Custom.Attributes.navBarLinkList ]

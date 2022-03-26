@@ -71,6 +71,10 @@ initCurrentPage ( model, existingCmds ) =
                 Route.NotFound ->
                     ( NotFoundPage, Cmd.none )
 
+                {- Currently points to teams page. -}
+                Route.Home ->
+                    initPage ListTeams.init TeamsPage TeamsPageMsg
+
                 Route.Teams ->
                     initPage ListTeams.init TeamsPage TeamsPageMsg
 
@@ -133,6 +137,7 @@ update msg model =
             , Cmd.map HeaderMsg newCmd
             )
 
+        {- Team CRUD pages -}
         ( TeamsPageMsg subMsg, TeamsPage pageModel ) ->
             ListTeams.update subMsg pageModel
                 |> updateWith TeamsPage TeamsPageMsg model
@@ -140,6 +145,7 @@ update msg model =
         ( TeamsPageMsg _, _ ) ->
             ( model, Cmd.none )
 
+        {- Coach CRUD pages -}
         ( CoachesPageMsg subMsg, CoachesPage pageModel ) ->
             ListCoaches.update subMsg pageModel
                 |> updateWith CoachesPage CoachesPageMsg model
