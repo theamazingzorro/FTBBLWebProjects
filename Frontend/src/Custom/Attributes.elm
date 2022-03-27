@@ -140,3 +140,10 @@ formInput thisId otherAttributes =
     , id thisId
     ]
         ++ otherAttributes
+
+
+formDropdown : String -> List (Attribute msg) -> List (Attribute msg)
+formDropdown thisId otherAttributes =
+    formInput thisId <|
+        class "form-select"
+            :: otherAttributes

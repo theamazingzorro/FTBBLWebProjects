@@ -5,9 +5,10 @@ module Model.Race exposing
     , idToString
     , raceDecoder
     , raceEncoder
+    , racesDecoder
     )
 
-import Json.Decode as Decode exposing (Decoder, int, string)
+import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
 
@@ -48,6 +49,11 @@ defaultRace =
 
 
 -- Decoders --
+
+
+racesDecoder : Decoder (List Race)
+racesDecoder =
+    list raceDecoder
 
 
 raceDecoder : Decoder Race
