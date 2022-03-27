@@ -25,6 +25,10 @@ let webApp =
                     routef "/team/%i" TeamApiHandlers.getTeam
                     routef "/team/%i/" TeamApiHandlers.getTeam
 
+                    routex "/race(/?)" >=> RaceApiHandlers.getRaces
+                    routef "/race/%i" RaceApiHandlers.getRace
+                    routef "/race/%i/" RaceApiHandlers.getRace
+
                     routex "/coach(/?)" >=> CoachApiHandlers.getCoaches
                     routef "/coach/%i" CoachApiHandlers.getCoach
                     routef "/coach/%i/" CoachApiHandlers.getCoach

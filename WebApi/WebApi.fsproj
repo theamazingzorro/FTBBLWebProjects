@@ -19,8 +19,10 @@
 	<Compile Include="Models\Race.fs" /> 
 	<Compile Include="Models\Coach.fs" /> 
 	<Compile Include="Models\Team.fs" /> 
+	<Compile Include="Repos\RaceRepository.fs" /> 
 	<Compile Include="Repos\CoachRepository.fs" />
     <Compile Include="Repos\TeamRepository.fs" />
+    <Compile Include="Handlers\RaceHandler.fs" />
     <Compile Include="Handlers\CoachApiHandlers.fs" />
     <Compile Include="Handlers\TeamApiHandlers.fs" />
     <Compile Include="Program.fs" />
