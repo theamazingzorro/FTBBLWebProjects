@@ -1,12 +1,13 @@
 module Api exposing (Endpoint(..), deleteRequest, getRequest, postRequest, putRequest)
 
 import Http exposing (Body, Expect)
-import Model.Coach exposing (CoachId, idToString)
+import Model.Coach as Coach exposing (CoachId)
+import Model.Team as Team exposing (TeamId)
 
 
 type Endpoint
     = Teams
-    | Team Int
+    | Team TeamId
     | Coaches
     | Coach CoachId
 
@@ -23,13 +24,13 @@ stringOf endpoint =
             "team"
 
         Team index ->
-            "team/" ++ String.fromInt index
+            "team/" ++ Team.idToString index
 
         Coaches ->
             "coach"
 
         Coach index ->
-            "coach/" ++ idToString index
+            "coach/" ++ Coach.idToString index
 
 
 urlOf : Endpoint -> String

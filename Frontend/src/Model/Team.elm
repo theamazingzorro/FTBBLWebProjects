@@ -1,9 +1,10 @@
-module Model.Team exposing (Team, TeamId, defaultTeam, teamsDecoder)
+module Model.Team exposing (Team, TeamId, defaultTeam, idParser, idToString, teamsDecoder)
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (required)
 import Model.Coach exposing (Coach, coachDecoder, defaultCoach)
 import Model.Race exposing (Race, defaultRace, raceDecoder)
+import Url.Parser exposing (Parser, custom)
 
 
 
@@ -21,6 +22,15 @@ type alias Team =
 
 type TeamId
     = TeamId Int
+
+
+
+-- ToString --
+
+
+idToString : TeamId -> String
+idToString (TeamId id) =
+    String.fromInt id
 
 
 
@@ -59,3 +69,14 @@ teamDecoder =
 teamIdDecoder : Decoder TeamId
 teamIdDecoder =
     Decode.map TeamId int
+
+
+
+-- Parsers --
+
+
+idParser : Parser (TeamId -> a) a
+idParser =
+    custom "POSTID" <|
+        \postId ->
+            Maybe.map TeamId (String.toInt postId)

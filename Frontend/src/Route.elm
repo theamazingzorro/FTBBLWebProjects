@@ -2,6 +2,7 @@ module Route exposing (Route(..), parseUrl, pushUrl)
 
 import Browser.Navigation as Nav
 import Model.Coach as Coach exposing (CoachId)
+import Model.Team as Team exposing (TeamId)
 import Url exposing (Url)
 import Url.Parser exposing (..)
 
@@ -13,6 +14,8 @@ type Route
     | AddCoach
     | EditCoach CoachId
     | Teams
+    | AddTeam
+    | EditTeam TeamId
 
 
 parseUrl : Url -> Route
@@ -30,6 +33,16 @@ matchRoute =
     oneOf
         [ map Home top
         , map Teams <| oneOf [ s "Team", s "team" ]
+        , map AddTeam <|
+            oneOf
+                [ s "team" </> s "add"
+                , s "Team" </> s "Add"
+                ]
+        , map EditTeam <|
+            oneOf
+                [ s "Team" </> s "Edit" </> Team.idParser
+                , s "team" </> s "edit" </> Team.idParser
+                ]
         , map Coaches <| oneOf [ s "Coach", s "coach" ]
         , map AddCoach <|
             oneOf
@@ -44,10 +57,10 @@ matchRoute =
         ]
 
 
-pushUrl : Route -> Nav.Key -> Cmd msg
-pushUrl route navKey =
+pushUrl : Nav.Key -> Route -> Cmd msg
+pushUrl navkey route =
     routeToString route
-        |> Nav.pushUrl navKey
+        |> Nav.pushUrl navkey
 
 
 routeToString : Route -> String
@@ -61,6 +74,12 @@ routeToString route =
 
         Teams ->
             "/Team"
+
+        AddTeam ->
+            "/Team/Add"
+
+        EditTeam id ->
+            "/Team/Edit/" ++ Team.idToString id
 
         Coaches ->
             "/Coach"

@@ -40,13 +40,13 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         TeamIndexClicked ->
-            ( model, pushUrl Route.Teams model.navkey )
+            ( model, pushUrl model.navkey Route.Teams )
 
         CoachIndexClicked ->
-            ( model, pushUrl Route.Coaches model.navkey )
+            ( model, pushUrl model.navkey Route.Coaches )
 
         HomeClicked ->
-            ( model, pushUrl Route.Home model.navkey )
+            ( model, pushUrl model.navkey Route.Home )
 
 
 

@@ -65,7 +65,7 @@ update msg model =
             trySaveCoach model
 
         CoachSubmitted (Ok _) ->
-            ( { model | saveError = Nothing }, pushUrl Route.Coaches model.navkey )
+            ( { model | saveError = Nothing }, pushUrl model.navkey Route.Coaches )
 
         CoachSubmitted (Err err) ->
             ( { model | saveError = Just (buildErrorMessage err) }, Cmd.none )

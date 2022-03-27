@@ -9,6 +9,8 @@ import Page.AddCoach as AddCoach
 import Page.EditCoach as EditCoach
 import Page.ListCoaches as ListCoaches
 import Page.ListTeams as ListTeams
+import Page.AddTeam as AddTeam
+import Page.EditTeam as EditTeam
 import Route exposing (Route(..))
 import Url exposing (Url)
 
@@ -21,13 +23,15 @@ type alias Model =
     { route : Route
     , headerModel : Header.Model
     , page : Page
-    , navKey : Nav.Key
+    , navkey : Nav.Key
     }
 
 
 type Page
     = NotFoundPage
     | TeamsPage ListTeams.Model
+    | AddTeamPage AddTeam.Model
+    | EditTeamPage EditTeam.Model
     | CoachesPage ListCoaches.Model
     | AddCoachPage AddCoach.Model
     | EditCoachPage EditCoach.Model
@@ -38,6 +42,8 @@ type Msg
     | UrlChanged Url
     | HeaderMsg Header.Msg
     | TeamsPageMsg ListTeams.Msg
+    | AddTeamPageMsg AddTeam.Msg
+    | EditTeamPageMsg EditTeam.Msg
     | CoachesPageMsg ListCoaches.Msg
     | AddCoachPageMsg AddCoach.Msg
     | EditCoachPageMsg EditCoach.Msg
@@ -57,7 +63,7 @@ init _ url navKey =
             { route = Route.parseUrl url
             , headerModel = navModel
             , page = NotFoundPage
-            , navKey = navKey
+            , navkey = navKey
             }
     in
     initCurrentPage ( model, Cmd.map HeaderMsg navCommand )
@@ -73,19 +79,25 @@ initCurrentPage ( model, existingCmds ) =
 
                 {- Currently points to teams page. -}
                 Route.Home ->
-                    initPage ListTeams.init TeamsPage TeamsPageMsg
+                    initPage (ListTeams.init model.navkey) TeamsPage TeamsPageMsg
 
                 Route.Teams ->
-                    initPage ListTeams.init TeamsPage TeamsPageMsg
+                    initPage (ListTeams.init model.navkey) TeamsPage TeamsPageMsg
+
+                Route.AddTeam ->
+                    initPage AddTeam.init AddTeamPage AddTeamPageMsg
+
+                Route.EditTeam id ->
+                    initPage EditTeam.init EditTeamPage EditTeamPageMsg
 
                 Route.Coaches ->
-                    initPage (ListCoaches.init model.navKey) CoachesPage CoachesPageMsg
+                    initPage (ListCoaches.init model.navkey) CoachesPage CoachesPageMsg
 
                 Route.AddCoach ->
                     initPage AddCoach.init AddCoachPage AddCoachPageMsg
 
                 Route.EditCoach id ->
-                    initPage (EditCoach.init model.navKey id) EditCoachPage EditCoachPageMsg
+                    initPage (EditCoach.init model.navkey id) EditCoachPage EditCoachPageMsg
     in
     ( { model | page = currentPage }
     , Cmd.batch [ existingCmds, mappedPageCmds ]
@@ -112,7 +124,7 @@ update msg model =
             case urlRequest of
                 Browser.Internal url ->
                     ( model
-                    , Nav.pushUrl model.navKey <| Url.toString url
+                    , Nav.pushUrl model.navkey <| Url.toString url
                     )
 
                 Browser.External url ->
@@ -143,6 +155,20 @@ update msg model =
                 |> updateWith TeamsPage TeamsPageMsg model
 
         ( TeamsPageMsg _, _ ) ->
+            ( model, Cmd.none )
+
+        ( AddTeamPageMsg subMsg, AddTeamPage pageModel ) ->
+            AddTeam.update subMsg pageModel
+                |> updateWith AddTeamPage AddTeamPageMsg model
+
+        ( AddTeamPageMsg _, _ ) ->
+            ( model, Cmd.none )
+
+        ( EditTeamPageMsg subMsg, EditTeamPage pageModel ) ->
+            EditTeam.update subMsg pageModel
+                |> updateWith EditTeamPage EditTeamPageMsg model
+
+        ( EditTeamPageMsg _, _ ) ->
             ( model, Cmd.none )
 
         {- Coach CRUD pages -}
@@ -206,6 +232,14 @@ currentView model =
         TeamsPage pageModel ->
             ListTeams.view pageModel
                 |> Html.map TeamsPageMsg
+
+        AddTeamPage pageModel ->
+            AddTeam.view pageModel
+                |> Html.map AddTeamPageMsg
+
+        EditTeamPage pageModel ->
+            EditTeam.view pageModel
+                |> Html.map EditTeamPageMsg
 
         CoachesPage pageModel ->
             ListCoaches.view pageModel

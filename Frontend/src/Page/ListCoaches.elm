@@ -11,7 +11,7 @@ import Http
 import Model.Coach exposing (Coach, CoachId, coachsDecoder)
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import RemoteData exposing (WebData)
-import Route exposing (Route(..), pushUrl)
+import Route exposing (pushUrl)
 
 
 
@@ -62,10 +62,10 @@ update msg model =
             ( { model | coaches = response }, Cmd.none )
 
         AddCoachButtonClick ->
-            ( model, pushUrl AddCoach model.navkey )
+            ( model, pushUrl model.navkey Route.AddCoach )
 
         EditCoachButtonClick id ->
-            ( model, pushUrl (EditCoach id) model.navkey )
+            ( model, pushUrl model.navkey <| Route.EditCoach id )
 
         DeleteCoachButtonClick id ->
             ( model, deleteCoachRequest id )
