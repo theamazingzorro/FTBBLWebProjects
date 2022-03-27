@@ -2,6 +2,7 @@ module Model.Race exposing
     ( Race
     , RaceId
     , defaultRace
+    , idToString
     , raceDecoder
     , raceEncoder
     )
@@ -23,6 +24,15 @@ type alias Race =
 
 type RaceId
     = RaceId Int
+
+
+
+-- ToString --
+
+
+idToString : RaceId -> String
+idToString (RaceId id) =
+    String.fromInt id
 
 
 
