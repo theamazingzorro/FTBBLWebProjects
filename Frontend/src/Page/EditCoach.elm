@@ -92,7 +92,7 @@ trySaveCoach model =
 
 
 
--- Common Helpers --
+-- API Requests --
 
 
 getCoachRequest : CoachId -> Cmd Msg

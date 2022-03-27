@@ -60,6 +60,10 @@ update msg model =
             ( { model | submitError = Just (buildErrorMessage err) }, Cmd.none )
 
 
+
+-- API Requests --
+
+
 submitCoach : Coach -> Cmd Msg
 submitCoach coach =
     Api.postRequest Api.Coaches

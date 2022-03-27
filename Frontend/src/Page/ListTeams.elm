@@ -88,7 +88,7 @@ buildDeleteError res =
 
 
 
--- Common Helpers --
+-- API Requests --
 
 
 getTeamsRequest : Cmd Msg
