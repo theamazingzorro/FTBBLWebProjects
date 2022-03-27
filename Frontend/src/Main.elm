@@ -235,7 +235,12 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = unsubscribe
         , onUrlRequest = LinkClicked
         , onUrlChange = UrlChanged
         }
+
+
+unsubscribe : Model -> Sub msg
+unsubscribe _ =
+    Sub.none
