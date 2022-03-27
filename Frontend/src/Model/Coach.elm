@@ -1,4 +1,14 @@
-module Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder, coachsDecoder, defaultCoach, idParser, idToString, newCoachEncoder)
+module Model.Coach exposing
+    ( Coach
+    , CoachId
+    , coachDecoder
+    , coachEncoder
+    , coachsDecoder
+    , defaultCoach
+    , idParser
+    , idToString
+    , newCoachEncoder
+    )
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (required)

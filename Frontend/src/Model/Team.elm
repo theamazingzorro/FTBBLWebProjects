@@ -1,9 +1,20 @@
-module Model.Team exposing (Team, TeamId, defaultTeam, idParser, idToString, teamsDecoder)
+module Model.Team exposing
+    ( Team
+    , TeamId
+    , defaultTeam
+    , idParser
+    , idToString
+    , newTeamEncoder
+    , teamDecoder
+    , teamEncoder
+    , teamsDecoder
+    )
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (required)
-import Model.Coach exposing (Coach, coachDecoder, defaultCoach)
-import Model.Race exposing (Race, defaultRace, raceDecoder)
+import Json.Encode as Encode
+import Model.Coach exposing (Coach, coachDecoder, coachEncoder, defaultCoach)
+import Model.Race exposing (Race, defaultRace, raceDecoder, raceEncoder)
 import Url.Parser exposing (Parser, custom)
 
 
@@ -69,6 +80,36 @@ teamDecoder =
 teamIdDecoder : Decoder TeamId
 teamIdDecoder =
     Decode.map TeamId int
+
+
+
+-- Encoders --
+
+
+teamEncoder : Team -> Encode.Value
+teamEncoder team =
+    Encode.object
+        [ ( "id", encodeId team.id )
+        , ( "name", Encode.string team.name )
+        , ( "race", raceEncoder team.race )
+        , ( "coach", coachEncoder team.coach )
+        , ( "elo", Encode.int team.elo )
+        ]
+
+
+newTeamEncoder : Team -> Encode.Value
+newTeamEncoder team =
+    Encode.object
+        [ ( "name", Encode.string team.name )
+        , ( "race", raceEncoder team.race )
+        , ( "coach", coachEncoder team.coach )
+        , ( "elo", Encode.int team.elo )
+        ]
+
+
+encodeId : TeamId -> Encode.Value
+encodeId (TeamId id) =
+    Encode.int id
 
 
 

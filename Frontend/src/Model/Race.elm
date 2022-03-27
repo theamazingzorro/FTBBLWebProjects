@@ -1,7 +1,14 @@
-module Model.Race exposing (Race, RaceId, defaultRace, raceDecoder)
+module Model.Race exposing
+    ( Race
+    , RaceId
+    , defaultRace
+    , raceDecoder
+    , raceEncoder
+    )
 
 import Json.Decode as Decode exposing (Decoder, int, string)
 import Json.Decode.Pipeline exposing (required)
+import Json.Encode as Encode
 
 
 
@@ -43,3 +50,20 @@ raceDecoder =
 raceIdDecoder : Decoder RaceId
 raceIdDecoder =
     Decode.map RaceId int
+
+
+
+-- Encoders --
+
+
+raceEncoder : Race -> Encode.Value
+raceEncoder race =
+    Encode.object
+        [ ( "id", encodeId race.id )
+        , ( "name", Encode.string race.name )
+        ]
+
+
+encodeId : RaceId -> Encode.Value
+encodeId (RaceId id) =
+    Encode.int id

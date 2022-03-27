@@ -6,11 +6,11 @@ import Custom.Attributes
 import Header
 import Html exposing (..)
 import Page.AddCoach as AddCoach
+import Page.AddTeam as AddTeam
 import Page.EditCoach as EditCoach
+import Page.EditTeam as EditTeam
 import Page.ListCoaches as ListCoaches
 import Page.ListTeams as ListTeams
-import Page.AddTeam as AddTeam
-import Page.EditTeam as EditTeam
 import Route exposing (Route(..))
 import Url exposing (Url)
 

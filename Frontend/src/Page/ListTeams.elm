@@ -165,12 +165,14 @@ viewTeams teams =
             ]
         ]
 
+
 viewHeader : Html Msg
 viewHeader =
     div Custom.Attributes.row
         [ div [ Custom.Attributes.col ] [ h3 [] [ text "Teams" ] ]
         , div [ Custom.Attributes.col ] [ viewToolBar ]
         ]
+
 
 viewToolBar : Html Msg
 viewToolBar =
@@ -215,6 +217,7 @@ viewTeam team =
         , td [ Custom.Attributes.tableButtonColumn ]
             [ viewEditButton team, viewDeleteButton team ]
         ]
+
 
 viewDeleteButton : Team -> Html Msg
 viewDeleteButton team =
