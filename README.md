@@ -5,6 +5,5 @@ Developed fully in the Functional Programming paradigm, using F# and giraffe for
 
 
 # TODO
-- pull generic page functionality out of Main in Frontend
 - add division data to teams
 - add division CRUD pages
