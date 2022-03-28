@@ -32,6 +32,8 @@ matchRoute : Parser (Route -> a) a
 matchRoute =
     oneOf
         [ map Home top
+
+        {- Team CRUD -}
         , map Teams <| oneOf [ s "Team", s "team" ]
         , map AddTeam <|
             oneOf
@@ -43,6 +45,8 @@ matchRoute =
                 [ s "Team" </> s "Edit" </> Team.idParser
                 , s "team" </> s "edit" </> Team.idParser
                 ]
+
+        {- Coach CRUD -}
         , map Coaches <| oneOf [ s "Coach", s "coach" ]
         , map AddCoach <|
             oneOf
