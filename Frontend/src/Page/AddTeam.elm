@@ -125,13 +125,13 @@ view model =
     div []
         [ h3 [] [ text "Add Team" ]
         , br [] []
-        , viewError model.submitError
+        , viewSubmitError model.submitError
         , viewForm model
         ]
 
 
-viewError : Maybe String -> Html msg
-viewError maybeError =
+viewSubmitError : Maybe String -> Html msg
+viewSubmitError maybeError =
     case maybeError of
         Just error ->
             div [ Custom.Attributes.errorMessage ]
@@ -184,7 +184,7 @@ viewRaceField data =
             h4 [] [ text "Loading Options..." ]
 
         RemoteData.Failure httpError ->
-            text <| Error.buildErrorMessage httpError
+            h4 [ Custom.Attributes.errorMessage ] [ text <| "Cannot load options. " ++ Error.buildErrorMessage httpError]
 
         RemoteData.Success races ->
             raceDropdown races
