@@ -37,8 +37,8 @@ matchRoute =
         , map Teams <| oneOf [ s "Team", s "team" ]
         , map AddTeam <|
             oneOf
-                [ s "team" </> s "add"
-                , s "Team" </> s "Add"
+                [ s "Team" </> s "Add"
+                , s "team" </> s "add"
                 ]
         , map EditTeam <|
             oneOf
@@ -50,8 +50,8 @@ matchRoute =
         , map Coaches <| oneOf [ s "Coach", s "coach" ]
         , map AddCoach <|
             oneOf
-                [ s "coach" </> s "add"
-                , s "Coach" </> s "Add"
+                [ s "Coach" </> s "Add"
+                , s "coach" </> s "add"
                 ]
         , map EditCoach <|
             oneOf
