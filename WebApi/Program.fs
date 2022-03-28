@@ -68,7 +68,7 @@ let errorHandler (ex : Exception) (logger : ILogger) =
 // Config and Main
 // ---------------------------------
 
-let configureCors (builder : CorsPolicyBuilder) =
+let configureDevCors (builder : CorsPolicyBuilder) =
     builder
         .WithOrigins(
             "http://localhost:5000",
@@ -77,20 +77,32 @@ let configureCors (builder : CorsPolicyBuilder) =
             "https://localhost:8000",
             "http://localhost:8080",
             "https://localhost:8080",
-            "http://127.0.0.1:8080")
+            "http://127.0.0.1:8080"
+        )
+       .AllowAnyMethod()
+       .AllowAnyHeader()
+       |> ignore
+
+let configureProdCors (builder : CorsPolicyBuilder) =
+    builder
+       .WithOrigins(
+            "https://ftbbl-elo.github.io/"
+       )
        .AllowAnyMethod()
        .AllowAnyHeader()
        |> ignore
 
 let configureApp (app : IApplicationBuilder) =
     let env = app.ApplicationServices.GetService<IWebHostEnvironment>()
-    (match env.IsDevelopment() with
+    ( match env.IsDevelopment() with
     | true  ->
-        app.UseDeveloperExceptionPage()
+        app .UseDeveloperExceptionPage()
+            .UseCors(configureDevCors)
     | false ->
         app .UseGiraffeErrorHandler(errorHandler)
-            .UseHttpsRedirection())
-        .UseCors(configureCors)
+            .UseHttpsRedirection()
+            .UseCors(configureProdCors)
+    )
         .UseStaticFiles()
         .UseGiraffe(webApp)
 
