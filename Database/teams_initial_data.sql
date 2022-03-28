@@ -10,3 +10,18 @@ INSERT INTO Team (name, race_id, coach_id, elo)
     SELECT  "Scooby Snacks", Race.id, Coach.id, 1000 FROM (Race, Coach) WHERE Race.name="Necromantic" AND Coach.name="Danean" UNION ALL
     SELECT  " Murder Hobos", Race.id, Coach.id, 1000 FROM (Race, Coach) WHERE Race.name="Chaos" AND Coach.name="Theamazingzorro"
 ;
+
+INSERT INTO Division (name, season)
+	SELECT "Div A", 1 UNION ALL
+    SELECT "Div B", 1 UNION ALL
+    SELECT "Div A", 2
+;
+
+INSERT INTO TeamDivision (team_id, div_id, start_date, end_date)
+	SELECT Team.id, Division.id, date('2020-01-01'), date('2021-01-01') 
+		FROM (Team, Division) WHERE Team.name="The Government" AND Division.name="Div A" and Division.season=1 UNION ALL
+    SELECT Team.id, Division.id, date('2020-01-01'), NULL 
+		FROM (Team, Division) WHERE Team.name="Scooby Snacks" AND Division.name="Div B" and Division.season=1 UNION ALL
+    SELECT Team.id, Division.id, date('2021-01-01'), NULL 
+		FROM (Team, Division) WHERE Team.name="The Government" AND Division.name="Div A" and Division.season=2
+;

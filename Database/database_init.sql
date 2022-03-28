@@ -54,12 +54,32 @@ CREATE TABLE IF NOT EXISTS Coach(
 -- Team --
 
 CREATE TABLE IF NOT EXISTS Team(
-   id INT NOT NULL AUTO_INCREMENT,
-   name VARCHAR(40) NOT NULL UNIQUE,
-   race_id INT NOT NULL,
-   coach_id INT NOT NULL,
-   elo INT NOT NULL,
-   FOREIGN KEY ( race_id ) REFERENCES Race(id),
-   FOREIGN KEY ( coach_id ) REFERENCES Coach(id),
-   PRIMARY KEY ( id )
+	id INT NOT NULL AUTO_INCREMENT,
+	name VARCHAR(40) NOT NULL UNIQUE,
+	race_id INT NOT NULL,
+	coach_id INT NOT NULL,
+	elo INT NOT NULL,
+	FOREIGN KEY ( race_id ) REFERENCES Race(id),
+	FOREIGN KEY ( coach_id ) REFERENCES Coach(id),
+	PRIMARY KEY ( id )
+);
+
+
+-- Divisions --
+
+CREATE TABLE IF NOT EXISTS Division(
+	id INT NOT NULL AUTO_INCREMENT,
+	name VARCHAR(40) NOT NULL,
+	season INT NOT NULL,
+	UNIQUE ( name, season),
+	PRIMARY KEY ( id )
+);
+
+
+CREATE TABLE IF NOT EXISTS TeamDivision(
+	team_id INT NOT NULL,
+	div_id INT NOT NULL,
+	start_date DATE NOT NULL,
+	end_date DATE NULL,
+	PRIMARY KEY ( team_id, div_id )
 );
