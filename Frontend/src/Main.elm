@@ -88,7 +88,7 @@ initCurrentPage ( model, existingCmds ) =
                     initPage AddTeam.init AddTeamPage AddTeamPageMsg
 
                 Route.EditTeam id ->
-                    initPage EditTeam.init EditTeamPage EditTeamPageMsg
+                    initPage (EditTeam.init model.navkey id) EditTeamPage EditTeamPageMsg
 
                 Route.Coaches ->
                     initPage (ListCoaches.init model.navkey) CoachesPage CoachesPageMsg

@@ -2,6 +2,7 @@ module Custom.Attributes exposing (..)
 
 import Html exposing (Attribute)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 
 
 
@@ -147,3 +148,12 @@ formDropdown thisId otherAttributes =
     formInput thisId <|
         class "form-select"
             :: otherAttributes
+
+
+formInputLink : String -> msg -> List (Attribute msg) -> List (Attribute msg)
+formInputLink thisId clickMsg otherAttributes =
+    formInput thisId
+        [ onClick clickMsg
+        , class "btn-link"
+        ]
+        ++ otherAttributes
