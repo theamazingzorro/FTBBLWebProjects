@@ -8,6 +8,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
+import Model.Coach as Coach exposing (Coach, coachsDecoder)
 import Model.Race as Race exposing (Race, racesDecoder)
 import Model.Team exposing (Team, defaultTeam, newTeamEncoder, teamDecoder)
 import RemoteData exposing (WebData)
@@ -20,6 +21,7 @@ import RemoteData exposing (WebData)
 type alias Model =
     { team : Team
     , raceOptions : WebData (List Race)
+    , coachOptions : WebData (List Coach)
     , submitError : Maybe String
     }
 
@@ -27,8 +29,11 @@ type alias Model =
 type Msg
     = FetchRaces
     | RacesRecieved (WebData (List Race))
+    | FetchCoaches
+    | CoachesReceived (WebData (List Coach))
     | NameChanged String
     | RaceSelected String
+    | CoachSelected String
     | Submit
     | TeamSubmitted (Result Http.Error Team)
 
@@ -41,9 +46,10 @@ init : ( Model, Cmd Msg )
 init =
     ( { team = defaultTeam
       , raceOptions = RemoteData.Loading
+      , coachOptions = RemoteData.Loading
       , submitError = Nothing
       }
-    , getRacesRequest
+    , Cmd.batch [ getRacesRequest, getCoachesRequest ]
     )
 
 
@@ -60,6 +66,12 @@ update msg model =
         RacesRecieved response ->
             ( { model | raceOptions = response }, Cmd.none )
 
+        FetchCoaches ->
+            ( { model | coachOptions = RemoteData.Loading }, getCoachesRequest )
+
+        CoachesReceived response ->
+            ( { model | coachOptions = response }, Cmd.none )
+
         NameChanged newName ->
             let
                 rename oldTeam =
@@ -73,14 +85,29 @@ update msg model =
                     case model.raceOptions of
                         RemoteData.Success races ->
                             searchByIdString idString Race.idToString model.team.race races
-                        
+
                         _ ->
                             model.team.race
 
-                changeRace oldTeam = 
+                changeRace oldTeam =
                     { oldTeam | race = newRace }
             in
             ( { model | team = changeRace model.team }, Cmd.none )
+
+        CoachSelected idString ->
+            let
+                newCoach =
+                    case model.coachOptions of
+                        RemoteData.Success coaches ->
+                            searchByIdString idString Coach.idToString model.team.coach coaches
+
+                        _ ->
+                            model.team.coach
+
+                changeCoach oldTeam =
+                    { oldTeam | coach = newCoach }
+            in
+            ( { model | team = changeCoach model.team }, Cmd.none )
 
         Submit ->
             ( model, submitTeam model.team )
@@ -92,11 +119,12 @@ update msg model =
             ( { model | submitError = Just (buildErrorMessage err) }, Cmd.none )
 
 
-searchByIdString : String -> (id -> String) -> { c | id : id } -> List { c | id : id } ->  { c | id : id }
+searchByIdString : String -> (id -> String) -> { c | id : id } -> List { c | id : id } -> { c | id : id }
 searchByIdString idString stringFromId defaultVal list =
     List.filter (\item -> stringFromId item.id == idString) list
         |> List.head
         |> Maybe.withDefault defaultVal
+
 
 
 -- API Requests --
@@ -114,6 +142,12 @@ getRacesRequest : Cmd Msg
 getRacesRequest =
     Api.getRequest Api.Races <|
         Http.expectJson (RemoteData.fromResult >> RacesRecieved) racesDecoder
+
+
+getCoachesRequest : Cmd Msg
+getCoachesRequest =
+    Api.getRequest Api.Coaches <|
+        Http.expectJson (RemoteData.fromResult >> CoachesReceived) coachsDecoder
 
 
 
@@ -148,7 +182,8 @@ viewForm : Model -> Html Msg
 viewForm model =
     div []
         [ viewNameField model.team
-        , viewRaceField model.raceOptions
+        , viewRaceField model.team model.raceOptions
+        , viewCoachField model.team model.coachOptions
         , button
             [ Custom.Attributes.submitButton
             , onClick Submit
@@ -174,8 +209,8 @@ viewNameField team =
         ]
 
 
-viewRaceField : WebData (List Race) -> Html Msg
-viewRaceField data =
+viewRaceField : Team -> WebData (List Race) -> Html Msg
+viewRaceField team data =
     case data of
         RemoteData.NotAsked ->
             text ""
@@ -184,23 +219,55 @@ viewRaceField data =
             h4 [] [ text "Loading Options..." ]
 
         RemoteData.Failure httpError ->
-            h4 [ Custom.Attributes.errorMessage ] [ text <| "Cannot load options. " ++ Error.buildErrorMessage httpError]
+            h4 [ Custom.Attributes.errorMessage ]
+                [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
 
         RemoteData.Success races ->
-            raceDropdown races
+            raceDropdown team races
 
 
-raceDropdown : List Race -> Html Msg
-raceDropdown races =
+raceDropdown : Team -> List Race -> Html Msg
+raceDropdown team races =
     div [ Custom.Attributes.formEntry ]
         [ label
             (Custom.Attributes.formLabel "raceDropdown")
             [ text "Race" ]
         , select
-            (Custom.Attributes.formDropdown "raceDropdown" 
+            (Custom.Attributes.formDropdown "raceDropdown"
                 [ onInput RaceSelected ]
             )
-            (defaultOption :: (races |> List.map raceOption))
+            (defaultOption :: List.map (raceOption team) races)
+        ]
+
+
+viewCoachField : Team -> WebData (List Coach) -> Html Msg
+viewCoachField team data =
+    case data of
+        RemoteData.NotAsked ->
+            text ""
+
+        RemoteData.Loading ->
+            h4 [] [ text "Loading Options..." ]
+
+        RemoteData.Failure httpError ->
+            h4 [ Custom.Attributes.errorMessage ]
+                [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
+
+        RemoteData.Success coaches ->
+            coachDropdown team coaches
+
+
+coachDropdown : Team -> List Coach -> Html Msg
+coachDropdown team coaches =
+    div [ Custom.Attributes.formEntry ]
+        [ label
+            (Custom.Attributes.formLabel "coachDropdown")
+            [ text "Coach" ]
+        , select
+            (Custom.Attributes.formDropdown "coachDropdown"
+                [ onInput CoachSelected ]
+            )
+            (defaultOption :: List.map (coachOption team) coaches)
         ]
 
 
@@ -209,6 +276,19 @@ defaultOption =
     option [ value "0" ] [ text "-" ]
 
 
-raceOption : Race -> Html msg
-raceOption race =
-    option [ value <| Race.idToString race.id ] [ text race.name ]
+raceOption : Team -> Race -> Html msg
+raceOption team race =
+    option
+        [ value <| Race.idToString race.id
+        , selected (race.id == team.race.id)
+        ]
+        [ text race.name ]
+
+
+coachOption : Team -> Coach -> Html msg
+coachOption team coach =
+    option
+        [ value <| Coach.idToString coach.id
+        , selected (coach.id == team.coach.id)
+        ]
+        [ text coach.name ]
