@@ -40,7 +40,7 @@ init _ url navkey =
             Header.init navkey
 
         ( page, pageCommand ) =
-            Page.init (Route.parseUrl url) navkey
+            Page.init navkey <| Route.parseUrl url
 
         model =
             { route = Route.parseUrl url
@@ -83,7 +83,7 @@ update msg model =
                     Route.parseUrl url
 
                 ( newPage, pageCmds ) =
-                    Page.init newRoute model.navkey
+                    Page.init model.navkey newRoute
             in
             ( { model | route = newRoute, page = newPage }
             , Cmd.map PageMsg pageCmds

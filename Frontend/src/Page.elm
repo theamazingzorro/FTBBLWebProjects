@@ -39,42 +39,40 @@ type Msg
 -- Init --
 
 
-init : Route -> Nav.Key -> ( Model, Cmd Msg )
-init route navkey =
+init : Nav.Key -> Route -> ( Model, Cmd Msg )
+init navkey route =
     case route of
         Route.NotFound ->
             ( NotFoundPage, Cmd.none )
 
         {- Currently points to teams page. -}
         Route.Home ->
-            initPage (ListTeams.init navkey) TeamsPage TeamsPageMsg
+            ListTeams.init navkey
+                |> wrapWith TeamsPage TeamsPageMsg
 
         Route.Teams ->
-            initPage (ListTeams.init navkey) TeamsPage TeamsPageMsg
+            ListTeams.init navkey
+                |> wrapWith TeamsPage TeamsPageMsg
 
         Route.AddTeam ->
-            initPage AddTeam.init AddTeamPage AddTeamPageMsg
+            AddTeam.init
+                |> wrapWith AddTeamPage AddTeamPageMsg
 
         Route.EditTeam id ->
-            initPage (EditTeam.init navkey id) EditTeamPage EditTeamPageMsg
+            EditTeam.init navkey id
+                |> wrapWith EditTeamPage EditTeamPageMsg
 
         Route.Coaches ->
-            initPage (ListCoaches.init navkey) CoachesPage CoachesPageMsg
+            ListCoaches.init navkey
+                |> wrapWith CoachesPage CoachesPageMsg
 
         Route.AddCoach ->
-            initPage AddCoach.init AddCoachPage AddCoachPageMsg
+            AddCoach.init
+                |> wrapWith AddCoachPage AddCoachPageMsg
 
         Route.EditCoach id ->
-            initPage (EditCoach.init navkey id) EditCoachPage EditCoachPageMsg
-
-
-initPage : ( subModel, Cmd subMsg ) -> (subModel -> Model) -> (subMsg -> Msg) -> ( Model, Cmd Msg )
-initPage initFunc pageWrap msgWrap =
-    let
-        ( newModel, newCmds ) =
-            initFunc
-    in
-    ( pageWrap newModel, Cmd.map msgWrap newCmds )
+            EditCoach.init navkey id
+                |> wrapWith EditCoachPage EditCoachPageMsg
 
 
 
@@ -87,21 +85,21 @@ update msg model =
         {- Team CRUD pages -}
         ( TeamsPageMsg subMsg, TeamsPage pageModel ) ->
             ListTeams.update subMsg pageModel
-                |> updateWith TeamsPage TeamsPageMsg
+                |> wrapWith TeamsPage TeamsPageMsg
 
         ( TeamsPageMsg _, _ ) ->
             ( model, Cmd.none )
 
         ( AddTeamPageMsg subMsg, AddTeamPage pageModel ) ->
             AddTeam.update subMsg pageModel
-                |> updateWith AddTeamPage AddTeamPageMsg
+                |> wrapWith AddTeamPage AddTeamPageMsg
 
         ( AddTeamPageMsg _, _ ) ->
             ( model, Cmd.none )
 
         ( EditTeamPageMsg subMsg, EditTeamPage pageModel ) ->
             EditTeam.update subMsg pageModel
-                |> updateWith EditTeamPage EditTeamPageMsg
+                |> wrapWith EditTeamPage EditTeamPageMsg
 
         ( EditTeamPageMsg _, _ ) ->
             ( model, Cmd.none )
@@ -109,28 +107,32 @@ update msg model =
         {- Coach CRUD pages -}
         ( CoachesPageMsg subMsg, CoachesPage pageModel ) ->
             ListCoaches.update subMsg pageModel
-                |> updateWith CoachesPage CoachesPageMsg
+                |> wrapWith CoachesPage CoachesPageMsg
 
         ( CoachesPageMsg _, _ ) ->
             ( model, Cmd.none )
 
         ( AddCoachPageMsg subMsg, AddCoachPage pageModel ) ->
             AddCoach.update subMsg pageModel
-                |> updateWith AddCoachPage AddCoachPageMsg
+                |> wrapWith AddCoachPage AddCoachPageMsg
 
         ( AddCoachPageMsg _, _ ) ->
             ( model, Cmd.none )
 
         ( EditCoachPageMsg subMsg, EditCoachPage pageModel ) ->
             EditCoach.update subMsg pageModel
-                |> updateWith EditCoachPage EditCoachPageMsg
+                |> wrapWith EditCoachPage EditCoachPageMsg
 
         ( EditCoachPageMsg _, _ ) ->
             ( model, Cmd.none )
 
 
-updateWith : (subModel -> Model) -> (subMsg -> Msg) -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
-updateWith toModel toMsg ( subModel, subCmd ) =
+
+-- Common helpers --
+
+
+wrapWith : (subModel -> Model) -> (subMsg -> Msg) -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
+wrapWith toModel toMsg ( subModel, subCmd ) =
     ( toModel subModel
     , Cmd.map toMsg subCmd
     )
