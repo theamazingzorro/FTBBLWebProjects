@@ -64,8 +64,8 @@ init _ url navkey =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model.page ) of
-        ( LinkClicked urlRequest, _ ) ->
+    case msg of
+        LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
                     ( model
@@ -77,7 +77,7 @@ update msg model =
                     , Nav.load url
                     )
 
-        ( UrlChanged url, _ ) ->
+        UrlChanged url ->
             let
                 newRoute =
                     Route.parseUrl url
@@ -89,7 +89,7 @@ update msg model =
             , Cmd.map PageMsg pageCmds
             )
 
-        ( HeaderMsg subMsg, _ ) ->
+        HeaderMsg subMsg ->
             let
                 ( newModel, newCmd ) =
                     Header.update subMsg model.headerModel
@@ -98,10 +98,10 @@ update msg model =
             , Cmd.map HeaderMsg newCmd
             )
 
-        ( PageMsg subMsg, page ) ->
+        PageMsg subMsg ->
             let
                 ( newPage, pageCmds ) =
-                    Page.update subMsg page
+                    Page.update subMsg model.page
             in
             ( { model | page = newPage }
             , Cmd.map PageMsg pageCmds
