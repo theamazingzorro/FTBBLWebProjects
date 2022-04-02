@@ -214,7 +214,7 @@ viewTeam team =
             [ text team.coach.name ]
         , td []
             [ text <| String.fromInt team.elo ]
-        , td [ Custom.Attributes.tableButtonColumn ]
+        , td [ Custom.Attributes.tableButtonColumn 2 ]
             [ viewEditButton team, viewDeleteButton team ]
         ]
 

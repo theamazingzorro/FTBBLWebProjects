@@ -176,7 +176,7 @@ viewDivision division =
             [ text division.name ]
         , td []
             [ text <| String.fromInt division.season ]
-        , td [ Custom.Attributes.tableButtonColumn ]
+        , td [ Custom.Attributes.tableButtonColumn 1 ]
             [ viewEditButton division ]
         ]
 

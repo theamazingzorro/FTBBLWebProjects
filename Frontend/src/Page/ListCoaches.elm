@@ -205,7 +205,7 @@ viewCoach coach =
             [ text coach.name ]
         , td []
             [ text <| String.fromInt coach.elo ]
-        , td [ Custom.Attributes.tableButtonColumn ]
+        , td [ Custom.Attributes.tableButtonColumn 2 ]
             [ viewEditButton coach, viewDeleteButton coach ]
         ]
 
