@@ -18,9 +18,10 @@ type alias Model =
 
 
 type Msg
-    = TeamIndexClicked
+    = HomeClicked
+    | TeamIndexClicked
     | CoachIndexClicked
-    | HomeClicked
+    | DivisionIndexClicked
 
 
 
@@ -45,6 +46,9 @@ update msg model =
         CoachIndexClicked ->
             ( model, pushUrl model.navkey Route.Coaches )
 
+        DivisionIndexClicked ->
+            ( model, pushUrl model.navkey Route.Divisions )
+
         HomeClicked ->
             ( model, pushUrl model.navkey Route.Home )
 
@@ -66,6 +70,7 @@ view _ =
             [ ul [ Custom.Attributes.navBarLinkList ]
                 [ linkElement "Teams" TeamIndexClicked
                 , linkElement "Coaches" CoachIndexClicked
+                , linkElement "Divisions" DivisionIndexClicked
                 ]
             ]
         ]
