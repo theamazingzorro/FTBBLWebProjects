@@ -111,6 +111,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ div Custom.Attributes.row [ viewRefreshButton ]
+        , viewErrorMessage model.deleteError
         , viewTeamsOrError model
         ]
 
@@ -139,11 +140,11 @@ viewTeamsOrError model =
             viewTeams teams
 
         RemoteData.Failure httpError ->
-            viewError <| Error.buildErrorMessage httpError
+            viewLoadError <| Error.buildErrorMessage httpError
 
 
-viewError : String -> Html Msg
-viewError errorMessage =
+viewLoadError : String -> Html Msg
+viewLoadError errorMessage =
     let
         errorHeading =
             "Couldn't fetch data at this time."
@@ -152,6 +153,17 @@ viewError errorMessage =
         [ h3 [] [ text errorHeading ]
         , text <| "Error: " ++ errorMessage
         ]
+
+
+viewErrorMessage : Maybe String -> Html Msg
+viewErrorMessage message =
+    case message of
+        Just m ->
+            div [ Custom.Attributes.errorMessage ]
+                [ text <| "Error: " ++ m ]
+        
+        Nothing ->
+            text ""
 
 
 viewTeams : List Team -> Html Msg

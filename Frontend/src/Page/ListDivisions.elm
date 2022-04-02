@@ -8,6 +8,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
+import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, divisionsDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
@@ -20,6 +21,7 @@ import Route exposing (pushUrl)
 type alias Model =
     { divisions : WebData (List Division)
     , navkey : Nav.Key
+    , deleteError : Maybe String
     }
 
 
@@ -28,6 +30,8 @@ type Msg
     | DivisionsRecieved (WebData (List Division))
     | AddDivisionButtonClick
     | EditDivisionButtonClick DivisionId
+    | DeleteDivisionButtonClick DivisionId
+    | DivisionDeleted (Result Http.Error DeleteResponse)
 
 
 
@@ -38,6 +42,7 @@ init : Nav.Key -> ( Model, Cmd Msg )
 init navkey =
     ( { divisions = RemoteData.Loading
       , navkey = navkey
+      , deleteError = Nothing
       }
     , getDivisionsRequest
     )
@@ -62,6 +67,24 @@ update msg model =
         EditDivisionButtonClick id ->
             ( model, pushUrl model.navkey <| Route.EditDivision id )
 
+        DeleteDivisionButtonClick id ->
+            ( model, deleteDivisionRequest id )
+
+        DivisionDeleted (Ok res) ->
+            ( { model | deleteError = buildDeleteError res }, getDivisionsRequest )
+
+        DivisionDeleted (Err err) ->
+            ( { model | deleteError = Just (Error.buildErrorMessage err) }, Cmd.none )
+
+
+buildDeleteError : DeleteResponse -> Maybe String
+buildDeleteError res =
+    if res.deleted then
+        Nothing
+
+    else
+        Just "Delete Failed. Does the division still have teams in it?"
+
 
 
 -- API Requests --
@@ -73,6 +96,12 @@ getDivisionsRequest =
         Http.expectJson (RemoteData.fromResult >> DivisionsRecieved) divisionsDecoder
 
 
+deleteDivisionRequest : DivisionId -> Cmd Msg
+deleteDivisionRequest id =
+    Api.deleteRequest (Api.Division id) <|
+        Http.expectJson DivisionDeleted deleteResponseDecoder
+
+
 
 -- View --
 
@@ -81,9 +110,9 @@ view : Model -> Html Msg
 view model =
     div []
         [ div Custom.Attributes.row [ viewRefreshButton ]
+        , viewErrorMessage model.deleteError
         , viewDivisionsOrError model
         ]
-
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
@@ -109,11 +138,11 @@ viewDivisionsOrError model =
             viewDivisions divisions
 
         RemoteData.Failure httpError ->
-            viewError <| Error.buildErrorMessage httpError
+            viewLoadError <| Error.buildErrorMessage httpError
 
 
-viewError : String -> Html Msg
-viewError errorMessage =
+viewLoadError : String -> Html Msg
+viewLoadError errorMessage =
     let
         errorHeading =
             "Couldn't fetch data at this time."
@@ -123,6 +152,15 @@ viewError errorMessage =
         , text <| "Error: " ++ errorMessage
         ]
 
+viewErrorMessage : Maybe String -> Html Msg
+viewErrorMessage message =
+    case message of
+        Just m ->
+            div [ Custom.Attributes.errorMessage ]
+                [ text <| "Error: " ++ m ]
+        
+        Nothing ->
+            text ""
 
 viewDivisions : List Division -> Html Msg
 viewDivisions divisions =
@@ -176,9 +214,16 @@ viewDivision division =
             [ text division.name ]
         , td []
             [ text <| String.fromInt division.season ]
-        , td [ Custom.Attributes.tableButtonColumn 1 ]
-            [ viewEditButton division ]
+        , td [ Custom.Attributes.tableButtonColumn 2 ]
+            [ viewEditButton division, viewDeleteButton division ]
         ]
+
+
+viewDeleteButton : Division -> Html Msg
+viewDeleteButton division =
+    button
+        (onClick (DeleteDivisionButtonClick division.id) :: Custom.Attributes.deleteButton)
+        [ text "Delete" ]
 
 
 viewEditButton : Division -> Html Msg
