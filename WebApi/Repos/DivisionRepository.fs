@@ -47,7 +47,10 @@ module DivisionRepository =
 
         use db = new Database(connection)
 
-        db.DeleteWhere<Division>("Division.id=@0", id)
+        try
+            db.DeleteWhere<Division>("Division.id=@0", id)
+        with
+            | :? MySqlException -> 0
 
 
     let update (division : Division) =
