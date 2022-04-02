@@ -81,5 +81,7 @@ CREATE TABLE IF NOT EXISTS TeamDivision(
 	div_id INT NOT NULL,
 	start_date DATE NOT NULL,
 	end_date DATE NULL,
+    FOREIGN KEY ( team_id ) REFERENCES Team(id),
+    FOREIGN KEY ( div_id ) REFERENCES Division(id),
 	PRIMARY KEY ( team_id, div_id )
 );
