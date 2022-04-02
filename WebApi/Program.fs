@@ -32,11 +32,17 @@ let webApp =
                     routex "/coach(/?)" >=> CoachApiHandlers.getCoaches
                     routef "/coach/%i" CoachApiHandlers.getCoach
                     routef "/coach/%i/" CoachApiHandlers.getCoach
+
+                    routex "/div(/?)" >=> DivisionApiHandlers.getDivisions
+                    routef "/div/%i" DivisionApiHandlers.getDivision
+                    routef "/div/%i/" DivisionApiHandlers.getDivision
                 ]
                 POST >=> choose [
                     routex "/team(/?)" >=> TeamApiHandlers.postTeam
 
                     routex "/coach(/?)" >=> CoachApiHandlers.postCoach
+
+                    routex "/div(/?)" >=> DivisionApiHandlers.postDivision
                 ]
                 PUT >=> choose [
                     routef "/team/%i" TeamApiHandlers.updateTeam
@@ -44,6 +50,9 @@ let webApp =
 
                     routef "/coach/%i" CoachApiHandlers.updateCoach
                     routef "/coach/%i/" CoachApiHandlers.updateCoach
+
+                    routef "/div/%i" DivisionApiHandlers.updateDivision
+                    routef "/div/%i/" DivisionApiHandlers.updateDivision
                 ]
                 DELETE >=> choose [
                     routef "/team/%i" TeamApiHandlers.deleteTeam
@@ -51,6 +60,9 @@ let webApp =
 
                     routef "/coach/%i" CoachApiHandlers.deleteCoach
                     routef "/coach/%i/" CoachApiHandlers.deleteCoach
+
+                    routef "/div/%i" DivisionApiHandlers.deleteDivision
+                    routef "/div/%i/" DivisionApiHandlers.deleteDivision
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" 
