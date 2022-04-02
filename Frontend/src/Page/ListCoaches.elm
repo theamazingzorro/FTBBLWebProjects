@@ -83,7 +83,7 @@ buildDeleteError res =
         Nothing
 
     else
-        Just "Delete Failed. Coach not found."
+        Just "Delete Failed. Coaches cannot be deleted before their last team."
 
 
 

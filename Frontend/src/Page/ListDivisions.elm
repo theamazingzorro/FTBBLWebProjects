@@ -83,7 +83,7 @@ buildDeleteError res =
         Nothing
 
     else
-        Just "Delete Failed. Does the division still have teams in it?"
+        Just "Delete Failed. If this div ever had teams assigned it cannot be deleted."
 
 
 
