@@ -84,7 +84,7 @@ init navkey route =
                 |> wrapWith EditCoachPage EditCoachPageMsg
 
         Route.Divisions ->
-            ListDivisions.init
+            ListDivisions.init navkey
                 |> wrapWith DivisionsPage DivisionsPageMsg
 
         Route.AddDivision ->
