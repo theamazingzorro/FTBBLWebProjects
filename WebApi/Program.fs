@@ -60,6 +60,9 @@ let webApp =
 
                     routef "/coach/%i" CoachApiHandlers.deleteCoach
                     routef "/coach/%i/" CoachApiHandlers.deleteCoach
+
+                    routef "/div/%i" DivisionApiHandlers.deleteDivision
+                    routef "/div/%i/" DivisionApiHandlers.deleteDivision
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" 

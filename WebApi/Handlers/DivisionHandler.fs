@@ -51,6 +51,20 @@ module DivisionApiHandlers =
             }
 
 
+    let deleteDivision (id : int) : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+                
+                logger.LogInformation $"Deleting Division: id={id}"
+                let res = DivisionRepository.deleteById(id)
+
+                logger.LogInformation $"{res} rows effected."
+
+                return! json {| Deleted = res > 0 |} next ctx
+            }
+
+
     let updateDivision (id : int) : HttpHandler =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {

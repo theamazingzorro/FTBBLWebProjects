@@ -29,9 +29,6 @@ module RaceRepository =
 
         use db = new Database(connection)
 
-        try 
-            db.Single<Race>("""
-                SELECT * FROM Race
-                WHERE Race.id=@0""", id)
-        with
-            :? InvalidOperationException -> { Id=0; Name="" }
+        db.SingleOrDefault<Race>("""
+            SELECT * FROM Race
+            WHERE Race.id=@0""", id)

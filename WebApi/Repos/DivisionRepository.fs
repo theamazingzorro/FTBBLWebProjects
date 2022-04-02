@@ -27,12 +27,9 @@ module DivisionRepository =
 
         use db = new Database(connection)
 
-        try 
-            db.Single<Division>("""
-                SELECT * FROM Division
-                WHERE Division.id=@0""", id)
-        with
-            :? InvalidOperationException -> { Id=0; Name=""; Season=0u }
+        db.SingleOrDefault<Division>("""
+            SELECT * FROM Division
+            WHERE Division.id=@0""", id)
         
 
     let save (division : Division) =
@@ -42,6 +39,15 @@ module DivisionRepository =
         use db = new Database(connection)
 
         db.Save<Division>(division)   
+
+
+    let deleteById (id : int) =
+        use connection = new MySqlConnection(connStr)
+        connection.Open()
+
+        use db = new Database(connection)
+
+        db.DeleteWhere<Division>("Division.id=@0", id)
 
 
     let update (division : Division) =
