@@ -6,7 +6,7 @@ module CoachApiHandlers =
 
     open Microsoft.AspNetCore.Http
     open Giraffe
-    open ftbbl.WebApi.Models.Team
+    open ftbbl.WebApi.Models
     open ftbbl.WebApi.Repositories
 
     let private getLogger (ctx : HttpContext) = 

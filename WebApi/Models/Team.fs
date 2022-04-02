@@ -1,4 +1,4 @@
-﻿namespace ftbbl.WebApi.Models.Team
+﻿namespace ftbbl.WebApi.Models
 
 open NPoco
 

@@ -2,7 +2,7 @@
 
 module RaceRepository =
 
-    open ftbbl.WebApi.Models.Team
+    open ftbbl.WebApi.Models
 
     open Microsoft.AspNetCore.Builder
     open System
