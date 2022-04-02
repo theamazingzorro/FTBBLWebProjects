@@ -44,15 +44,6 @@ module DivisionRepository =
         db.Save<Division>(division)   
 
 
-    let deleteById (id : int) =
-        use connection = new MySqlConnection(connStr)
-        connection.Open()
-
-        use db = new Database(connection)
-
-        db.DeleteWhere<Division>("Division.id=@0", id)
-
-
     let update (division : Division) =
         use connection = new MySqlConnection(connStr)
         connection.Open()
