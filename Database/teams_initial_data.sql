@@ -11,10 +11,10 @@ INSERT INTO Team (name, race_id, coach_id, elo)
     SELECT  " Murder Hobos", Race.id, Coach.id, 1000 FROM (Race, Coach) WHERE Race.name="Chaos" AND Coach.name="Theamazingzorro"
 ;
 
-INSERT INTO Division (name, season)
-	SELECT "Div A", 1 UNION ALL
-    SELECT "Div B", 1 UNION ALL
-    SELECT "Div A", 2
+INSERT INTO Division (name, closed, season)
+	SELECT "Div A", True, 1 UNION ALL
+    SELECT "Div B", False, 1 UNION ALL
+    SELECT "Div A", False, 2
 ;
 
 INSERT INTO TeamDivision (team_id, div_id, start_date, end_date)

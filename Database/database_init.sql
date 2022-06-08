@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS Division(
 	id INT NOT NULL AUTO_INCREMENT,
 	name VARCHAR(40) NOT NULL,
 	season INT NOT NULL,
+    closed BOOL NOT NULL,
 	UNIQUE ( name, season),
 	PRIMARY KEY ( id )
 );
@@ -84,4 +85,43 @@ CREATE TABLE IF NOT EXISTS TeamDivision(
     FOREIGN KEY ( team_id ) REFERENCES Team(id),
     FOREIGN KEY ( div_id ) REFERENCES Division(id),
 	PRIMARY KEY ( team_id, div_id )
+);
+
+
+-- Game --
+
+CREATE TABLE IF NOT EXISTS Game(
+	id INT NOT NULL AUTO_INCREMENT,
+	home_team_id INT NOT NULL,
+    away_team_id INT NOT NULL,
+    div_id INT NOT NULL,
+    home_score INT,
+    away_score INT,
+    week INT,
+    FOREIGN KEY ( home_team_id ) REFERENCES Team(id),
+    FOREIGN KEY ( away_team_id ) REFERENCES Team(id),
+    FOREIGN KEY ( div_id ) REFERENCES Division(id),
+    PRIMARY KEY ( id )
+);
+
+
+-- ELO History --
+
+CREATE TABLE IF NOT EXISTS TeamEloHistory(
+	id INT NOT NULL AUTO_INCREMENT,
+    team_id INT NOT NULL,
+    elo INT NOT NULL,
+    date DATE NOT NULL,
+    FOREIGN KEY ( team_id ) REFERENCES Team(id),
+    PRIMARY KEY ( id )
+);
+
+
+CREATE TABLE IF NOT EXISTS CoachEloHistory(
+	id INT NOT NULL AUTO_INCREMENT,
+    coach_id INT NOT NULL,
+    elo INT NOT NULL,
+    date DATE NOT NULL,
+    FOREIGN KEY ( coach_id ) REFERENCES Coach(id),
+    PRIMARY KEY ( id )
 );
