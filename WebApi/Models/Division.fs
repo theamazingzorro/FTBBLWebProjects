@@ -1,12 +1,10 @@
 ﻿namespace ftbbl.WebApi.Models
 
-
 [<CLIMutable>]
-type Coach =
+type Division =
     {
         Id : int
         Name : string
-        Elo : int
+        Season : uint
     }
-
 

@@ -1,6 +1,6 @@
 ﻿namespace ftbbl.WebApi.Repositories
 
-module TeamRepository = 
+module DivisionRepository = 
     open ftbbl.WebApi.Models
 
     open Microsoft.AspNetCore.Builder
@@ -17,11 +17,7 @@ module TeamRepository =
 
         use db = new Database(connection)
 
-        db.Fetch<Team>("""
-                SELECT * FROM Team
-                JOIN Race ON Team.race_id=Race.id
-                JOIN Coach ON Team.coach_id=Coach.id
-                """)
+        db.Fetch<Division>("SELECT * FROM Division")
             |> List.ofSeq
 
 
@@ -31,23 +27,18 @@ module TeamRepository =
 
         use db = new Database(connection)
 
-        try 
-            db.Single<Team>("""
-                SELECT * FROM Team
-                JOIN Race ON Team.race_id=Race.id
-                JOIN Coach ON Team.coach_id=Coach.id
-                WHERE Team.id=@0""", id)
-        with
-            :? InvalidOperationException -> { Id=0; Name=""; Race={Id=0; Name="";}; Coach={Id=0; Name=""; Elo=0}; Elo=0 }
+        db.SingleOrDefault<Division>("""
+            SELECT * FROM Division
+            WHERE Division.id=@0""", id)
         
 
-    let save (team : Team) =
+    let save (division : Division) =
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
         use db = new Database(connection)
 
-        db.Save<Team>(team)   
+        db.Save<Division>(division)   
 
 
     let deleteById (id : int) =
@@ -56,15 +47,18 @@ module TeamRepository =
 
         use db = new Database(connection)
 
-        db.DeleteWhere<Team>("Team.id=@0", id)
+        try
+            db.DeleteWhere<Division>("Division.id=@0", id)
+        with
+            | :? MySqlException -> 0
 
 
-    let update (team : Team) =
+    let update (division : Division) =
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
         use db = new Database(connection)
 
-        db.Save<Team>(team)
+        db.Save<Division>(division)
         
         

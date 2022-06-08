@@ -1,34 +1,32 @@
 ﻿namespace ftbbl.WebApi.Repositories
 
-module RaceRepository =
-
+module TeamEloHistoryRepository = 
     open ftbbl.WebApi.Models
 
     open Microsoft.AspNetCore.Builder
-    open System
     open MySql.Data.MySqlClient
     open NPoco
 
     let connStr = WebApplication.CreateBuilder().Configuration["ConnString"]
 
-    let getAll() =  
+
+    let getByTeam(id : int) =  
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
         use db = new Database(connection)
 
-        db.Fetch<Race>("""
-                SELECT * FROM Race
-                """)
+        db.Fetch<TeamEloHistory>("""
+                SELECT * FROM TeamEloHistory
+                WHERE TeamEloHistory.id=@0""", id)
             |> List.ofSeq
 
+        
 
-    let getById (id : int) =
+    let save (history : TeamEloHistory) =
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
         use db = new Database(connection)
 
-        db.SingleOrDefault<Race>("""
-            SELECT * FROM Race
-            WHERE Race.id=@0""", id)
+        db.Save<TeamEloHistory>(history)   

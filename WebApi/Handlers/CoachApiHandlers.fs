@@ -1,12 +1,13 @@
 ﻿namespace ftbbl.WebApi.Handlers
 
 open Microsoft.Extensions.Logging
+open System
 
 module CoachApiHandlers =
 
     open Microsoft.AspNetCore.Http
     open Giraffe
-    open ftbbl.WebApi.Models.Team
+    open ftbbl.WebApi.Models
     open ftbbl.WebApi.Repositories
 
     let private getLogger (ctx : HttpContext) = 
@@ -72,6 +73,10 @@ module CoachApiHandlers =
 
                 let! coach = ctx.BindJsonAsync<Coach>()
                 logger.LogInformation $"Updating Coach: id={id}"
+
+                let oldCoach = CoachRepository.getById(id)
+                if (oldCoach.Elo <> coach.Elo) 
+                then CoachEloHistoryRepository.save({Id = 0; CoachId=id; Elo = oldCoach.Elo; Date = DateTime.Now})
 
                 CoachRepository.update { coach with Id = id }
 

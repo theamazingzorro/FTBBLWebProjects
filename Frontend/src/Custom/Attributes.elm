@@ -67,9 +67,9 @@ table =
     class "table table-striped table-hover"
 
 
-tableButtonColumn : Attribute msg
-tableButtonColumn =
-    width 175
+tableButtonColumn : Int -> Attribute msg
+tableButtonColumn btnCount =
+    width <| btnCount * 100
 
 
 

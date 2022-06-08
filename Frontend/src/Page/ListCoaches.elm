@@ -83,7 +83,7 @@ buildDeleteError res =
         Nothing
 
     else
-        Just "Delete Failed. Coach not found."
+        Just "Delete Failed. Coaches cannot be deleted before their last team."
 
 
 
@@ -110,6 +110,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ div Custom.Attributes.row [ viewRefreshButton ]
+        , viewErrorMessage model.deleteError
         , viewCoachesOrError model
         ]
 
@@ -138,11 +139,11 @@ viewCoachesOrError model =
             viewCoaches coaches
 
         RemoteData.Failure httpError ->
-            viewError <| Error.buildErrorMessage httpError
+            viewLoadError <| Error.buildErrorMessage httpError
 
 
-viewError : String -> Html Msg
-viewError errorMessage =
+viewLoadError : String -> Html Msg
+viewLoadError errorMessage =
     let
         errorHeading =
             "Couldn't fetch data at this time."
@@ -151,6 +152,17 @@ viewError errorMessage =
         [ h3 [] [ text errorHeading ]
         , text <| "Error: " ++ errorMessage
         ]
+
+
+viewErrorMessage : Maybe String -> Html Msg
+viewErrorMessage message =
+    case message of
+        Just m ->
+            div [ Custom.Attributes.errorMessage ]
+                [ text <| "Error: " ++ m ]
+
+        Nothing ->
+            text ""
 
 
 viewCoaches : List Coach -> Html Msg
@@ -205,7 +217,7 @@ viewCoach coach =
             [ text coach.name ]
         , td []
             [ text <| String.fromInt coach.elo ]
-        , td [ Custom.Attributes.tableButtonColumn ]
+        , td [ Custom.Attributes.tableButtonColumn 2 ]
             [ viewEditButton coach, viewDeleteButton coach ]
         ]
 

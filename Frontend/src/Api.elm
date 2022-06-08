@@ -2,6 +2,7 @@ module Api exposing (Endpoint(..), deleteRequest, getRequest, postRequest, putRe
 
 import Http exposing (Body, Expect)
 import Model.Coach as Coach exposing (CoachId)
+import Model.Division as Div exposing (DivisionId)
 import Model.Race as Race exposing (RaceId)
 import Model.Team as Team exposing (TeamId)
 
@@ -13,6 +14,8 @@ type Endpoint
     | Coach CoachId
     | Races
     | Race RaceId
+    | Divisions
+    | Division DivisionId
 
 
 baseUrl : String
@@ -40,6 +43,12 @@ stringOf endpoint =
 
         Race index ->
             "race/" ++ Race.idToString index
+
+        Divisions ->
+            "div"
+
+        Division index ->
+            "div/" ++ Div.idToString index
 
 
 urlOf : Endpoint -> String

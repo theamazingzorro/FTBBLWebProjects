@@ -2,7 +2,7 @@
 
 module CoachRepository =
 
-    open ftbbl.WebApi.Models.Team
+    open ftbbl.WebApi.Models
 
     open Microsoft.AspNetCore.Builder
     open System
@@ -29,12 +29,9 @@ module CoachRepository =
 
         use db = new Database(connection)
 
-        try 
-            db.Single<Coach>("""
-                SELECT * FROM Coach
-                WHERE Coach.id=@0""", id)
-        with
-            :? InvalidOperationException -> { Id=0; Name=""; Elo=0 }
+        db.SingleOrDefault<Coach>("""
+            SELECT * FROM Coach
+            WHERE Coach.id=@0""", id)
 
 
     let save (coach : Coach) =
