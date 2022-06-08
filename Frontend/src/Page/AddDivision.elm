@@ -1,15 +1,14 @@
 module Page.AddDivision exposing (Model, Msg, init, update, view)
 
 import Api
+import Custom.Attributes
+import Custom.Events exposing (onEnter)
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Division exposing (Division, defaultDivision, divisionDecoder, newDivisionEncoder)
-import Custom.Attributes
-import Html.Events exposing (onClick)
-import Html.Events exposing (onInput)
-import Custom.Events exposing (onEnter)
 
 
 
@@ -54,9 +53,9 @@ update msg model =
 
         SeasonChanged newSeasonText ->
             let
-                newSeason = 
+                newSeason =
                     String.toInt newSeasonText
-                    |> Maybe.withDefault 0
+                        |> Maybe.withDefault 0
 
                 reseason oldDiv =
                     { oldDiv | season = newSeason }
@@ -124,6 +123,7 @@ viewForm model =
             ]
             [ text "Add" ]
         ]
+
 
 viewNameField : Division -> Html Msg
 viewNameField division =

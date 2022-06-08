@@ -1,21 +1,17 @@
 module Page.EditDivision exposing (Model, Msg, init, update, view)
 
+import Api
+import Browser.Navigation as Nav
+import Custom.Attributes
+import Custom.Events exposing (onEnter)
+import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Browser.Navigation as Nav
-import Model.Division exposing (DivisionId)
-import RemoteData exposing (WebData)
-import Model.Division exposing (Division)
+import Html.Events exposing (onClick, onInput)
 import Http
+import Model.Division exposing (Division, DivisionId, divisionDecoder, divisionEncoder)
+import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
-import Error exposing (buildErrorMessage)
-import Api
-import Model.Division exposing (divisionEncoder)
-import Model.Division exposing (divisionDecoder)
-import Custom.Attributes
-import Html.Events exposing (onClick)
-import Html.Events exposing (onInput)
-import Custom.Events exposing (onEnter)
 
 
 
@@ -94,9 +90,9 @@ reseason division newSeasonText =
     case division of
         RemoteData.Success oldDivision ->
             let
-                newSeason = 
+                newSeason =
                     String.toInt newSeasonText
-                    |> Maybe.withDefault 0
+                        |> Maybe.withDefault 0
             in
             RemoteData.Success { oldDivision | season = newSeason }
 
@@ -113,7 +109,10 @@ trySaveDivision model =
         _ ->
             ( { model | saveError = Just "Cannot submit data, please refresh page and try again." }, Cmd.none )
 
+
+
 -- API Requests --
+
 
 getDivisionRequest : DivisionId -> Cmd Msg
 getDivisionRequest id =
@@ -127,6 +126,7 @@ saveDivision division =
         (Http.jsonBody (divisionEncoder division))
     <|
         Http.expectJson DivisionSubmitted divisionDecoder
+
 
 
 -- View --
