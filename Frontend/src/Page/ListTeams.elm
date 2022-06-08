@@ -161,7 +161,7 @@ viewErrorMessage message =
         Just m ->
             div [ Custom.Attributes.errorMessage ]
                 [ text <| "Error: " ++ m ]
-        
+
         Nothing ->
             text ""
 

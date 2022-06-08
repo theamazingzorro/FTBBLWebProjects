@@ -7,6 +7,7 @@ module Model.Division exposing
     , divisionsDecoder
     , idParser
     , idToString
+    , newDivisionEncoder
     )
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
@@ -82,6 +83,14 @@ divisionEncoder division =
     Encode.object
         [ ( "id", encodeId division.id )
         , ( "name", Encode.string division.name )
+        , ( "season", Encode.int division.season )
+        ]
+
+
+newDivisionEncoder : Division -> Encode.Value
+newDivisionEncoder division =
+    Encode.object
+        [ ( "name", Encode.string division.name )
         , ( "season", Encode.int division.season )
         ]
 

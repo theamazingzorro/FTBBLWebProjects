@@ -114,6 +114,7 @@ view model =
         , viewDivisionsOrError model
         ]
 
+
 viewRefreshButton : Html Msg
 viewRefreshButton =
     div [ Custom.Attributes.col ]
@@ -152,15 +153,17 @@ viewLoadError errorMessage =
         , text <| "Error: " ++ errorMessage
         ]
 
+
 viewErrorMessage : Maybe String -> Html Msg
 viewErrorMessage message =
     case message of
         Just m ->
             div [ Custom.Attributes.errorMessage ]
                 [ text <| "Error: " ++ m ]
-        
+
         Nothing ->
             text ""
+
 
 viewDivisions : List Division -> Html Msg
 viewDivisions divisions =

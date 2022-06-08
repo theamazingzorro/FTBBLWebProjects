@@ -153,15 +153,17 @@ viewLoadError errorMessage =
         , text <| "Error: " ++ errorMessage
         ]
 
+
 viewErrorMessage : Maybe String -> Html Msg
 viewErrorMessage message =
     case message of
         Just m ->
             div [ Custom.Attributes.errorMessage ]
                 [ text <| "Error: " ++ m ]
-        
+
         Nothing ->
             text ""
+
 
 viewCoaches : List Coach -> Html Msg
 viewCoaches coaches =
