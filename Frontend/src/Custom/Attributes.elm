@@ -69,7 +69,7 @@ table =
 
 tableButtonColumn : Int -> Attribute msg
 tableButtonColumn btnCount =
-    width <| btnCount * 90
+    width <| btnCount * 100
 
 
 
