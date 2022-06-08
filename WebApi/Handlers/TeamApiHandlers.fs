@@ -1,6 +1,7 @@
 ﻿namespace ftbbl.WebApi.Handlers
 
 open Microsoft.Extensions.Logging
+open System
 
 module TeamApiHandlers =
 
@@ -73,6 +74,10 @@ module TeamApiHandlers =
 
                 let! team = ctx.BindJsonAsync<Team>()
                 logger.LogInformation $"Updating Team: id={id}"
+
+                let oldTeam = TeamRepository.getById(id)
+                if (oldTeam.Elo <> team.Elo) 
+                then TeamEloHistoryRepository.save({Id = 0; TeamId=id; Elo = oldTeam.Elo; Date = DateTime.Now})
 
                 TeamRepository.update { team with Id = id }
 
