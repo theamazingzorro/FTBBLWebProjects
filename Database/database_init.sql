@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS TeamEloHistory(
 	id INT NOT NULL AUTO_INCREMENT,
     team_id INT NOT NULL,
     elo INT NOT NULL,
-    date DATE NOT NULL,
+    date DATETIME NOT NULL,
     FOREIGN KEY ( team_id ) REFERENCES Team(id),
     PRIMARY KEY ( id )
 );
@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS CoachEloHistory(
 	id INT NOT NULL AUTO_INCREMENT,
     coach_id INT NOT NULL,
     elo INT NOT NULL,
-    date DATE NOT NULL,
+    date DATETIME NOT NULL,
     FOREIGN KEY ( coach_id ) REFERENCES Coach(id),
     PRIMARY KEY ( id )
 );
