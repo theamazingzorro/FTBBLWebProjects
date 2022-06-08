@@ -56,7 +56,7 @@ update msg model =
             let
                 newSeason = 
                     String.toInt newSeasonText
-                    |> Maybe.withDefault model.division.season
+                    |> Maybe.withDefault 0
 
                 reseason oldDiv =
                     { oldDiv | season = newSeason }

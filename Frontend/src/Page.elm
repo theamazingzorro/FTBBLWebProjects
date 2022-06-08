@@ -91,8 +91,8 @@ init navkey route =
             AddDivision.init
                 |> wrapWith AddDivisionPage AddDivisionPageMsg
 
-        Route.EditDivision _ ->
-            EditDivision.init
+        Route.EditDivision id ->
+            EditDivision.init navkey id
                 |> wrapWith EditDivisionPage EditDivisionPageMsg
 
 
