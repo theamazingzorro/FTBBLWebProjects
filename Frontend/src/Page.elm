@@ -74,10 +74,12 @@ init session route =
         Route.AddTeam ->
             AddTeam.init session
                 |> wrapWith AddTeamPage AddTeamPageMsg
+                |> requiresAuth session
 
         Route.EditTeam id ->
             EditTeam.init session id
                 |> wrapWith EditTeamPage EditTeamPageMsg
+                |> requiresAuth session
 
         Route.Coaches ->
             ListCoaches.init session
@@ -86,10 +88,12 @@ init session route =
         Route.AddCoach ->
             AddCoach.init session
                 |> wrapWith AddCoachPage AddCoachPageMsg
+                |> requiresAuth session
 
         Route.EditCoach id ->
             EditCoach.init session id
                 |> wrapWith EditCoachPage EditCoachPageMsg
+                |> requiresAuth session
 
         Route.Divisions ->
             ListDivisions.init session
@@ -98,10 +102,12 @@ init session route =
         Route.AddDivision ->
             AddDivision.init session
                 |> wrapWith AddDivisionPage AddDivisionPageMsg
+                |> requiresAuth session
 
         Route.EditDivision id ->
             EditDivision.init session id
                 |> wrapWith EditDivisionPage EditDivisionPageMsg
+                |> requiresAuth session
 
 
 
@@ -129,6 +135,7 @@ update msg model =
         ( AddTeamPageMsg subMsg, AddTeamPage pageModel ) ->
             AddTeam.update subMsg pageModel
                 |> wrapWith AddTeamPage AddTeamPageMsg
+                
 
         ( AddTeamPageMsg _, _ ) ->
             ( model, Cmd.none )
@@ -153,7 +160,7 @@ update msg model =
                 |> wrapWith AddCoachPage AddCoachPageMsg
 
         ( AddCoachPageMsg _, _ ) ->
-            ( model, Cmd.none )
+            ( model, Cmd.none ) 
 
         ( EditCoachPageMsg subMsg, EditCoachPage pageModel ) ->
             EditCoach.update subMsg pageModel
@@ -196,6 +203,14 @@ wrapWith toModel toMsg ( subModel, subCmd ) =
     )
 
 
+requiresAuth : Session -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+requiresAuth session ( model, cmd ) =
+    case session.token of
+        Nothing ->
+            ( NotFoundPage, Cmd.none )
+
+        Just _ ->
+            ( model, cmd )
 
 -- View --
 
