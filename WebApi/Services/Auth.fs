@@ -2,6 +2,7 @@
 
 open Giraffe
 open Microsoft.AspNetCore.Authentication.JwtBearer
+open Microsoft.AspNetCore.Builder
 
 module Auth =
 
@@ -11,7 +12,7 @@ module Auth =
     open System.Security.Claims
     open Microsoft.IdentityModel.Tokens
 
-    let key = "pleaseReplaceWithYourSecretKeyRetrievedFromSomeSecureLocation"
+    let key = WebApplication.CreateBuilder().Configuration["JWTKey"]
     let site : string = "http://ftbbl-elo.github.io/"
     let lifespan = 24 * 60
 
