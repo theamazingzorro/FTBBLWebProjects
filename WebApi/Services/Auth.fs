@@ -37,4 +37,7 @@ module Auth =
 
 
     let enticate : HttpHandler =
-        requiresAuthentication (challenge JwtBearerDefaults.AuthenticationScheme >=> text "Authentication required.")
+        requiresAuthentication (challenge JwtBearerDefaults.AuthenticationScheme >=> text "Authorization required.")
+
+    let requireAdminRole : HttpHandler = 
+        requiresRole "Admin" (RequestErrors.FORBIDDEN  "Permission denied. You must be an admin.")
