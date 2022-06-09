@@ -13,7 +13,9 @@ import Page.EditTeam as EditTeam
 import Page.ListCoaches as ListCoaches
 import Page.ListDivisions as ListDivisions
 import Page.ListTeams as ListTeams
+import Page.Signin as Signin    
 import Route exposing (Route)
+import Route exposing (Route(..))
 
 
 
@@ -22,6 +24,7 @@ import Route exposing (Route)
 
 type Model
     = NotFoundPage
+    | SigninPage Signin.Model
     | TeamsPage ListTeams.Model
     | AddTeamPage AddTeam.Model
     | EditTeamPage EditTeam.Model
@@ -34,7 +37,8 @@ type Model
 
 
 type Msg
-    = TeamsPageMsg ListTeams.Msg
+    = SigninPageMsg Signin.Msg
+    | TeamsPageMsg ListTeams.Msg
     | AddTeamPageMsg AddTeam.Msg
     | EditTeamPageMsg EditTeam.Msg
     | CoachesPageMsg ListCoaches.Msg
@@ -59,6 +63,10 @@ init session route =
         Route.Home ->
             ListTeams.init session
                 |> wrapWith TeamsPage TeamsPageMsg
+
+        Route.Signin ->
+            Signin.init session
+                |> wrapWith SigninPage SigninPageMsg
 
         Route.Teams ->
             ListTeams.init session
@@ -104,6 +112,13 @@ init session route =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model ) of
+        ( SigninPageMsg subMsg, SigninPage pageModel ) ->
+            Signin.update subMsg pageModel
+                |> wrapWith SigninPage SigninPageMsg
+
+        ( SigninPageMsg _, _ ) ->
+            ( model, Cmd.none )
+
         {- Team CRUD pages -}
         ( TeamsPageMsg subMsg, TeamsPage pageModel ) ->
             ListTeams.update subMsg pageModel
@@ -191,6 +206,10 @@ view model =
     case model of
         NotFoundPage ->
             notFoundView
+
+        SigninPage pageModel ->
+            Signin.view pageModel
+                |> Html.map SigninPageMsg
 
         TeamsPage pageModel ->
             ListTeams.view pageModel

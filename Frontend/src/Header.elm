@@ -19,6 +19,7 @@ type alias Model =
 
 type Msg
     = HomeClicked
+    | SigninClicked
     | TeamIndexClicked
     | CoachIndexClicked
     | DivisionIndexClicked
@@ -52,6 +53,9 @@ update msg model =
         HomeClicked ->
             ( model, pushUrl model.session.navkey Route.Home )
 
+        SigninClicked ->
+            ( model, pushUrl model.session.navkey Route.Signin )
+
 
 
 -- View --
@@ -71,6 +75,7 @@ view _ =
                 [ linkElement "Teams" TeamIndexClicked
                 , linkElement "Coaches" CoachIndexClicked
                 , linkElement "Divisions" DivisionIndexClicked
+                , linkElement "Sign In" SigninClicked
                 ]
             ]
         ]

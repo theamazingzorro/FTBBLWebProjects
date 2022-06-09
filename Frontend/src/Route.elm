@@ -20,6 +20,7 @@ type Route
     | Divisions
     | AddDivision
     | EditDivision DivisionId
+    | Signin
 
 
 parseUrl : Url -> Route
@@ -36,6 +37,8 @@ matchRoute : Parser (Route -> a) a
 matchRoute =
     oneOf
         [ map Home top
+
+        , map Signin <| oneOf [ s "Signin", s "signin" ]
 
         {- Team CRUD -}
         , map Teams <| oneOf [ s "Team", s "team" ]
@@ -92,6 +95,9 @@ routeToString route =
 
         Home ->
             "/"
+
+        Signin ->
+            "/signin"
 
         Teams ->
             "/Team"
