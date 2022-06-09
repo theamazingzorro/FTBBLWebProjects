@@ -37,10 +37,11 @@ type Msg
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url navkey =
     let
-        session = defaultSession navkey
+        session =
+            defaultSession navkey
 
         ( navModel, navCommand ) =
-            Header.init navkey
+            Header.init session
 
         ( page, pageCommand ) =
             Page.init session <| Route.parseUrl url

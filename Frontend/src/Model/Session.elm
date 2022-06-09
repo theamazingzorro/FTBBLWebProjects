@@ -20,5 +20,5 @@ type alias Session =
 defaultSession : Nav.Key -> Session
 defaultSession navkey =
     { token = Nothing
-    , navkey = navkey 
+    , navkey = navkey
     }
