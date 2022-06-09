@@ -3,6 +3,7 @@ module Page exposing (Model, Msg, init, update, view)
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Model.Session exposing (Session)
 import Page.AddCoach as AddCoach
 import Page.AddDivision as AddDivision
 import Page.AddTeam as AddTeam
@@ -48,51 +49,51 @@ type Msg
 -- Init --
 
 
-init : Nav.Key -> Route -> ( Model, Cmd Msg )
-init navkey route =
+init : Session -> Route -> ( Model, Cmd Msg )
+init session route =
     case route of
         Route.NotFound ->
             ( NotFoundPage, Cmd.none )
 
         {- Currently points to teams page. -}
         Route.Home ->
-            ListTeams.init navkey
+            ListTeams.init session
                 |> wrapWith TeamsPage TeamsPageMsg
 
         Route.Teams ->
-            ListTeams.init navkey
+            ListTeams.init session
                 |> wrapWith TeamsPage TeamsPageMsg
 
         Route.AddTeam ->
-            AddTeam.init
+            AddTeam.init session
                 |> wrapWith AddTeamPage AddTeamPageMsg
 
         Route.EditTeam id ->
-            EditTeam.init navkey id
+            EditTeam.init session id
                 |> wrapWith EditTeamPage EditTeamPageMsg
 
         Route.Coaches ->
-            ListCoaches.init navkey
+            ListCoaches.init session
                 |> wrapWith CoachesPage CoachesPageMsg
 
         Route.AddCoach ->
-            AddCoach.init
+            AddCoach.init session
                 |> wrapWith AddCoachPage AddCoachPageMsg
 
         Route.EditCoach id ->
-            EditCoach.init navkey id
+            EditCoach.init session id
                 |> wrapWith EditCoachPage EditCoachPageMsg
 
         Route.Divisions ->
-            ListDivisions.init navkey
+            ListDivisions.init session
                 |> wrapWith DivisionsPage DivisionsPageMsg
 
         Route.AddDivision ->
-            AddDivision.init
+            AddDivision.init session
                 |> wrapWith AddDivisionPage AddDivisionPageMsg
 
         Route.EditDivision id ->
-            EditDivision.init navkey id
+            EditDivision.init session id
                 |> wrapWith EditDivisionPage EditDivisionPageMsg
 
 

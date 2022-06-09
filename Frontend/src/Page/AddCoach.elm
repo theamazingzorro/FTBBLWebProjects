@@ -9,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Coach exposing (Coach, coachDecoder, defaultCoach, newCoachEncoder)
+import Model.Session exposing (Session)
 
 
 
@@ -16,7 +17,8 @@ import Model.Coach exposing (Coach, coachDecoder, defaultCoach, newCoachEncoder)
 
 
 type alias Model =
-    { coach : Coach
+    { session : Session
+    , coach : Coach
     , submitError : Maybe String
     }
 
@@ -31,9 +33,14 @@ type Msg
 -- Init --
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( { coach = defaultCoach, submitError = Nothing }, Cmd.none )
+init : Session -> ( Model, Cmd Msg )
+init session =
+    ( { session = session
+      , coach = defaultCoach
+      , submitError = Nothing
+      }
+    , Cmd.none
+    )
 
 
 

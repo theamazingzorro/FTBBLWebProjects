@@ -2,14 +2,15 @@ module PageSkeleton exposing (Model, Msg, init, update, view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-
+import Model.Session exposing (Session)
 
 
 -- Types --
 
 
 type alias Model =
-    {}
+    { session : Session
+    }
 
 
 type Msg
@@ -20,9 +21,9 @@ type Msg
 -- Init --
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( {}, Cmd.none )
+init : Session -> ( Model, Cmd Msg )
+init session =
+    ( { session = session }, Cmd.none )
 
 
 

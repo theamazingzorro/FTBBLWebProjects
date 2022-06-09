@@ -9,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
+import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
@@ -21,7 +22,7 @@ import Url exposing (Protocol(..))
 
 type alias Model =
     { teams : WebData (List Team)
-    , navkey : Nav.Key
+    , session : Session
     , deleteError : Maybe String
     }
 
@@ -39,10 +40,10 @@ type Msg
 -- Init --
 
 
-init : Nav.Key -> ( Model, Cmd Msg )
-init navkey =
+init : Session -> ( Model, Cmd Msg )
+init session =
     ( { teams = RemoteData.Loading
-      , navkey = navkey
+      , session = session
       , deleteError = Nothing
       }
     , getTeamsRequest
@@ -63,10 +64,10 @@ update msg model =
             ( { model | teams = response }, Cmd.none )
 
         AddTeamButtonClick ->
-            ( model, pushUrl model.navkey Route.AddTeam )
+            ( model, pushUrl model.session.navkey Route.AddTeam )
 
         EditTeamButtonClick id ->
-            ( model, pushUrl model.navkey <| Route.EditTeam id )
+            ( model, pushUrl model.session.navkey <| Route.EditTeam id )
 
         DeleteTeamButtonClick id ->
             ( model, deleteTeamRequest id )

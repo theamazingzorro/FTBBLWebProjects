@@ -10,6 +10,7 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Coach as Coach exposing (Coach, coachsDecoder)
 import Model.Race as Race exposing (Race, racesDecoder)
+import Model.Session exposing (Session)
 import Model.Team exposing (Team, defaultTeam, newTeamEncoder, teamDecoder)
 import RemoteData exposing (WebData)
 
@@ -19,7 +20,8 @@ import RemoteData exposing (WebData)
 
 
 type alias Model =
-    { team : Team
+    { session : Session
+    , team : Team
     , raceOptions : WebData (List Race)
     , coachOptions : WebData (List Coach)
     , submitError : Maybe String
@@ -42,9 +44,10 @@ type Msg
 -- Init --
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( { team = defaultTeam
+init : Session -> ( Model, Cmd Msg )
+init session =
+    ( { session = session
+      , team = defaultTeam
       , raceOptions = RemoteData.Loading
       , coachOptions = RemoteData.Loading
       , submitError = Nothing

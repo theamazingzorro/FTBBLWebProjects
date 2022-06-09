@@ -1,7 +1,6 @@
 module Page.ListCoaches exposing (Model, Msg, init, update, view)
 
 import Api
-import Browser.Navigation as Nav
 import Custom.Attributes
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
@@ -10,6 +9,7 @@ import Html.Events exposing (onClick)
 import Http
 import Model.Coach exposing (Coach, CoachId, coachsDecoder)
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
+import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 
@@ -20,7 +20,7 @@ import Route exposing (pushUrl)
 
 type alias Model =
     { coaches : WebData (List Coach)
-    , navkey : Nav.Key
+    , session : Session
     , deleteError : Maybe String
     }
 
@@ -38,10 +38,10 @@ type Msg
 -- Init --
 
 
-init : Nav.Key -> ( Model, Cmd Msg )
-init navkey =
+init : Session -> ( Model, Cmd Msg )
+init session =
     ( { coaches = RemoteData.Loading
-      , navkey = navkey
+      , session = session
       , deleteError = Nothing
       }
     , getCoachesRequest
@@ -62,10 +62,10 @@ update msg model =
             ( { model | coaches = response }, Cmd.none )
 
         AddCoachButtonClick ->
-            ( model, pushUrl model.navkey Route.AddCoach )
+            ( model, pushUrl model.session.navkey Route.AddCoach )
 
         EditCoachButtonClick id ->
-            ( model, pushUrl model.navkey <| Route.EditCoach id )
+            ( model, pushUrl model.session.navkey <| Route.EditCoach id )
 
         DeleteCoachButtonClick id ->
             ( model, deleteCoachRequest id )

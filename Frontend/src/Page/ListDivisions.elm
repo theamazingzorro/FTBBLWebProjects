@@ -1,7 +1,6 @@
 module Page.ListDivisions exposing (Model, Msg, init, update, view)
 
 import Api
-import Browser.Navigation as Nav
 import Custom.Attributes
 import Error
 import Html exposing (..)
@@ -10,6 +9,7 @@ import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, divisionsDecoder)
+import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 
@@ -20,7 +20,7 @@ import Route exposing (pushUrl)
 
 type alias Model =
     { divisions : WebData (List Division)
-    , navkey : Nav.Key
+    , session : Session
     , deleteError : Maybe String
     }
 
@@ -38,10 +38,10 @@ type Msg
 -- Init --
 
 
-init : Nav.Key -> ( Model, Cmd Msg )
-init navkey =
+init : Session -> ( Model, Cmd Msg )
+init session =
     ( { divisions = RemoteData.Loading
-      , navkey = navkey
+      , session = session
       , deleteError = Nothing
       }
     , getDivisionsRequest
@@ -62,10 +62,10 @@ update msg model =
             ( { model | divisions = response }, Cmd.none )
 
         AddDivisionButtonClick ->
-            ( model, pushUrl model.navkey Route.AddDivision )
+            ( model, pushUrl model.session.navkey Route.AddDivision )
 
         EditDivisionButtonClick id ->
-            ( model, pushUrl model.navkey <| Route.EditDivision id )
+            ( model, pushUrl model.session.navkey <| Route.EditDivision id )
 
         DeleteDivisionButtonClick id ->
             ( model, deleteDivisionRequest id )

@@ -5,6 +5,7 @@ import Browser.Navigation as Nav
 import Custom.Attributes
 import Header
 import Html exposing (..)
+import Model.Session exposing (..)
 import Page
 import Route exposing (Route(..))
 import Url exposing (Url)
@@ -18,7 +19,7 @@ type alias Model =
     { route : Route
     , headerModel : Header.Model
     , page : Page.Model
-    , navkey : Nav.Key
+    , session : Session
     }
 
 
@@ -36,17 +37,19 @@ type Msg
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url navkey =
     let
+        session = defaultSession navkey
+
         ( navModel, navCommand ) =
             Header.init navkey
 
         ( page, pageCommand ) =
-            Page.init navkey <| Route.parseUrl url
+            Page.init session <| Route.parseUrl url
 
         model =
             { route = Route.parseUrl url
             , headerModel = navModel
             , page = page
-            , navkey = navkey
+            , session = session
             }
 
         cmds =
@@ -69,7 +72,7 @@ update msg model =
             case urlRequest of
                 Browser.Internal url ->
                     ( model
-                    , Nav.pushUrl model.navkey <| Url.toString url
+                    , Nav.pushUrl model.session.navkey <| Url.toString url
                     )
 
                 Browser.External url ->
@@ -83,7 +86,7 @@ update msg model =
                     Route.parseUrl url
 
                 ( newPage, pageCmds ) =
-                    Page.init model.navkey newRoute
+                    Page.init model.session newRoute
             in
             ( { model | route = newRoute, page = newPage }
             , Cmd.map PageMsg pageCmds
