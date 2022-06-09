@@ -13,8 +13,7 @@ import Page.EditTeam as EditTeam
 import Page.ListCoaches as ListCoaches
 import Page.ListDivisions as ListDivisions
 import Page.ListTeams as ListTeams
-import Page.Signin as Signin    
-import Route exposing (Route)
+import Page.Signin as Signin
 import Route exposing (Route(..))
 
 

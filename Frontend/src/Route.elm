@@ -37,7 +37,6 @@ matchRoute : Parser (Route -> a) a
 matchRoute =
     oneOf
         [ map Home top
-
         , map Signin <| oneOf [ s "Signin", s "signin" ]
 
         {- Team CRUD -}
