@@ -18,7 +18,7 @@ module CoachEloHistoryRepository =
 
         db.Fetch<CoachEloHistory>("""
                 SELECT * FROM CoachEloHistory
-                WHERE CoachEloHistory.id=@0""", id)
+                WHERE CoachEloHistory.coach_id=@0""", id)
             |> List.ofSeq
 
         
