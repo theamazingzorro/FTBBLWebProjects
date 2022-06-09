@@ -8,9 +8,13 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.AspNetCore.Authentication.JwtBearer
 open Giraffe
 
 open ftbbl.WebApi.Handlers
+open ftbbl.WebApi.Services
+open Microsoft.IdentityModel.Tokens
+open System.Text
 
 // ---------------------------------
 // Web app
@@ -36,15 +40,18 @@ let webApp =
                     routex "/div(/?)" >=> DivisionApiHandlers.getDivisions
                     routef "/div/%i" DivisionApiHandlers.getDivision
                     routef "/div/%i/" DivisionApiHandlers.getDivision
+
+                    routex "/token(/?)" >=> text (Auth.getToken())
+                    
                 ]
-                POST >=> choose [
+                POST >=> Auth.enticate >=> choose [
                     routex "/team(/?)" >=> TeamApiHandlers.postTeam
 
                     routex "/coach(/?)" >=> CoachApiHandlers.postCoach
 
                     routex "/div(/?)" >=> DivisionApiHandlers.postDivision
                 ]
-                PUT >=> choose [
+                PUT >=> Auth.enticate >=> choose [
                     routef "/team/%i" TeamApiHandlers.updateTeam
                     routef "/team/%i/" TeamApiHandlers.updateTeam
 
@@ -54,7 +61,7 @@ let webApp =
                     routef "/div/%i" DivisionApiHandlers.updateDivision
                     routef "/div/%i/" DivisionApiHandlers.updateDivision
                 ]
-                DELETE >=> choose [
+                DELETE >=> Auth.enticate >=> choose [
                     routef "/team/%i" TeamApiHandlers.deleteTeam
                     routef "/team/%i/" TeamApiHandlers.deleteTeam
 
@@ -116,12 +123,25 @@ let configureApp (app : IApplicationBuilder) =
             .UseCors(configureProdCors)
     )
         .UseStaticFiles()
+        .UseAuthentication()
         .UseGiraffe(webApp)
 
 let configureServices (services : IServiceCollection) =
     services.AddCors()
         .AddLogging()
         .AddGiraffe() 
+        .AddAuthentication(fun opt ->
+            opt.DefaultAuthenticateScheme <- JwtBearerDefaults.AuthenticationScheme
+        )
+        .AddJwtBearer(fun opt ->
+            opt.TokenValidationParameters <- TokenValidationParameters(
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Auth.key)),
+                ValidateIssuer = true,
+                ValidIssuer = Auth.site,
+                ValidateAudience = true,
+                ValidAudience = Auth.site
+            )
+        )
         |> ignore
 
 let configureLogging (builder : ILoggingBuilder) =
