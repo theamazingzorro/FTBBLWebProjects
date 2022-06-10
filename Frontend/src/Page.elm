@@ -1,6 +1,5 @@
 module Page exposing (Model, Msg, init, update, view)
 
-import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Model.Session exposing (Session)
