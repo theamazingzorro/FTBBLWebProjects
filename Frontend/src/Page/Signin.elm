@@ -9,8 +9,7 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Session exposing (Session)
 import Model.UserPassword exposing (..)
-import Platform exposing (Router)
-import Route exposing (Route)
+import Route
 
 
 

@@ -1,7 +1,6 @@
 module Page.ListTeams exposing (Model, Msg, init, update, view)
 
 import Api
-import Browser.Navigation as Nav
 import Custom.Attributes
 import Error exposing (buildErrorMessage)
 import Html exposing (..)

@@ -135,7 +135,6 @@ update msg model =
         ( AddTeamPageMsg subMsg, AddTeamPage pageModel ) ->
             AddTeam.update subMsg pageModel
                 |> wrapWith AddTeamPage AddTeamPageMsg
-                
 
         ( AddTeamPageMsg _, _ ) ->
             ( model, Cmd.none )
@@ -160,7 +159,7 @@ update msg model =
                 |> wrapWith AddCoachPage AddCoachPageMsg
 
         ( AddCoachPageMsg _, _ ) ->
-            ( model, Cmd.none ) 
+            ( model, Cmd.none )
 
         ( EditCoachPageMsg subMsg, EditCoachPage pageModel ) ->
             EditCoach.update subMsg pageModel
@@ -203,7 +202,7 @@ wrapWith toModel toMsg ( subModel, subCmd ) =
     )
 
 
-requiresAuth : Session -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+requiresAuth : Session -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 requiresAuth session ( model, cmd ) =
     case session.token of
         Nothing ->
@@ -211,6 +210,8 @@ requiresAuth session ( model, cmd ) =
 
         Just _ ->
             ( model, cmd )
+
+
 
 -- View --
 
