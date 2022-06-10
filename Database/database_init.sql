@@ -125,3 +125,13 @@ CREATE TABLE IF NOT EXISTS CoachEloHistory(
     FOREIGN KEY ( coach_id ) REFERENCES Coach(id),
     PRIMARY KEY ( id )
 );
+
+
+-- Users --
+
+CREATE TABLE IF NOT EXISTS User(
+    username VARCHAR(100),
+    password VARCHAR(100),
+    is_admin BIT,
+    PRIMARY KEY ( username )
+);
