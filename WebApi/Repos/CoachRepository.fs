@@ -50,12 +50,3 @@ module CoachRepository =
         use db = new Database(connection)
 
         db.DeleteWhere<Coach>("Coach.id=@0", id)
-
-
-    let update (coach : Coach) =
-        use connection = new MySqlConnection(connStr)
-        connection.Open()
-
-        use db = new Database(connection)
-
-        db.Save<Coach>(coach)

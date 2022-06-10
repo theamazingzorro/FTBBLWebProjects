@@ -58,13 +58,5 @@ module TeamRepository =
 
         db.DeleteWhere<Team>("Team.id=@0", id)
 
-
-    let update (team : Team) =
-        use connection = new MySqlConnection(connStr)
-        connection.Open()
-
-        use db = new Database(connection)
-
-        db.Save<Team>(team)
         
         

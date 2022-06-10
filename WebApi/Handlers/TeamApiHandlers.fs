@@ -79,7 +79,7 @@ module TeamApiHandlers =
                 if (oldTeam.Elo <> team.Elo) 
                 then TeamEloHistoryRepository.save({Id = 0; TeamId=id; Elo = oldTeam.Elo; Date = DateTime.Now})
 
-                TeamRepository.update { team with Id = id }
+                TeamRepository.save { team with Id = id }
 
                 return! json team next ctx
             }

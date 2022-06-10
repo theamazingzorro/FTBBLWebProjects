@@ -73,7 +73,7 @@ module DivisionApiHandlers =
                 let! division = ctx.BindJsonAsync<Division>()
                 logger.LogInformation $"Updating Division: id={id}"
 
-                DivisionRepository.update { division with Id = id }
+                DivisionRepository.save { division with Id = id }
 
                 return! json division next ctx
             }
