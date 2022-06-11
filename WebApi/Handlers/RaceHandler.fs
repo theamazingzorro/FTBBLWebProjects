@@ -2,7 +2,7 @@
 
 open Microsoft.Extensions.Logging
 
-module RaceApiHandlers =
+module RaceHandler =
 
     open Microsoft.AspNetCore.Http
     open Giraffe

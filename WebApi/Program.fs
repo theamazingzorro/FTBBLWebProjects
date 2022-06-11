@@ -25,51 +25,49 @@ let webApp =
         subRoute "/api"
             ( choose [
                 GET >=> choose [
-                    routex "/team(/?)" >=> TeamApiHandlers.getTeams
-                    routef "/team/%i" TeamApiHandlers.getTeam
-                    routef "/team/%i/" TeamApiHandlers.getTeam
+                    routex "/team(/?)" >=> TeamHandler.getTeams
+                    routef "/team/%i" TeamHandler.getTeam
+                    routef "/team/%i/" TeamHandler.getTeam
 
-                    routex "/race(/?)" >=> RaceApiHandlers.getRaces
-                    routef "/race/%i" RaceApiHandlers.getRace
-                    routef "/race/%i/" RaceApiHandlers.getRace
+                    routex "/race(/?)" >=> RaceHandler.getRaces
+                    routef "/race/%i" RaceHandler.getRace
+                    routef "/race/%i/" RaceHandler.getRace
 
-                    routex "/coach(/?)" >=> CoachApiHandlers.getCoaches
-                    routef "/coach/%i" CoachApiHandlers.getCoach
-                    routef "/coach/%i/" CoachApiHandlers.getCoach
+                    routex "/coach(/?)" >=> CoachHandler.getCoaches
+                    routef "/coach/%i" CoachHandler.getCoach
+                    routef "/coach/%i/" CoachHandler.getCoach
 
-                    routex "/div(/?)" >=> DivisionApiHandlers.getDivisions
-                    routef "/div/%i" DivisionApiHandlers.getDivision
-                    routef "/div/%i/" DivisionApiHandlers.getDivision
+                    routex "/div(/?)" >=> DivisionHandler.getDivisions
+                    routef "/div/%i" DivisionHandler.getDivision
+                    routef "/div/%i/" DivisionHandler.getDivision
 
-                    routex "/token(/?)" >=> text (Auth.getToken())
-                    
                 ]
                 POST >=> Auth.enticate >=> choose [
-                    routex "/team(/?)" >=> TeamApiHandlers.postTeam
+                    routex "/team(/?)" >=> TeamHandler.postTeam
 
-                    routex "/coach(/?)" >=> CoachApiHandlers.postCoach
+                    routex "/coach(/?)" >=> CoachHandler.postCoach
 
-                    routex "/div(/?)" >=> DivisionApiHandlers.postDivision
+                    routex "/div(/?)" >=> DivisionHandler.postDivision
                 ]
                 PUT >=> Auth.enticate >=> choose [
-                    routef "/team/%i" TeamApiHandlers.updateTeam
-                    routef "/team/%i/" TeamApiHandlers.updateTeam
+                    routef "/team/%i" TeamHandler.updateTeam
+                    routef "/team/%i/" TeamHandler.updateTeam
 
-                    routef "/coach/%i" CoachApiHandlers.updateCoach
-                    routef "/coach/%i/" CoachApiHandlers.updateCoach
+                    routef "/coach/%i" CoachHandler.updateCoach
+                    routef "/coach/%i/" CoachHandler.updateCoach
 
-                    routef "/div/%i" DivisionApiHandlers.updateDivision
-                    routef "/div/%i/" DivisionApiHandlers.updateDivision
+                    routef "/div/%i" DivisionHandler.updateDivision
+                    routef "/div/%i/" DivisionHandler.updateDivision
                 ]
                 DELETE >=> Auth.enticate >=> choose [
-                    routef "/team/%i" TeamApiHandlers.deleteTeam
-                    routef "/team/%i/" TeamApiHandlers.deleteTeam
+                    routef "/team/%i" TeamHandler.deleteTeam
+                    routef "/team/%i/" TeamHandler.deleteTeam
 
-                    routef "/coach/%i" CoachApiHandlers.deleteCoach
-                    routef "/coach/%i/" CoachApiHandlers.deleteCoach
+                    routef "/coach/%i" CoachHandler.deleteCoach
+                    routef "/coach/%i/" CoachHandler.deleteCoach
 
-                    routef "/div/%i" DivisionApiHandlers.deleteDivision
-                    routef "/div/%i/" DivisionApiHandlers.deleteDivision
+                    routef "/div/%i" DivisionHandler.deleteDivision
+                    routef "/div/%i/" DivisionHandler.deleteDivision
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" 

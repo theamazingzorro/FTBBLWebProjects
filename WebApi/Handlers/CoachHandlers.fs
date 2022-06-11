@@ -3,7 +3,7 @@
 open Microsoft.Extensions.Logging
 open System
 
-module CoachApiHandlers =
+module CoachHandler =
 
     open Microsoft.AspNetCore.Http
     open Giraffe

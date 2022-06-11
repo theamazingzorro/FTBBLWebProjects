@@ -2,7 +2,7 @@
 
 open Microsoft.Extensions.Logging
 
-module DivisionApiHandlers =
+module DivisionHandler =
 
     open Microsoft.AspNetCore.Http
     open Giraffe

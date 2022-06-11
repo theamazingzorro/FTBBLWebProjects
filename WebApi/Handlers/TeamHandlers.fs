@@ -3,7 +3,7 @@
 open Microsoft.Extensions.Logging
 open System
 
-module TeamApiHandlers =
+module TeamHandler =
 
     open Microsoft.AspNetCore.Http
     open Giraffe
