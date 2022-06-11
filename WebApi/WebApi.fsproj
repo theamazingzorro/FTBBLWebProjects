@@ -18,12 +18,14 @@
   </ItemGroup>
 
   <ItemGroup> 
+	<Compile Include="Models\User.fs" /> 
 	<Compile Include="Models\Division.fs" /> 
 	<Compile Include="Models\Race.fs" /> 
 	<Compile Include="Models\Coach.fs" /> 
 	<Compile Include="Models\Team.fs" /> 
 	<Compile Include="Models\TeamEloHistory.fs" /> 
 	<Compile Include="Models\CoachEloHistory.fs" /> 
+	<Compile Include="Repos\UserRepository.fs" /> 
 	<Compile Include="Repos\DivisionRepository.fs" /> 
 	<Compile Include="Repos\RaceRepository.fs" /> 
 	<Compile Include="Repos\CoachRepository.fs" />
@@ -31,10 +33,11 @@
     <Compile Include="Repos\TeamEloHistoryRepository.fs" />
     <Compile Include="Repos\CoachEloHistoryRepository.fs" />
     <Compile Include="Services\Auth.fs" />
+    <Compile Include="Handlers\SecurityHandler.fs" />
     <Compile Include="Handlers\DivisionHandler.fs" />
     <Compile Include="Handlers\RaceHandler.fs" />
-    <Compile Include="Handlers\CoachApiHandlers.fs" />
-    <Compile Include="Handlers\TeamApiHandlers.fs" />
+    <Compile Include="Handlers\CoachHandlers.fs" />
+    <Compile Include="Handlers\TeamHandlers.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

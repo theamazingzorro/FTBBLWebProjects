@@ -40,14 +40,18 @@ let webApp =
                     routex "/div(/?)" >=> DivisionHandler.getDivisions
                     routef "/div/%i" DivisionHandler.getDivision
                     routef "/div/%i/" DivisionHandler.getDivision
-
                 ]
-                POST >=> Auth.enticate >=> choose [
-                    routex "/team(/?)" >=> TeamHandler.postTeam
+                POST >=> choose [
+                    routex "/signin(/?)" >=> SecurityHandler.signIn
 
-                    routex "/coach(/?)" >=> CoachHandler.postCoach
 
-                    routex "/div(/?)" >=> DivisionHandler.postDivision
+                    Auth.enticate >=> choose [
+                        routex "/team(/?)" >=> TeamHandler.postTeam
+
+                        routex "/coach(/?)" >=> CoachHandler.postCoach
+
+                        routex "/div(/?)" >=> DivisionHandler.postDivision
+                    ]
                 ]
                 PUT >=> Auth.enticate >=> choose [
                     routef "/team/%i" TeamHandler.updateTeam

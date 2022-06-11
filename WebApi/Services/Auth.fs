@@ -3,6 +3,7 @@
 open Giraffe
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.AspNetCore.Builder
+open ftbbl.WebApi.Models
 
 module Auth =
 
@@ -11,14 +12,20 @@ module Auth =
     open System.IdentityModel.Tokens.Jwt 
     open System.Security.Claims
     open Microsoft.IdentityModel.Tokens
+    open ftbbl.WebApi.Repositories
 
     let key = WebApplication.CreateBuilder().Configuration["JWTKey"]
     let site : string = "http://ftbbl-elo.github.io/"
     let lifespan = 24 * 60
 
-    let getToken() : string =
+    let getTokenFor(username : String, password : String) : string =
+        let user = UserRepository.getByUsername(username)
+
+        if (user :> obj = null || user.Password <> password) then ""
+        else
+
         let claims =[|
-            new Claim(ClaimTypes.Role, "Admin")
+            if (user.IsAdmin) then new Claim(ClaimTypes.Role, "Admin")
         |]
 
         let securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
