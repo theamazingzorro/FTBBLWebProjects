@@ -1,5 +1,6 @@
 module Api exposing (Endpoint(..), deleteRequest, getRequest, postRequest, putRequest)
 
+import Env
 import Http exposing (Body, Expect)
 import Model.Coach as Coach exposing (CoachId)
 import Model.Division as Div exposing (DivisionId)
@@ -16,11 +17,12 @@ type Endpoint
     | Race RaceId
     | Divisions
     | Division DivisionId
+    | Signin
 
 
 baseUrl : String
 baseUrl =
-    "https://localhost:17317/api/"
+    Env.baseApiUrl
 
 
 stringOf : Endpoint -> String
@@ -49,6 +51,9 @@ stringOf endpoint =
 
         Division index ->
             "div/" ++ Div.idToString index
+
+        Signin ->
+            "signin"
 
 
 urlOf : Endpoint -> String

@@ -2,7 +2,7 @@
 
 open Microsoft.Extensions.Logging
 
-module RaceApiHandlers =
+module RaceHandler =
 
     open Microsoft.AspNetCore.Http
     open Giraffe
@@ -19,9 +19,9 @@ module RaceApiHandlers =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Races"
                 
-                let coachs = RaceRepository.getAll()
+                let races = RaceRepository.getAll()
 
-                return! json coachs next ctx
+                return! json races next ctx
             }
 
 
@@ -31,7 +31,7 @@ module RaceApiHandlers =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Race: id={id}"
                 
-                let coach = RaceRepository.getById id
+                let race = RaceRepository.getById id
 
-                return! json coach next ctx
+                return! json race next ctx
             }

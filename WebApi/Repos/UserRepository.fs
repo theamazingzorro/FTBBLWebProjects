@@ -1,11 +1,10 @@
 ﻿namespace ftbbl.WebApi.Repositories
 
-module CoachRepository =
+module UserRepository =
 
     open ftbbl.WebApi.Models
 
     open Microsoft.AspNetCore.Builder
-    open System
     open MySql.Data.MySqlClient
     open NPoco
 
@@ -17,36 +16,27 @@ module CoachRepository =
 
         use db = new Database(connection)
 
-        db.Fetch<Coach>("""
-                SELECT * FROM Coach
+        db.Fetch<User>("""
+                SELECT * FROM User
                 """)
             |> List.ofSeq
 
 
-    let getById (id : int) =
+    let getByUsername (username : string) =
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
         use db = new Database(connection)
 
-        db.SingleOrDefault<Coach>("""
-            SELECT * FROM Coach
-            WHERE Coach.id=@0""", id)
+        db.SingleOrDefault<User>("""
+            SELECT * FROM User
+            WHERE User.username=@0""", username)
 
 
-    let save (coach : Coach) =
+    let save (user : User) =
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
         use db = new Database(connection)
 
-        db.Save<Coach>(coach)
-
-
-    let deleteById (id : int) =
-        use connection = new MySqlConnection(connStr)
-        connection.Open()
-
-        use db = new Database(connection)
-
-        db.DeleteWhere<Coach>("Coach.id=@0", id)
+        db.Save<User>(user)

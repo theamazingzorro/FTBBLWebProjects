@@ -53,12 +53,5 @@ module DivisionRepository =
             | :? MySqlException -> 0
 
 
-    let update (division : Division) =
-        use connection = new MySqlConnection(connStr)
-        connection.Open()
-
-        use db = new Database(connection)
-
-        db.Save<Division>(division)
         
         

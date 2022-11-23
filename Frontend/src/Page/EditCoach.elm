@@ -1,7 +1,6 @@
 module Page.EditCoach exposing (Model, Msg, init, update, view)
 
 import Api
-import Browser.Navigation as Nav
 import Custom.Attributes
 import Custom.Events exposing (onEnter)
 import Error exposing (buildErrorMessage)
@@ -10,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder)
+import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 
@@ -19,7 +19,7 @@ import Route exposing (pushUrl)
 
 
 type alias Model =
-    { navkey : Nav.Key
+    { session : Session
     , id : CoachId
     , coach : WebData Coach
     , saveError : Maybe String
@@ -37,9 +37,9 @@ type Msg
 -- Init --
 
 
-init : Nav.Key -> CoachId -> ( Model, Cmd Msg )
-init navkey id =
-    ( { navkey = navkey
+init : Session -> CoachId -> ( Model, Cmd Msg )
+init session id =
+    ( { session = session
       , id = id
       , coach = RemoteData.Loading
       , saveError = Nothing
@@ -65,7 +65,7 @@ update msg model =
             trySaveCoach model
 
         CoachSubmitted (Ok _) ->
-            ( { model | saveError = Nothing }, pushUrl model.navkey Route.Coaches )
+            ( { model | saveError = Nothing }, pushUrl model.session.navkey Route.Coaches )
 
         CoachSubmitted (Err err) ->
             ( { model | saveError = Just (buildErrorMessage err) }, Cmd.none )

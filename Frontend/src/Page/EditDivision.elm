@@ -1,7 +1,6 @@
 module Page.EditDivision exposing (Model, Msg, init, update, view)
 
 import Api
-import Browser.Navigation as Nav
 import Custom.Attributes
 import Custom.Events exposing (onEnter)
 import Error exposing (buildErrorMessage)
@@ -10,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Division exposing (Division, DivisionId, divisionDecoder, divisionEncoder)
+import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 
@@ -19,7 +19,7 @@ import Route exposing (pushUrl)
 
 
 type alias Model =
-    { navkey : Nav.Key
+    { session : Session
     , id : DivisionId
     , division : WebData Division
     , saveError : Maybe String
@@ -38,9 +38,9 @@ type Msg
 -- Init --
 
 
-init : Nav.Key -> DivisionId -> ( Model, Cmd Msg )
-init navkey id =
-    ( { navkey = navkey
+init : Session -> DivisionId -> ( Model, Cmd Msg )
+init session id =
+    ( { session = session
       , id = id
       , division = RemoteData.Loading
       , saveError = Nothing
@@ -69,7 +69,7 @@ update msg model =
             trySaveDivision model
 
         DivisionSubmitted (Ok _) ->
-            ( { model | saveError = Nothing }, pushUrl model.navkey Route.Divisions )
+            ( { model | saveError = Nothing }, pushUrl model.session.navkey Route.Divisions )
 
         DivisionSubmitted (Err err) ->
             ( { model | saveError = Just (buildErrorMessage err) }, Cmd.none )

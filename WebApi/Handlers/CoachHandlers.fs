@@ -3,7 +3,7 @@
 open Microsoft.Extensions.Logging
 open System
 
-module CoachApiHandlers =
+module CoachHandler =
 
     open Microsoft.AspNetCore.Http
     open Giraffe
@@ -78,7 +78,7 @@ module CoachApiHandlers =
                 if (oldCoach.Elo <> coach.Elo) 
                 then CoachEloHistoryRepository.save({Id = 0; CoachId=id; Elo = oldCoach.Elo; Date = DateTime.Now})
 
-                CoachRepository.update { coach with Id = id }
+                CoachRepository.save { coach with Id = id }
 
                 return! json coach next ctx
             }

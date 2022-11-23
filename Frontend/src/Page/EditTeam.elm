@@ -1,7 +1,6 @@
 module Page.EditTeam exposing (Model, Msg, init, update, view)
 
 import Api exposing (Endpoint(..))
-import Browser.Navigation as Nav
 import Custom.Attributes
 import Custom.Events exposing (onEnter)
 import Error exposing (buildErrorMessage)
@@ -10,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Coach exposing (CoachId)
+import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamDecoder, teamEncoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
@@ -20,7 +20,7 @@ import Route exposing (pushUrl)
 
 
 type alias Model =
-    { navkey : Nav.Key
+    { session : Session
     , id : TeamId
     , team : WebData Team
     , saveError : Maybe String
@@ -39,9 +39,9 @@ type Msg
 -- Init --
 
 
-init : Nav.Key -> TeamId -> ( Model, Cmd Msg )
-init navkey id =
-    ( { navkey = navkey
+init : Session -> TeamId -> ( Model, Cmd Msg )
+init session id =
+    ( { session = session
       , id = id
       , team = RemoteData.Loading
       , saveError = Nothing
@@ -64,13 +64,13 @@ update msg model =
             ( { model | team = rename model.team newName }, Cmd.none )
 
         CoachLinkClicked id ->
-            ( model, pushUrl model.navkey <| Route.EditCoach id )
+            ( model, pushUrl model.session.navkey <| Route.EditCoach id )
 
         Submit ->
             trySaveTeam model
 
         TeamSubmitted (Ok _) ->
-            ( { model | saveError = Nothing }, pushUrl model.navkey Route.Teams )
+            ( { model | saveError = Nothing }, pushUrl model.session.navkey Route.Teams )
 
         TeamSubmitted (Err err) ->
             ( { model | saveError = Just (buildErrorMessage err) }, Cmd.none )

@@ -1,7 +1,7 @@
 module Page.ListDivisions exposing (Model, Msg, init, update, view)
 
 import Api
-import Browser.Navigation as Nav
+import Auth exposing (requiresAuth)
 import Custom.Attributes
 import Error
 import Html exposing (..)
@@ -10,6 +10,7 @@ import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, divisionsDecoder)
+import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 
@@ -20,7 +21,7 @@ import Route exposing (pushUrl)
 
 type alias Model =
     { divisions : WebData (List Division)
-    , navkey : Nav.Key
+    , session : Session
     , deleteError : Maybe String
     }
 
@@ -38,10 +39,10 @@ type Msg
 -- Init --
 
 
-init : Nav.Key -> ( Model, Cmd Msg )
-init navkey =
+init : Session -> ( Model, Cmd Msg )
+init session =
     ( { divisions = RemoteData.Loading
-      , navkey = navkey
+      , session = session
       , deleteError = Nothing
       }
     , getDivisionsRequest
@@ -62,10 +63,10 @@ update msg model =
             ( { model | divisions = response }, Cmd.none )
 
         AddDivisionButtonClick ->
-            ( model, pushUrl model.navkey Route.AddDivision )
+            ( model, pushUrl model.session.navkey Route.AddDivision )
 
         EditDivisionButtonClick id ->
-            ( model, pushUrl model.navkey <| Route.EditDivision id )
+            ( model, pushUrl model.session.navkey <| Route.EditDivision id )
 
         DeleteDivisionButtonClick id ->
             ( model, deleteDivisionRequest id )
@@ -136,7 +137,7 @@ viewDivisionsOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success divisions ->
-            viewDivisions divisions
+            viewDivisions model.session divisions
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -165,23 +166,23 @@ viewErrorMessage message =
             text ""
 
 
-viewDivisions : List Division -> Html Msg
-viewDivisions divisions =
+viewDivisions : Session -> List Division -> Html Msg
+viewDivisions session divisions =
     div []
-        [ viewHeader
+        [ viewHeader session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader
             , tbody [] <|
-                List.map viewDivision divisions
+                List.map (viewDivision session) divisions
             ]
         ]
 
 
-viewHeader : Html Msg
-viewHeader =
+viewHeader : Session -> Html Msg
+viewHeader session =
     div Custom.Attributes.row
         [ div [ Custom.Attributes.col ] [ h3 [] [ text "Divisions" ] ]
-        , div [ Custom.Attributes.col ] [ viewToolBar ]
+        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
         ]
 
 
@@ -210,15 +211,16 @@ viewTableHeader =
         ]
 
 
-viewDivision : Division -> Html Msg
-viewDivision division =
+viewDivision : Session -> Division -> Html Msg
+viewDivision session division =
     tr []
         [ td []
             [ text division.name ]
         , td []
             [ text <| String.fromInt division.season ]
-        , td [ Custom.Attributes.tableButtonColumn 2 ]
-            [ viewEditButton division, viewDeleteButton division ]
+        , requiresAuth session <|
+            td [ Custom.Attributes.tableButtonColumn 2 ]
+                [ viewEditButton division, viewDeleteButton division ]
         ]
 
 

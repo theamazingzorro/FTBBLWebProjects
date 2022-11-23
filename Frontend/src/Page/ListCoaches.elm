@@ -1,7 +1,7 @@
 module Page.ListCoaches exposing (Model, Msg, init, update, view)
 
 import Api
-import Browser.Navigation as Nav
+import Auth exposing (requiresAuth)
 import Custom.Attributes
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
@@ -10,6 +10,7 @@ import Html.Events exposing (onClick)
 import Http
 import Model.Coach exposing (Coach, CoachId, coachsDecoder)
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
+import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 
@@ -20,7 +21,7 @@ import Route exposing (pushUrl)
 
 type alias Model =
     { coaches : WebData (List Coach)
-    , navkey : Nav.Key
+    , session : Session
     , deleteError : Maybe String
     }
 
@@ -38,10 +39,10 @@ type Msg
 -- Init --
 
 
-init : Nav.Key -> ( Model, Cmd Msg )
-init navkey =
+init : Session -> ( Model, Cmd Msg )
+init session =
     ( { coaches = RemoteData.Loading
-      , navkey = navkey
+      , session = session
       , deleteError = Nothing
       }
     , getCoachesRequest
@@ -62,10 +63,10 @@ update msg model =
             ( { model | coaches = response }, Cmd.none )
 
         AddCoachButtonClick ->
-            ( model, pushUrl model.navkey Route.AddCoach )
+            ( model, pushUrl model.session.navkey Route.AddCoach )
 
         EditCoachButtonClick id ->
-            ( model, pushUrl model.navkey <| Route.EditCoach id )
+            ( model, pushUrl model.session.navkey <| Route.EditCoach id )
 
         DeleteCoachButtonClick id ->
             ( model, deleteCoachRequest id )
@@ -136,7 +137,7 @@ viewCoachesOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success coaches ->
-            viewCoaches coaches
+            viewCoaches model.session coaches
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -165,23 +166,23 @@ viewErrorMessage message =
             text ""
 
 
-viewCoaches : List Coach -> Html Msg
-viewCoaches coaches =
+viewCoaches : Session -> List Coach -> Html Msg
+viewCoaches session coaches =
     div []
-        [ viewHeader
+        [ viewHeader session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader
             , tbody [] <|
-                List.map viewCoach coaches
+                List.map (viewCoach session) coaches
             ]
         ]
 
 
-viewHeader : Html Msg
-viewHeader =
+viewHeader : Session -> Html Msg
+viewHeader session =
     div Custom.Attributes.row
         [ div [ Custom.Attributes.col ] [ h3 [] [ text "Coaches" ] ]
-        , div [ Custom.Attributes.col ] [ viewToolBar ]
+        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
         ]
 
 
@@ -210,15 +211,16 @@ viewTableHeader =
         ]
 
 
-viewCoach : Coach -> Html Msg
-viewCoach coach =
+viewCoach : Session -> Coach -> Html Msg
+viewCoach session coach =
     tr []
         [ td []
             [ text coach.name ]
         , td []
             [ text <| String.fromInt coach.elo ]
-        , td [ Custom.Attributes.tableButtonColumn 2 ]
-            [ viewEditButton coach, viewDeleteButton coach ]
+        , requiresAuth session <|
+            td [ Custom.Attributes.tableButtonColumn 2 ]
+                [ viewEditButton coach, viewDeleteButton coach ]
         ]
 
 

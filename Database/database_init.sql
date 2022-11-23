@@ -125,3 +125,21 @@ CREATE TABLE IF NOT EXISTS CoachEloHistory(
     FOREIGN KEY ( coach_id ) REFERENCES Coach(id),
     PRIMARY KEY ( id )
 );
+
+
+-- Users --
+
+CREATE TABLE IF NOT EXISTS User(
+    username VARCHAR(100),
+    password VARCHAR(100),
+    is_admin BIT,
+    PRIMARY KEY ( username )
+);
+
+INSERT INTO User (username, password, is_admin)
+	SELECT t.name, t.pass, t.admin
+	FROM (
+		SELECT "theamazingzorro@gmail.com" as name, "TmYrm3FB56SltMWUXT2jMGgjchOI3DNvb+l0nPd88O7Nl6JpzKSBqmmJ6K4uBuelbcporyEoIr+EvEEv7DyG3g==" as pass, true as admin UNION ALL
+        SELECT "user" as name, "test" as pass, false as admin
+		 ) t
+	WHERE NOT EXISTS (SELECT 1 FROM User);

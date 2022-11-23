@@ -9,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Division exposing (Division, defaultDivision, divisionDecoder, newDivisionEncoder)
+import Model.Session exposing (Session)
 
 
 
@@ -16,7 +17,8 @@ import Model.Division exposing (Division, defaultDivision, divisionDecoder, newD
 
 
 type alias Model =
-    { division : Division
+    { session : Session
+    , division : Division
     , submitError : Maybe String
     }
 
@@ -32,9 +34,9 @@ type Msg
 -- Init --
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( { division = defaultDivision, submitError = Nothing }, Cmd.none )
+init : Session -> ( Model, Cmd Msg )
+init session =
+    ( { session = session, division = defaultDivision, submitError = Nothing }, Cmd.none )
 
 
 

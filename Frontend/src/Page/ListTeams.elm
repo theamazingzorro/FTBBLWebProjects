@@ -1,7 +1,7 @@
 module Page.ListTeams exposing (Model, Msg, init, update, view)
 
 import Api
-import Browser.Navigation as Nav
+import Auth exposing (requiresAuth)
 import Custom.Attributes
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
@@ -9,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
+import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
@@ -21,7 +22,7 @@ import Url exposing (Protocol(..))
 
 type alias Model =
     { teams : WebData (List Team)
-    , navkey : Nav.Key
+    , session : Session
     , deleteError : Maybe String
     }
 
@@ -39,10 +40,10 @@ type Msg
 -- Init --
 
 
-init : Nav.Key -> ( Model, Cmd Msg )
-init navkey =
+init : Session -> ( Model, Cmd Msg )
+init session =
     ( { teams = RemoteData.Loading
-      , navkey = navkey
+      , session = session
       , deleteError = Nothing
       }
     , getTeamsRequest
@@ -63,10 +64,10 @@ update msg model =
             ( { model | teams = response }, Cmd.none )
 
         AddTeamButtonClick ->
-            ( model, pushUrl model.navkey Route.AddTeam )
+            ( model, pushUrl model.session.navkey Route.AddTeam )
 
         EditTeamButtonClick id ->
-            ( model, pushUrl model.navkey <| Route.EditTeam id )
+            ( model, pushUrl model.session.navkey <| Route.EditTeam id )
 
         DeleteTeamButtonClick id ->
             ( model, deleteTeamRequest id )
@@ -137,7 +138,7 @@ viewTeamsOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success teams ->
-            viewTeams teams
+            viewTeams model.session teams
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -166,23 +167,23 @@ viewErrorMessage message =
             text ""
 
 
-viewTeams : List Team -> Html Msg
-viewTeams teams =
+viewTeams : Session -> List Team -> Html Msg
+viewTeams session teams =
     div []
-        [ viewHeader
+        [ viewHeader session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader
             , tbody [] <|
-                List.map viewTeam teams
+                List.map (viewTeam session) teams
             ]
         ]
 
 
-viewHeader : Html Msg
-viewHeader =
+viewHeader : Session -> Html Msg
+viewHeader session =
     div Custom.Attributes.row
         [ div [ Custom.Attributes.col ] [ h3 [] [ text "Teams" ] ]
-        , div [ Custom.Attributes.col ] [ viewToolBar ]
+        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
         ]
 
 
@@ -215,8 +216,8 @@ viewTableHeader =
         ]
 
 
-viewTeam : Team -> Html Msg
-viewTeam team =
+viewTeam : Session -> Team -> Html Msg
+viewTeam session team =
     tr []
         [ td []
             [ text team.name ]
@@ -226,8 +227,9 @@ viewTeam team =
             [ text team.coach.name ]
         , td []
             [ text <| String.fromInt team.elo ]
-        , td [ Custom.Attributes.tableButtonColumn 2 ]
-            [ viewEditButton team, viewDeleteButton team ]
+        , requiresAuth session <|
+            td [ Custom.Attributes.tableButtonColumn 2 ]
+                [ viewEditButton team, viewDeleteButton team ]
         ]
 
 

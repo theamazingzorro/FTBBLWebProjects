@@ -1,10 +1,10 @@
-module Header exposing (Model, Msg, init, update, view)
+module Header exposing (Model, Msg, OutMsg(..), init, update, view)
 
-import Browser.Navigation as Nav
 import Custom.Attributes
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Model.Session exposing (Session)
 import Route exposing (Route(..), pushUrl)
 
 
@@ -13,44 +13,60 @@ import Route exposing (Route(..), pushUrl)
 
 
 type alias Model =
-    { navkey : Nav.Key
+    { session : Session
     }
 
 
 type Msg
     = HomeClicked
+    | SigninClicked
+    | SignoutClicked
     | TeamIndexClicked
     | CoachIndexClicked
     | DivisionIndexClicked
+
+
+type OutMsg
+    = Signout
 
 
 
 -- Init --
 
 
-init : Nav.Key -> ( Model, Cmd Msg )
-init navkey =
-    ( { navkey = navkey }, Cmd.none )
+init : Session -> ( Model, Cmd Msg )
+init session =
+    ( { session = session }, Cmd.none )
 
 
 
 -- Update --
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> ( Model, Cmd Msg, Maybe OutMsg )
 update msg model =
     case msg of
         TeamIndexClicked ->
-            ( model, pushUrl model.navkey Route.Teams )
+            ( model, pushUrl model.session.navkey Route.Teams, Nothing )
 
         CoachIndexClicked ->
-            ( model, pushUrl model.navkey Route.Coaches )
+            ( model, pushUrl model.session.navkey Route.Coaches, Nothing )
 
         DivisionIndexClicked ->
-            ( model, pushUrl model.navkey Route.Divisions )
+            ( model, pushUrl model.session.navkey Route.Divisions, Nothing )
 
         HomeClicked ->
-            ( model, pushUrl model.navkey Route.Home )
+            ( model, pushUrl model.session.navkey Route.Home, Nothing )
+
+        SigninClicked ->
+            ( model, pushUrl model.session.navkey Route.Signin, Nothing )
+
+        SignoutClicked ->
+            let
+                updateSession session =
+                    { session | token = Nothing }
+            in
+            ( { model | session = updateSession model.session }, Cmd.none, Just Signout )
 
 
 
@@ -58,7 +74,7 @@ update msg model =
 
 
 view : Model -> Html Msg
-view _ =
+view model =
     nav [ Custom.Attributes.mainNavBar ]
         [ a
             [ Custom.Attributes.navBarBrand
@@ -71,9 +87,20 @@ view _ =
                 [ linkElement "Teams" TeamIndexClicked
                 , linkElement "Coaches" CoachIndexClicked
                 , linkElement "Divisions" DivisionIndexClicked
+                , viewSignInOutLink model.session.token
                 ]
             ]
         ]
+
+
+viewSignInOutLink : Maybe String -> Html Msg
+viewSignInOutLink token =
+    case token of
+        Just _ ->
+            linkElement "Sign Out" SignoutClicked
+
+        Nothing ->
+            linkElement "Sign In" SigninClicked
 
 
 toggleBarButton : Html Msg

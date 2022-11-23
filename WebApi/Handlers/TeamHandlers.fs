@@ -3,7 +3,7 @@
 open Microsoft.Extensions.Logging
 open System
 
-module TeamApiHandlers =
+module TeamHandler =
 
     open Microsoft.AspNetCore.Http
     open Giraffe
@@ -79,7 +79,7 @@ module TeamApiHandlers =
                 if (oldTeam.Elo <> team.Elo) 
                 then TeamEloHistoryRepository.save({Id = 0; TeamId=id; Elo = oldTeam.Elo; Date = DateTime.Now})
 
-                TeamRepository.update { team with Id = id }
+                TeamRepository.save { team with Id = id }
 
                 return! json team next ctx
             }
