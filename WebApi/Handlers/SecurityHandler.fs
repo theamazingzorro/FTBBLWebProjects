@@ -24,7 +24,7 @@ module SecurityHandler =
                 
                 let token = Auth.getTokenFor(user.Username, user.Password)
 
-                if (token <> null) then logger.LogInformation $"Sign in success"
+                if (token <> "") then logger.LogInformation $"Sign in success"
                 else logger.LogInformation $"Sign in failed"
 
                 return! text token next ctx

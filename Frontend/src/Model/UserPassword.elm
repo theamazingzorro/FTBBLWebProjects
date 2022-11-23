@@ -33,7 +33,7 @@ userPasswordEncoder : UserPassword -> Encode.Value
 userPasswordEncoder up =
     Encode.object
         [ ( "username", Encode.string up.username )
-        , ( "name", Encode.string <| encrypt up.password )
+        , ( "password", Encode.string <| encrypt up.password )
         ]
 
 

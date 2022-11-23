@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Main exposing (Msg, main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav
@@ -7,6 +7,7 @@ import Header
 import Html exposing (..)
 import Model.Session exposing (..)
 import Page
+import Page.Signin as SigninPage
 import Route exposing (Route(..))
 import Url exposing (Url)
 
@@ -95,21 +96,71 @@ update msg model =
 
         HeaderMsg subMsg ->
             let
-                ( newModel, newCmd ) =
+                ( newHeader, headerCmds, headerOutMsg ) =
                     Header.update subMsg model.headerModel
+
+                ( newModel, newCmds ) =
+                    processHeaderOutMsg model headerOutMsg
             in
-            ( { model | headerModel = newModel }
-            , Cmd.map HeaderMsg newCmd
+            ( { newModel | headerModel = newHeader }
+            , Cmd.batch [ Cmd.map HeaderMsg headerCmds, newCmds ]
             )
 
         PageMsg subMsg ->
             let
-                ( newPage, pageCmds ) =
+                ( newPage, pageCmds, pageOutMsg ) =
                     Page.update subMsg model.page
+
+                ( newModel, newCmds ) =
+                    processPageOutMsg model pageOutMsg
             in
-            ( { model | page = newPage }
-            , Cmd.map PageMsg pageCmds
+            ( { newModel | page = newPage }
+            , Cmd.batch [ Cmd.map PageMsg pageCmds, newCmds ]
             )
+
+
+processHeaderOutMsg : Model -> Maybe Header.OutMsg -> ( Model, Cmd Msg )
+processHeaderOutMsg model outMsg =
+    case outMsg of
+        Just Header.Signout ->
+            let
+                updateSession session =
+                    { session | token = Nothing }
+
+                updateHeader header =
+                    { header | session = updateSession header.session }
+            in
+            ( { model
+                | session = updateSession model.session
+                , headerModel = updateHeader model.headerModel
+              }
+            , Cmd.none
+            )
+
+        Nothing ->
+            ( model, Cmd.none )
+
+
+processPageOutMsg : Model -> Maybe Page.OutMsg -> ( Model, Cmd Msg )
+processPageOutMsg model outMsg =
+    case outMsg of
+        Just (Page.SigninPageOutMsg (SigninPage.ChangeToken token)) ->
+            let
+                updateSession session =
+                    { session | token = Just token }
+
+                updateHeader header =
+                    { header | session = updateSession header.session }
+            in
+            ( { model
+                | session = updateSession model.session
+                , headerModel = updateHeader model.headerModel
+              }
+            , Cmd.none
+            )
+
+        Nothing ->
+            ( model, Cmd.none )
 
 
 

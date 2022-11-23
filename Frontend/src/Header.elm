@@ -1,4 +1,4 @@
-module Header exposing (Model, Msg, init, update, view)
+module Header exposing (Model, Msg, OutMsg(..), init, update, view)
 
 import Custom.Attributes
 import Html exposing (..)
@@ -20,9 +20,14 @@ type alias Model =
 type Msg
     = HomeClicked
     | SigninClicked
+    | SignoutClicked
     | TeamIndexClicked
     | CoachIndexClicked
     | DivisionIndexClicked
+
+
+type OutMsg
+    = Signout
 
 
 
@@ -38,23 +43,30 @@ init session =
 -- Update --
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> ( Model, Cmd Msg, Maybe OutMsg )
 update msg model =
     case msg of
         TeamIndexClicked ->
-            ( model, pushUrl model.session.navkey Route.Teams )
+            ( model, pushUrl model.session.navkey Route.Teams, Nothing )
 
         CoachIndexClicked ->
-            ( model, pushUrl model.session.navkey Route.Coaches )
+            ( model, pushUrl model.session.navkey Route.Coaches, Nothing )
 
         DivisionIndexClicked ->
-            ( model, pushUrl model.session.navkey Route.Divisions )
+            ( model, pushUrl model.session.navkey Route.Divisions, Nothing )
 
         HomeClicked ->
-            ( model, pushUrl model.session.navkey Route.Home )
+            ( model, pushUrl model.session.navkey Route.Home, Nothing )
 
         SigninClicked ->
-            ( model, pushUrl model.session.navkey Route.Signin )
+            ( model, pushUrl model.session.navkey Route.Signin, Nothing )
+
+        SignoutClicked ->
+            let
+                updateSession session =
+                    { session | token = Nothing }
+            in
+            ( { model | session = updateSession model.session }, Cmd.none, Just Signout )
 
 
 
@@ -62,7 +74,7 @@ update msg model =
 
 
 view : Model -> Html Msg
-view _ =
+view model =
     nav [ Custom.Attributes.mainNavBar ]
         [ a
             [ Custom.Attributes.navBarBrand
@@ -75,10 +87,20 @@ view _ =
                 [ linkElement "Teams" TeamIndexClicked
                 , linkElement "Coaches" CoachIndexClicked
                 , linkElement "Divisions" DivisionIndexClicked
-                , linkElement "Sign In" SigninClicked
+                , viewSignInOutLink model.session.token
                 ]
             ]
         ]
+
+
+viewSignInOutLink : Maybe String -> Html Msg
+viewSignInOutLink token =
+    case token of
+        Just _ ->
+            linkElement "Sign Out" SignoutClicked
+
+        Nothing ->
+            linkElement "Sign In" SigninClicked
 
 
 toggleBarButton : Html Msg

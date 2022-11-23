@@ -1,5 +1,6 @@
-module Page.Signin exposing (Model, Msg, init, update, view)
+module Page.Signin exposing (Model, Msg, OutMsg(..), init, update, view)
 
+import Api
 import Custom.Attributes
 import Custom.Events exposing (onEnter)
 import Error exposing (buildErrorMessage)
@@ -20,6 +21,7 @@ type alias Model =
     { session : Session
     , userPassword : UserPassword
     , signinError : Maybe String
+    , wrongPassword : Bool
     }
 
 
@@ -28,6 +30,10 @@ type Msg
     | PasswordChanged String
     | Submit
     | Submitted (Result Http.Error String)
+
+
+type OutMsg
+    = ChangeToken String
 
 
 
@@ -39,6 +45,7 @@ init session =
     ( { session = session
       , userPassword = defaultUserPassword
       , signinError = Nothing
+      , wrongPassword = False
       }
     , Cmd.none
     )
@@ -48,7 +55,7 @@ init session =
 -- Update --
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> ( Model, Cmd Msg, Maybe OutMsg )
 update msg model =
     case msg of
         UsernameChanged newName ->
@@ -56,23 +63,26 @@ update msg model =
                 rename oldUser =
                     { oldUser | username = newName }
             in
-            ( { model | userPassword = rename model.userPassword }, Cmd.none )
+            ( { model | userPassword = rename model.userPassword }, Cmd.none, Nothing )
 
         PasswordChanged newPassword ->
             let
                 repass oldUser =
                     { oldUser | password = newPassword }
             in
-            ( { model | userPassword = repass model.userPassword }, Cmd.none )
+            ( { model | userPassword = repass model.userPassword }, Cmd.none, Nothing )
 
         Submit ->
-            ( model, signinAttempt model.userPassword )
+            ( model, signinAttempt model.userPassword, Nothing )
 
-        Submitted (Ok _) ->
-            ( { model | signinError = Nothing }, Route.pushUrl model.session.navkey Route.Home )
+        Submitted (Ok "") ->
+            ( { model | signinError = Nothing, wrongPassword = True }, Cmd.none, Nothing )
+
+        Submitted (Ok token) ->
+            ( model, Route.pushUrl model.session.navkey Route.Home, Just (ChangeToken token) )
 
         Submitted (Err err) ->
-            ( { model | signinError = Just (buildErrorMessage err) }, Cmd.none )
+            ( { model | signinError = Just (buildErrorMessage err), wrongPassword = False }, Cmd.none, Nothing )
 
 
 
@@ -81,7 +91,10 @@ update msg model =
 
 signinAttempt : UserPassword -> Cmd Msg
 signinAttempt userPassword =
-    Cmd.none
+    Api.postRequest Api.Signin
+        (Http.jsonBody (userPasswordEncoder userPassword))
+    <|
+        Http.expectString Submitted
 
 
 
@@ -94,6 +107,7 @@ view model =
         [ h3 [] [ text "Sign in" ]
         , br [] []
         , viewSigninError model.signinError
+        , viewWrongPassword model.wrongPassword
         , viewForm model
         ]
 
@@ -110,6 +124,17 @@ viewSigninError maybeError =
 
         Nothing ->
             text ""
+
+
+viewWrongPassword : Bool -> Html Msg
+viewWrongPassword wrongPassword =
+    if wrongPassword then
+        div [ Custom.Attributes.errorMessage ]
+            [ text "Incorrect Username or Password."
+            ]
+
+    else
+        text ""
 
 
 viewForm : Model -> Html Msg
@@ -149,7 +174,7 @@ viewPasswordField userPassword =
             (Custom.Attributes.formLabel "passwordInput")
             [ text "Password" ]
         , input
-            (Custom.Attributes.formInput "passwordInput"
+            (Custom.Attributes.formPasswordInput "passwordInput"
                 [ onInput PasswordChanged
                 , onEnter Submit
                 , value userPassword.password

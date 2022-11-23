@@ -15,6 +15,9 @@ buildErrorMessage httpError =
         Http.NetworkError ->
             "Unable to reach server."
 
+        Http.BadStatus 401 ->
+            "Please Sign in to access this content."
+
         Http.BadStatus statusCode ->
             "Request failed with status code: " ++ String.fromInt statusCode
 

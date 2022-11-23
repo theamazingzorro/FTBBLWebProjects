@@ -1,6 +1,7 @@
 module Page.ListTeams exposing (Model, Msg, init, update, view)
 
 import Api
+import Auth exposing (requiresAuth)
 import Custom.Attributes
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
@@ -137,7 +138,7 @@ viewTeamsOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success teams ->
-            viewTeams teams
+            viewTeams model.session teams
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -166,23 +167,23 @@ viewErrorMessage message =
             text ""
 
 
-viewTeams : List Team -> Html Msg
-viewTeams teams =
+viewTeams : Session -> List Team -> Html Msg
+viewTeams session teams =
     div []
-        [ viewHeader
+        [ viewHeader session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader
             , tbody [] <|
-                List.map viewTeam teams
+                List.map (viewTeam session) teams
             ]
         ]
 
 
-viewHeader : Html Msg
-viewHeader =
+viewHeader : Session -> Html Msg
+viewHeader session =
     div Custom.Attributes.row
         [ div [ Custom.Attributes.col ] [ h3 [] [ text "Teams" ] ]
-        , div [ Custom.Attributes.col ] [ viewToolBar ]
+        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
         ]
 
 
@@ -215,8 +216,8 @@ viewTableHeader =
         ]
 
 
-viewTeam : Team -> Html Msg
-viewTeam team =
+viewTeam : Session -> Team -> Html Msg
+viewTeam session team =
     tr []
         [ td []
             [ text team.name ]
@@ -226,8 +227,9 @@ viewTeam team =
             [ text team.coach.name ]
         , td []
             [ text <| String.fromInt team.elo ]
-        , td [ Custom.Attributes.tableButtonColumn 2 ]
-            [ viewEditButton team, viewDeleteButton team ]
+        , requiresAuth session <|
+            td [ Custom.Attributes.tableButtonColumn 2 ]
+                [ viewEditButton team, viewDeleteButton team ]
         ]
 
 

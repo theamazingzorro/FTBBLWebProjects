@@ -143,6 +143,15 @@ formInput thisId otherAttributes =
         ++ otherAttributes
 
 
+formPasswordInput : String -> List (Attribute msg) -> List (Attribute msg)
+formPasswordInput thisId otherAttributes =
+    [ class "form-control"
+    , type_ "password"
+    , id thisId
+    ]
+        ++ otherAttributes
+
+
 formDropdown : String -> List (Attribute msg) -> List (Attribute msg)
 formDropdown thisId otherAttributes =
     formInput thisId <|

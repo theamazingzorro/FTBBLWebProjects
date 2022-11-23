@@ -1,6 +1,7 @@
 module Page.ListDivisions exposing (Model, Msg, init, update, view)
 
 import Api
+import Auth exposing (requiresAuth)
 import Custom.Attributes
 import Error
 import Html exposing (..)
@@ -136,7 +137,7 @@ viewDivisionsOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success divisions ->
-            viewDivisions divisions
+            viewDivisions model.session divisions
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -165,23 +166,23 @@ viewErrorMessage message =
             text ""
 
 
-viewDivisions : List Division -> Html Msg
-viewDivisions divisions =
+viewDivisions : Session -> List Division -> Html Msg
+viewDivisions session divisions =
     div []
-        [ viewHeader
+        [ viewHeader session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader
             , tbody [] <|
-                List.map viewDivision divisions
+                List.map (viewDivision session) divisions
             ]
         ]
 
 
-viewHeader : Html Msg
-viewHeader =
+viewHeader : Session -> Html Msg
+viewHeader session =
     div Custom.Attributes.row
         [ div [ Custom.Attributes.col ] [ h3 [] [ text "Divisions" ] ]
-        , div [ Custom.Attributes.col ] [ viewToolBar ]
+        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
         ]
 
 
@@ -210,15 +211,16 @@ viewTableHeader =
         ]
 
 
-viewDivision : Division -> Html Msg
-viewDivision division =
+viewDivision : Session -> Division -> Html Msg
+viewDivision session division =
     tr []
         [ td []
             [ text division.name ]
         , td []
             [ text <| String.fromInt division.season ]
-        , td [ Custom.Attributes.tableButtonColumn 2 ]
-            [ viewEditButton division, viewDeleteButton division ]
+        , requiresAuth session <|
+            td [ Custom.Attributes.tableButtonColumn 2 ]
+                [ viewEditButton division, viewDeleteButton division ]
         ]
 
 

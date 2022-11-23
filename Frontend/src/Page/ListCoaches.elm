@@ -1,6 +1,7 @@
 module Page.ListCoaches exposing (Model, Msg, init, update, view)
 
 import Api
+import Auth exposing (requiresAuth)
 import Custom.Attributes
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
@@ -136,7 +137,7 @@ viewCoachesOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success coaches ->
-            viewCoaches coaches
+            viewCoaches model.session coaches
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -165,23 +166,23 @@ viewErrorMessage message =
             text ""
 
 
-viewCoaches : List Coach -> Html Msg
-viewCoaches coaches =
+viewCoaches : Session -> List Coach -> Html Msg
+viewCoaches session coaches =
     div []
-        [ viewHeader
+        [ viewHeader session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader
             , tbody [] <|
-                List.map viewCoach coaches
+                List.map (viewCoach session) coaches
             ]
         ]
 
 
-viewHeader : Html Msg
-viewHeader =
+viewHeader : Session -> Html Msg
+viewHeader session =
     div Custom.Attributes.row
         [ div [ Custom.Attributes.col ] [ h3 [] [ text "Coaches" ] ]
-        , div [ Custom.Attributes.col ] [ viewToolBar ]
+        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
         ]
 
 
@@ -210,15 +211,16 @@ viewTableHeader =
         ]
 
 
-viewCoach : Coach -> Html Msg
-viewCoach coach =
+viewCoach : Session -> Coach -> Html Msg
+viewCoach session coach =
     tr []
         [ td []
             [ text coach.name ]
         , td []
             [ text <| String.fromInt coach.elo ]
-        , td [ Custom.Attributes.tableButtonColumn 2 ]
-            [ viewEditButton coach, viewDeleteButton coach ]
+        , requiresAuth session <|
+            td [ Custom.Attributes.tableButtonColumn 2 ]
+                [ viewEditButton coach, viewDeleteButton coach ]
         ]
 
 
