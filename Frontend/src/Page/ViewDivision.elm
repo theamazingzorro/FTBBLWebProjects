@@ -1,6 +1,5 @@
 module Page.ViewDivision exposing (Model, Msg, init, update, view)
 
-import Model.Division exposing (DivisionId)
 import Api
 import Auth exposing (requiresAuth)
 import Custom.Attributes
@@ -10,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
+import Model.Division exposing (Division, DivisionId, divisionDecoder)
 import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
@@ -23,6 +23,7 @@ import Url exposing (Protocol(..))
 
 type alias Model =
     { teams : WebData (List Team)
+    , division : WebData Division
     , divisionId : DivisionId
     , session : Session
     , deleteError : Maybe String
@@ -30,8 +31,9 @@ type alias Model =
 
 
 type Msg
-    = FetchTeams
+    = RefreshButtonClick
     | TeamsReceived (WebData (List Team))
+    | DivisionReceived (WebData Division)
     | AddTeamButtonClick
     | DeleteTeamButtonClick TeamId
     | EditTeamButtonClick TeamId
@@ -45,11 +47,15 @@ type Msg
 init : Session -> DivisionId -> ( Model, Cmd Msg )
 init session id =
     ( { teams = RemoteData.Loading
+      , division = RemoteData.Loading
       , session = session
       , deleteError = Nothing
       , divisionId = id
       }
-    , getTeamsInDivRequest id
+    , Cmd.batch
+        [ getTeamsInDivRequest session.token id
+        , getDivisionRequest session.token id
+        ]
     )
 
 
@@ -60,23 +66,34 @@ init session id =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        FetchTeams ->
-            ( { model | teams = RemoteData.Loading }, getTeamsInDivRequest model.divisionId )
+        RefreshButtonClick ->
+            ( { model
+                | teams = RemoteData.Loading
+                , division = RemoteData.Loading
+              }
+            , Cmd.batch
+                [ getTeamsInDivRequest model.session.token model.divisionId
+                , getDivisionRequest model.session.token model.divisionId
+                ]
+            )
 
         TeamsReceived response ->
             ( { model | teams = response }, Cmd.none )
 
+        DivisionReceived response ->
+            ( { model | division = response }, Cmd.none )
+
         AddTeamButtonClick ->
-            ( model, pushUrl model.session.navkey Route.AddTeam )
+            ( model, pushUrl model.session.navkey <| Route.AddTeamToDivision model.divisionId )
 
         EditTeamButtonClick id ->
             ( model, pushUrl model.session.navkey <| Route.EditTeam id )
 
         DeleteTeamButtonClick id ->
-            ( model, deleteTeamRequest id )
+            ( model, deleteTeamRequest model.session.token id )
 
         TeamDeleted (Ok res) ->
-            ( { model | deleteError = buildDeleteError res }, getTeamsInDivRequest model.divisionId )
+            ( { model | deleteError = buildDeleteError res }, getTeamsInDivRequest model.session.token model.divisionId )
 
         TeamDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
@@ -95,15 +112,21 @@ buildDeleteError res =
 -- API Requests --
 
 
-getTeamsInDivRequest : DivisionId -> Cmd Msg
-getTeamsInDivRequest divId =
-    Api.getRequest (Api.TeamsInDiv divId) <|
+getTeamsInDivRequest : Maybe String -> DivisionId -> Cmd Msg
+getTeamsInDivRequest token divId =
+    Api.getRequest token (Api.TeamsInDiv divId) <|
         Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
 
 
-deleteTeamRequest : TeamId -> Cmd Msg
-deleteTeamRequest id =
-    Api.deleteRequest (Api.Team id) <|
+getDivisionRequest : Maybe String -> DivisionId -> Cmd Msg
+getDivisionRequest token divId =
+    Api.getRequest token (Api.Division divId) <|
+        Http.expectJson (RemoteData.fromResult >> DivisionReceived) divisionDecoder
+
+
+deleteTeamRequest : Maybe String -> TeamId -> Cmd Msg
+deleteTeamRequest token id =
+    Api.deleteRequest token (Api.Team id) <|
         Http.expectJson TeamDeleted deleteResponseDecoder
 
 
@@ -124,10 +147,10 @@ viewRefreshButton : Html Msg
 viewRefreshButton =
     div [ Custom.Attributes.col ]
         [ button
-            [ onClick FetchTeams
+            [ onClick RefreshButtonClick
             , Custom.Attributes.refreshButton
             ]
-            [ text "Refresh Teams" ]
+            [ text "Refresh Page" ]
         ]
 
 
@@ -141,7 +164,7 @@ viewTeamsOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success teams ->
-            viewTeams model.session teams
+            viewTeams model teams
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -170,22 +193,41 @@ viewErrorMessage message =
             text ""
 
 
-viewTeams : Session -> List Team -> Html Msg
-viewTeams session teams =
+viewTeams : Model -> List Team -> Html Msg
+viewTeams model teams =
     div []
-        [ viewHeader session
+        [ viewHeaderOrError model.division model.session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader
             , tbody [] <|
-                List.map (viewTeam session) teams
+                List.map (viewTeam model.session) teams
             ]
         ]
 
 
-viewHeader : Session -> Html Msg
-viewHeader session =
+viewHeaderOrError : WebData Division -> Session -> Html Msg
+viewHeaderOrError data session =
+    case data of
+        RemoteData.NotAsked ->
+            text ""
+
+        RemoteData.Loading ->
+            viewHeader "Loading..." "" session
+
+        RemoteData.Success division ->
+            viewHeader division.name ("Season " ++ String.fromInt division.season) session
+
+        RemoteData.Failure httpError ->
+            viewHeader (Error.buildErrorMessage httpError) "" session
+
+
+viewHeader : String -> String -> Session -> Html Msg
+viewHeader title subtitle session =
     div Custom.Attributes.row
-        [ div [ Custom.Attributes.col ] [ h3 [] [ text "Teams" ] ]
+        [ div [ Custom.Attributes.col ]
+            [ h3 [] [ text title ]
+            , h6 [] [ text subtitle ]
+            ]
         , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
         ]
 
@@ -197,7 +239,7 @@ viewToolBar =
             [ Custom.Attributes.addButton
             , onClick AddTeamButtonClick
             ]
-            [ text "Add Team" ]
+            [ text "Add Team to Div" ]
         ]
 
 

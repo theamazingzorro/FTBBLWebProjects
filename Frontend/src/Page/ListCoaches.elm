@@ -45,7 +45,7 @@ init session =
       , session = session
       , deleteError = Nothing
       }
-    , getCoachesRequest
+    , getCoachesRequest session.token
     )
 
 
@@ -57,7 +57,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FetchCoaches ->
-            ( { model | coaches = RemoteData.Loading }, getCoachesRequest )
+            ( { model | coaches = RemoteData.Loading }, getCoachesRequest model.session.token )
 
         CoachesRecieved response ->
             ( { model | coaches = response }, Cmd.none )
@@ -69,10 +69,10 @@ update msg model =
             ( model, pushUrl model.session.navkey <| Route.EditCoach id )
 
         DeleteCoachButtonClick id ->
-            ( model, deleteCoachRequest id )
+            ( model, deleteCoachRequest model.session.token id )
 
         CoachDeleted (Ok res) ->
-            ( { model | deleteError = buildDeleteError res }, getCoachesRequest )
+            ( { model | deleteError = buildDeleteError res }, getCoachesRequest model.session.token  )
 
         CoachDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
@@ -91,15 +91,15 @@ buildDeleteError res =
 -- API Requests --
 
 
-getCoachesRequest : Cmd Msg
-getCoachesRequest =
-    Api.getRequest Api.Coaches <|
+getCoachesRequest : Maybe String -> Cmd Msg
+getCoachesRequest token =
+    Api.getRequest token Api.Coaches <|
         Http.expectJson (RemoteData.fromResult >> CoachesRecieved) coachsDecoder
 
 
-deleteCoachRequest : CoachId -> Cmd Msg
-deleteCoachRequest id =
-    Api.deleteRequest (Api.Coach id) <|
+deleteCoachRequest : Maybe String -> CoachId -> Cmd Msg
+deleteCoachRequest token id =
+    Api.deleteRequest token (Api.Coach id) <|
         Http.expectJson CoachDeleted deleteResponseDecoder
 
 

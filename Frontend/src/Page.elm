@@ -6,6 +6,7 @@ import Model.Session exposing (Session)
 import Page.AddCoach as AddCoach
 import Page.AddDivision as AddDivision
 import Page.AddTeam as AddTeam
+import Page.AddTeamToDiv as AddTeamToDiv
 import Page.EditCoach as EditCoach
 import Page.EditDivision as EditDivision
 import Page.EditTeam as EditTeam
@@ -34,6 +35,7 @@ type Model
     | AddDivisionPage AddDivision.Model
     | EditDivisionPage EditDivision.Model
     | ViewDivisionPage ViewDivision.Model
+    | AddTeamToDivPage AddTeamToDiv.Model
 
 
 type Msg
@@ -48,6 +50,7 @@ type Msg
     | AddDivisionPageMsg AddDivision.Msg
     | EditDivisionPageMsg EditDivision.Msg
     | ViewDivisionPageMsg ViewDivision.Msg
+    | AddTeamToDivPageMsg AddTeamToDiv.Msg
 
 
 type OutMsg
@@ -118,6 +121,11 @@ init session route =
         Route.ViewDivision id ->
             ViewDivision.init session id
                 |> wrapInitWith ViewDivisionPage ViewDivisionPageMsg
+
+        Route.AddTeamToDivision id ->
+            AddTeamToDiv.init session id
+                |> wrapInitWith AddTeamToDivPage AddTeamToDivPageMsg
+                |> requiresAuth session
 
 
 
@@ -198,6 +206,14 @@ update msg model =
                 |> wrapUpdateWith EditDivisionPage EditDivisionPageMsg
 
         ( EditDivisionPageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
+        {- Other -}
+        ( AddTeamToDivPageMsg subMsg, AddTeamToDivPage pageModel ) ->
+            AddTeamToDiv.update subMsg pageModel
+                |> wrapUpdateWith AddTeamToDivPage AddTeamToDivPageMsg
+
+        ( AddTeamToDivPageMsg _, _ ) ->
             ( model, Cmd.none, Nothing )
 
         ( ViewDivisionPageMsg subMsg, ViewDivisionPage pageModel ) ->
@@ -306,6 +322,10 @@ view model =
         ViewDivisionPage pageModel ->
             ViewDivision.view pageModel
                 |> Html.map ViewDivisionPageMsg
+
+        AddTeamToDivPage pageModel ->
+            AddTeamToDiv.view pageModel
+                |> Html.map AddTeamToDivPageMsg
 
 
 notFoundView : Html msg

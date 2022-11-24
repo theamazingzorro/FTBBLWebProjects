@@ -46,7 +46,7 @@ init session =
       , session = session
       , deleteError = Nothing
       }
-    , getTeamsRequest
+    , getTeamsRequest session.token
     )
 
 
@@ -58,7 +58,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FetchTeams ->
-            ( { model | teams = RemoteData.Loading }, getTeamsRequest )
+            ( { model | teams = RemoteData.Loading }, getTeamsRequest model.session.token)
 
         TeamsReceived response ->
             ( { model | teams = response }, Cmd.none )
@@ -70,10 +70,10 @@ update msg model =
             ( model, pushUrl model.session.navkey <| Route.EditTeam id )
 
         DeleteTeamButtonClick id ->
-            ( model, deleteTeamRequest id )
+            ( model, deleteTeamRequest model.session.token id )
 
         TeamDeleted (Ok res) ->
-            ( { model | deleteError = buildDeleteError res }, getTeamsRequest )
+            ( { model | deleteError = buildDeleteError res }, getTeamsRequest model.session.token )
 
         TeamDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
@@ -92,15 +92,15 @@ buildDeleteError res =
 -- API Requests --
 
 
-getTeamsRequest : Cmd Msg
-getTeamsRequest =
-    Api.getRequest Api.Teams <|
+getTeamsRequest : Maybe String -> Cmd Msg
+getTeamsRequest token=
+    Api.getRequest token Api.Teams <|
         Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
 
 
-deleteTeamRequest : TeamId -> Cmd Msg
-deleteTeamRequest id =
-    Api.deleteRequest (Api.Team id) <|
+deleteTeamRequest : Maybe String -> TeamId -> Cmd Msg
+deleteTeamRequest token id =
+    Api.deleteRequest token (Api.Team id) <|
         Http.expectJson TeamDeleted deleteResponseDecoder
 
 

@@ -56,8 +56,8 @@ let webApp =
 
                         routex "/div(/?)" >=> DivisionHandler.postDivision
 
-                        routef "team/updatediv/%i/%i" TeamHandler.updateDiv
-                        routef "team/updatediv/%i/%i/" TeamHandler.updateDiv
+                        routef "/team/updatediv/%i/%i" TeamHandler.updateDiv
+                        routef "/team/updatediv/%i/%i/" TeamHandler.updateDiv
                     ]
                 ]
                 PUT >=> Auth.enticate >=> choose [

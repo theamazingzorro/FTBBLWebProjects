@@ -33,6 +33,7 @@ type Msg
     | EditDivisionButtonClick DivisionId
     | DeleteDivisionButtonClick DivisionId
     | DivisionDeleted (Result Http.Error DeleteResponse)
+    | ViewDivisionButtonClick DivisionId
 
 
 
@@ -45,7 +46,7 @@ init session =
       , session = session
       , deleteError = Nothing
       }
-    , getDivisionsRequest
+    , getDivisionsRequest session.token
     )
 
 
@@ -57,7 +58,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FetchDivisions ->
-            ( { model | divisions = RemoteData.Loading }, getDivisionsRequest )
+            ( { model | divisions = RemoteData.Loading }, getDivisionsRequest model.session.token)
 
         DivisionsRecieved response ->
             ( { model | divisions = response }, Cmd.none )
@@ -68,11 +69,14 @@ update msg model =
         EditDivisionButtonClick id ->
             ( model, pushUrl model.session.navkey <| Route.EditDivision id )
 
+        ViewDivisionButtonClick id ->
+            ( model, pushUrl model.session.navkey <| Route.ViewDivision id )
+
         DeleteDivisionButtonClick id ->
-            ( model, deleteDivisionRequest id )
+            ( model, deleteDivisionRequest model.session.token id )
 
         DivisionDeleted (Ok res) ->
-            ( { model | deleteError = buildDeleteError res }, getDivisionsRequest )
+            ( { model | deleteError = buildDeleteError res }, getDivisionsRequest model.session.token)
 
         DivisionDeleted (Err err) ->
             ( { model | deleteError = Just (Error.buildErrorMessage err) }, Cmd.none )
@@ -91,15 +95,15 @@ buildDeleteError res =
 -- API Requests --
 
 
-getDivisionsRequest : Cmd Msg
-getDivisionsRequest =
-    Api.getRequest Api.Divisions <|
+getDivisionsRequest : Maybe String -> Cmd Msg
+getDivisionsRequest token=
+    Api.getRequest token Api.Divisions <|
         Http.expectJson (RemoteData.fromResult >> DivisionsRecieved) divisionsDecoder
 
 
-deleteDivisionRequest : DivisionId -> Cmd Msg
-deleteDivisionRequest id =
-    Api.deleteRequest (Api.Division id) <|
+deleteDivisionRequest : Maybe String -> DivisionId -> Cmd Msg
+deleteDivisionRequest token id =
+    Api.deleteRequest token (Api.Division id) <|
         Http.expectJson DivisionDeleted deleteResponseDecoder
 
 
@@ -214,7 +218,7 @@ viewTableHeader =
 viewDivision : Session -> Division -> Html Msg
 viewDivision session division =
     tr []
-        [ td []
+        [ td [ class "btn-link", onClick <| ViewDivisionButtonClick division.id ]
             [ text division.name ]
         , td []
             [ text <| String.fromInt division.season ]

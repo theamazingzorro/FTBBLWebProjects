@@ -29,9 +29,7 @@ type alias Model =
 
 
 type Msg
-    = FetchRaces
-    | RacesRecieved (WebData (List Race))
-    | FetchCoaches
+    = RacesRecieved (WebData (List Race))
     | CoachesReceived (WebData (List Coach))
     | NameChanged String
     | RaceSelected String
@@ -52,7 +50,7 @@ init session =
       , coachOptions = RemoteData.Loading
       , submitError = Nothing
       }
-    , Cmd.batch [ getRacesRequest, getCoachesRequest ]
+    , Cmd.batch [ getRacesRequest session.token, getCoachesRequest session.token ]
     )
 
 
@@ -63,14 +61,8 @@ init session =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        FetchRaces ->
-            ( { model | raceOptions = RemoteData.Loading }, getRacesRequest )
-
         RacesRecieved response ->
             ( { model | raceOptions = response }, Cmd.none )
-
-        FetchCoaches ->
-            ( { model | coachOptions = RemoteData.Loading }, getCoachesRequest )
 
         CoachesReceived response ->
             ( { model | coachOptions = response }, Cmd.none )
@@ -113,7 +105,7 @@ update msg model =
             ( { model | team = changeCoach model.team }, Cmd.none )
 
         Submit ->
-            ( model, submitTeam model.team )
+            ( model, submitTeam model.session.token model.team )
 
         TeamSubmitted (Ok _) ->
             ( { model | team = defaultTeam, submitError = Nothing }, Cmd.none )
@@ -133,23 +125,23 @@ searchByIdString idString stringFromId defaultVal list =
 -- API Requests --
 
 
-submitTeam : Team -> Cmd Msg
-submitTeam team =
-    Api.postRequest Api.Teams
+submitTeam : Maybe String -> Team -> Cmd Msg
+submitTeam token team =
+    Api.postRequest token Api.Teams
         (Http.jsonBody (newTeamEncoder team))
     <|
         Http.expectJson TeamSubmitted teamDecoder
 
 
-getRacesRequest : Cmd Msg
-getRacesRequest =
-    Api.getRequest Api.Races <|
+getRacesRequest : Maybe String -> Cmd Msg
+getRacesRequest token =
+    Api.getRequest token Api.Races <|
         Http.expectJson (RemoteData.fromResult >> RacesRecieved) racesDecoder
 
 
-getCoachesRequest : Cmd Msg
-getCoachesRequest =
-    Api.getRequest Api.Coaches <|
+getCoachesRequest : Maybe String -> Cmd Msg
+getCoachesRequest token =
+    Api.getRequest token Api.Coaches <|
         Http.expectJson (RemoteData.fromResult >> CoachesReceived) coachsDecoder
 
 
