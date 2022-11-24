@@ -18,6 +18,7 @@ type Endpoint
     | Divisions
     | Division DivisionId
     | Signin
+    | TeamsInDiv DivisionId
 
 
 baseUrl : String
@@ -54,6 +55,9 @@ stringOf endpoint =
 
         Signin ->
             "signin"
+
+        TeamsInDiv index ->
+            "team/bydiv/" ++ Div.idToString index
 
 
 urlOf : Endpoint -> String

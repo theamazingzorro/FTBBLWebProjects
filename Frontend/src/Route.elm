@@ -21,6 +21,7 @@ type Route
     | AddDivision
     | EditDivision DivisionId
     | Signin
+    | ViewDivision DivisionId
 
 
 parseUrl : Url -> Route
@@ -77,6 +78,13 @@ matchRoute =
                 [ s "Coach" </> s "Edit" </> Coach.idParser
                 , s "coach" </> s "edit" </> Coach.idParser
                 ]
+
+        {- More Complex Views -}
+        , map ViewDivision <|
+            oneOf
+                [ s "Division" </> s "View" </> Div.idParser
+                , s "division" </> s "view" </> Div.idParser
+                ]
         ]
 
 
@@ -124,3 +132,6 @@ routeToString route =
 
         EditDivision divisionId ->
             "/Division/Edit/" ++ Div.idToString divisionId
+
+        ViewDivision divisionId ->
+            "/Division/View/" ++ Div.idToString divisionId
