@@ -25,6 +25,18 @@ module TeamHandler =
             }
 
 
+    let getTeamsByDiv (divId : int) : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+                logger.LogInformation $"Getting Teams for division: div id={divId}"
+                
+                let teams = TeamRepository.getByDiv divId
+
+                return! json teams next ctx
+            }
+
+
     let getTeam (id : int) : HttpHandler =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {

@@ -29,6 +29,9 @@ let webApp =
                     routef "/team/%i" TeamHandler.getTeam
                     routef "/team/%i/" TeamHandler.getTeam
 
+                    routef "/team/bydiv/%i" TeamHandler.getTeamsByDiv
+                    routef "/team/bydiv/%i/" TeamHandler.getTeamsByDiv
+
                     routex "/race(/?)" >=> RaceHandler.getRaces
                     routef "/race/%i" RaceHandler.getRace
                     routef "/race/%i/" RaceHandler.getRace
