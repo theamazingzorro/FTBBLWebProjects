@@ -122,7 +122,8 @@ getDivisionRequest token id =
 
 saveDivision : Maybe String -> Division -> Cmd Msg
 saveDivision token division =
-    Api.putRequest token (Api.Division division.id)
+    Api.putRequest token
+        (Api.Division division.id)
         (Http.jsonBody (divisionEncoder division))
     <|
         Http.expectJson DivisionSubmitted divisionDecoder

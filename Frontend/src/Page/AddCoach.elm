@@ -73,7 +73,8 @@ update msg model =
 
 submitCoach : Maybe String -> Coach -> Cmd Msg
 submitCoach token coach =
-    Api.postRequest token Api.Coaches
+    Api.postRequest token
+        Api.Coaches
         (Http.jsonBody (newCoachEncoder coach))
     <|
         Http.expectJson CoachSubmitted coachDecoder

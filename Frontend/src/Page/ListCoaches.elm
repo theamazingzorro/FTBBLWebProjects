@@ -72,7 +72,7 @@ update msg model =
             ( model, deleteCoachRequest model.session.token id )
 
         CoachDeleted (Ok res) ->
-            ( { model | deleteError = buildDeleteError res }, getCoachesRequest model.session.token  )
+            ( { model | deleteError = buildDeleteError res }, getCoachesRequest model.session.token )
 
         CoachDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )

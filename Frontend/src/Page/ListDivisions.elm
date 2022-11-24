@@ -58,7 +58,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FetchDivisions ->
-            ( { model | divisions = RemoteData.Loading }, getDivisionsRequest model.session.token)
+            ( { model | divisions = RemoteData.Loading }, getDivisionsRequest model.session.token )
 
         DivisionsRecieved response ->
             ( { model | divisions = response }, Cmd.none )
@@ -76,7 +76,7 @@ update msg model =
             ( model, deleteDivisionRequest model.session.token id )
 
         DivisionDeleted (Ok res) ->
-            ( { model | deleteError = buildDeleteError res }, getDivisionsRequest model.session.token)
+            ( { model | deleteError = buildDeleteError res }, getDivisionsRequest model.session.token )
 
         DivisionDeleted (Err err) ->
             ( { model | deleteError = Just (Error.buildErrorMessage err) }, Cmd.none )
@@ -96,7 +96,7 @@ buildDeleteError res =
 
 
 getDivisionsRequest : Maybe String -> Cmd Msg
-getDivisionsRequest token=
+getDivisionsRequest token =
     Api.getRequest token Api.Divisions <|
         Http.expectJson (RemoteData.fromResult >> DivisionsRecieved) divisionsDecoder
 

@@ -108,7 +108,8 @@ getTeamRequest token id =
 
 saveTeam : Maybe String -> Team -> Cmd Msg
 saveTeam token team =
-    Api.putRequest token (Api.Team team.id)
+    Api.putRequest token
+        (Api.Team team.id)
         (Http.jsonBody (teamEncoder team))
     <|
         Http.expectJson TeamSubmitted teamDecoder

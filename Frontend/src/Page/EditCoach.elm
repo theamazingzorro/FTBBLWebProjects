@@ -103,7 +103,8 @@ getCoachRequest token id =
 
 saveCoach : Maybe String -> Coach -> Cmd Msg
 saveCoach token coach =
-    Api.putRequest token (Api.Coach coach.id)
+    Api.putRequest token
+        (Api.Coach coach.id)
         (Http.jsonBody (coachEncoder coach))
     <|
         Http.expectJson CoachSubmitted coachDecoder

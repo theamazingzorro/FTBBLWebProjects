@@ -91,7 +91,8 @@ update msg model =
 
 signinAttempt : Maybe String -> UserPassword -> Cmd Msg
 signinAttempt token userPassword =
-    Api.postRequest token Api.Signin
+    Api.postRequest token
+        Api.Signin
         (Http.jsonBody (userPasswordEncoder userPassword))
     <|
         Http.expectString Submitted

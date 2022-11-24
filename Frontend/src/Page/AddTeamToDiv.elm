@@ -84,7 +84,7 @@ update msg model =
             ( { model | selectedTeamId = newTeamId }, Cmd.none )
 
         Submit ->
-            ( { model | selectedTeamId = Nothing },  trySubmit model.session.token model.selectedTeamId model.divisionId)
+            ( { model | selectedTeamId = Nothing }, trySubmit model.session.token model.selectedTeamId model.divisionId )
 
         TeamDivSubmitted (Ok _) ->
             ( { model | saveError = Nothing }, pushUrl model.session.navkey <| Route.ViewDivision model.divisionId )
@@ -92,14 +92,17 @@ update msg model =
         TeamDivSubmitted (Err err) ->
             ( { model | saveError = Just (buildErrorMessage err) }, Cmd.none )
 
+
 trySubmit : Maybe String -> Maybe TeamId -> DivisionId -> Cmd Msg
-trySubmit token maybeTeamId divId = 
+trySubmit token maybeTeamId divId =
     case maybeTeamId of
         Just teamId ->
             addTeamToDiv token teamId divId
 
         Nothing ->
             Cmd.none
+
+
 
 -- API Requests --
 

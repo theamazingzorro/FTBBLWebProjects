@@ -127,7 +127,8 @@ searchByIdString idString stringFromId defaultVal list =
 
 submitTeam : Maybe String -> Team -> Cmd Msg
 submitTeam token team =
-    Api.postRequest token Api.Teams
+    Api.postRequest token
+        Api.Teams
         (Http.jsonBody (newTeamEncoder team))
     <|
         Http.expectJson TeamSubmitted teamDecoder

@@ -80,7 +80,8 @@ update msg model =
 
 submitDivision : Maybe String -> Division -> Cmd Msg
 submitDivision token div =
-    Api.postRequest token Api.Divisions
+    Api.postRequest token
+        Api.Divisions
         (Http.jsonBody (newDivisionEncoder div))
     <|
         Http.expectJson DivisionSubmitted divisionDecoder

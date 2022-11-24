@@ -58,7 +58,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FetchTeams ->
-            ( { model | teams = RemoteData.Loading }, getTeamsRequest model.session.token)
+            ( { model | teams = RemoteData.Loading }, getTeamsRequest model.session.token )
 
         TeamsReceived response ->
             ( { model | teams = response }, Cmd.none )
@@ -93,7 +93,7 @@ buildDeleteError res =
 
 
 getTeamsRequest : Maybe String -> Cmd Msg
-getTeamsRequest token=
+getTeamsRequest token =
     Api.getRequest token Api.Teams <|
         Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
 
