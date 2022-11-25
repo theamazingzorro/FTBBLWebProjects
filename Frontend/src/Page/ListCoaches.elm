@@ -37,6 +37,7 @@ type Msg
     | NameSortClick
     | EloSortClick
 
+
 type SortingMethod
     = None
     | Name
@@ -44,13 +45,15 @@ type SortingMethod
     | Elo
     | EloDesc
 
+
+
 -- Init --
 
 
 init : Session -> ( Model, Cmd Msg )
 init session =
     ( { coaches = RemoteData.Loading
-    ,sortingMethod = None
+      , sortingMethod = None
       , session = session
       , deleteError = Nothing
       }
@@ -85,7 +88,7 @@ update msg model =
 
         CoachDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
-                    
+
         NameSortClick ->
             ( { model | sortingMethod = newSort Name NameDesc model.sortingMethod }, Cmd.none )
 
@@ -126,6 +129,8 @@ deleteCoachRequest token id =
     Api.deleteRequest token (Api.Coach id) <|
         Http.expectJson CoachDeleted deleteResponseDecoder
 
+
+
 -- Helper Functions --
 
 
@@ -146,6 +151,8 @@ sortedCoaches sortingMethod coaches =
 
         EloDesc ->
             List.sortWith (\a b -> compare b.elo a.elo) coaches
+
+
 
 -- View --
 
@@ -216,7 +223,8 @@ viewCoaches session sortMethod coaches =
         , table [ Custom.Attributes.table ]
             [ viewTableHeader sortMethod
             , tbody [] <|
-                List.map (viewCoach session) <| sortedCoaches sortMethod coaches
+                List.map (viewCoach session) <|
+                    sortedCoaches sortMethod coaches
             ]
         ]
 

@@ -46,13 +46,15 @@ type SortingMethod
     | Season
     | SeasonDesc
 
+
+
 -- Init --
 
 
 init : Session -> ( Model, Cmd Msg )
 init session =
     ( { divisions = RemoteData.Loading
-        , sortingMethod = None
+      , sortingMethod = None
       , session = session
       , deleteError = Nothing
       }
@@ -105,6 +107,7 @@ newSort default alt oldSort =
 
     else
         default
+
 
 buildDeleteError : DeleteResponse -> Maybe String
 buildDeleteError res =
@@ -224,7 +227,8 @@ viewDivisions session sortMethod divisions =
         , table [ Custom.Attributes.table ]
             [ viewTableHeader sortMethod
             , tbody [] <|
-                List.map (viewDivision session) <| sortedDivs sortMethod divisions
+                List.map (viewDivision session) <|
+                    sortedDivs sortMethod divisions
             ]
         ]
 

@@ -64,7 +64,7 @@ type SortingMethod
 init : Session -> DivisionId -> ( Model, Cmd Msg )
 init session id =
     ( { teams = RemoteData.Loading
-    , sortingMethod = None
+      , sortingMethod = None
       , division = RemoteData.Loading
       , session = session
       , deleteError = Nothing
@@ -204,6 +204,7 @@ sortedTeams sortingMethod teams =
             List.sortWith (\a b -> compare b.elo a.elo) teams
 
 
+
 -- View --
 
 
@@ -273,7 +274,8 @@ viewTeams model teams =
         , table [ Custom.Attributes.table ]
             [ viewTableHeader model.sortingMethod
             , tbody [] <|
-                List.map (viewTeam model.session) <| sortedTeams model.sortingMethod teams
+                List.map (viewTeam model.session) <|
+                    sortedTeams model.sortingMethod teams
             ]
         ]
 
