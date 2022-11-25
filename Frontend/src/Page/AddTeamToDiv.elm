@@ -1,7 +1,6 @@
 module Page.AddTeamToDiv exposing (Model, Msg, init, update, view)
 
 import Api
-import Auth exposing (requiresAuth)
 import Custom.Attributes
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
