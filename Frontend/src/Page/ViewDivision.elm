@@ -23,6 +23,7 @@ import Url exposing (Protocol(..))
 
 type alias Model =
     { teams : WebData (List Team)
+    , sortingMethod : SortingMethod
     , division : WebData Division
     , divisionId : DivisionId
     , session : Session
@@ -38,6 +39,22 @@ type Msg
     | DeleteTeamButtonClick TeamId
     | EditTeamButtonClick TeamId
     | TeamDeleted (Result Http.Error DeleteResponse)
+    | NameSortClick
+    | RaceSortClick
+    | CoachSortClick
+    | EloSortClick
+
+
+type SortingMethod
+    = None
+    | Name
+    | NameDesc
+    | Race
+    | RaceDesc
+    | Coach
+    | CoachDesc
+    | Elo
+    | EloDesc
 
 
 
@@ -47,6 +64,7 @@ type Msg
 init : Session -> DivisionId -> ( Model, Cmd Msg )
 init session id =
     ( { teams = RemoteData.Loading
+    , sortingMethod = None
       , division = RemoteData.Loading
       , session = session
       , deleteError = Nothing
@@ -98,6 +116,27 @@ update msg model =
         TeamDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
 
+        NameSortClick ->
+            ( { model | sortingMethod = newSort Name NameDesc model.sortingMethod }, Cmd.none )
+
+        RaceSortClick ->
+            ( { model | sortingMethod = newSort Race RaceDesc model.sortingMethod }, Cmd.none )
+
+        CoachSortClick ->
+            ( { model | sortingMethod = newSort Coach CoachDesc model.sortingMethod }, Cmd.none )
+
+        EloSortClick ->
+            ( { model | sortingMethod = newSort Elo EloDesc model.sortingMethod }, Cmd.none )
+
+
+newSort : SortingMethod -> SortingMethod -> SortingMethod -> SortingMethod
+newSort default alt oldSort =
+    if oldSort == default then
+        alt
+
+    else
+        default
+
 
 buildDeleteError : DeleteResponse -> Maybe String
 buildDeleteError res =
@@ -129,6 +168,40 @@ deleteTeamRequest token id =
     Api.deleteRequest token (Api.Team id) <|
         Http.expectJson TeamDeleted deleteResponseDecoder
 
+
+
+-- Helper Functions --
+
+
+sortedTeams : SortingMethod -> List Team -> List Team
+sortedTeams sortingMethod teams =
+    case sortingMethod of
+        None ->
+            teams
+
+        Name ->
+            List.sortWith (\a b -> compare a.name b.name) teams
+
+        NameDesc ->
+            List.sortWith (\a b -> compare b.name a.name) teams
+
+        Coach ->
+            List.sortWith (\a b -> compare a.coach.name b.coach.name) teams
+
+        CoachDesc ->
+            List.sortWith (\a b -> compare b.coach.name a.coach.name) teams
+
+        Race ->
+            List.sortWith (\a b -> compare a.race.name b.race.name) teams
+
+        RaceDesc ->
+            List.sortWith (\a b -> compare b.race.name a.race.name) teams
+
+        Elo ->
+            List.sortWith (\a b -> compare a.elo b.elo) teams
+
+        EloDesc ->
+            List.sortWith (\a b -> compare b.elo a.elo) teams
 
 
 -- View --
@@ -198,9 +271,9 @@ viewTeams model teams =
     div []
         [ viewHeaderOrError model.division model.session
         , table [ Custom.Attributes.table ]
-            [ viewTableHeader
+            [ viewTableHeader model.sortingMethod
             , tbody [] <|
-                List.map (viewTeam model.session) teams
+                List.map (viewTeam model.session) <| sortedTeams model.sortingMethod teams
             ]
         ]
 
@@ -243,18 +316,54 @@ viewToolBar =
         ]
 
 
-viewTableHeader : Html Msg
-viewTableHeader =
+viewTableHeader : SortingMethod -> Html Msg
+viewTableHeader sortMethod =
     thead []
         [ tr []
-            [ th [ scope "col" ]
-                [ text "Name" ]
-            , th [ scope "col" ]
-                [ text "Race" ]
-            , th [ scope "col" ]
-                [ text "Coach" ]
-            , th [ scope "col" ]
-                [ text "Elo" ]
+            [ th [ scope "col", onClick NameSortClick ]
+                [ case sortMethod of
+                    Name ->
+                        text "Name ▲"
+
+                    NameDesc ->
+                        text "Name ▼"
+
+                    _ ->
+                        text "Name"
+                ]
+            , th [ scope "col", onClick RaceSortClick ]
+                [ case sortMethod of
+                    Race ->
+                        text "Race ▲"
+
+                    RaceDesc ->
+                        text "Race ▼"
+
+                    _ ->
+                        text "Race"
+                ]
+            , th [ scope "col", onClick CoachSortClick ]
+                [ case sortMethod of
+                    Coach ->
+                        text "Coach ▲"
+
+                    CoachDesc ->
+                        text "Coach ▼"
+
+                    _ ->
+                        text "Coach"
+                ]
+            , th [ scope "col", onClick EloSortClick ]
+                [ case sortMethod of
+                    Elo ->
+                        text "Elo ▲"
+
+                    EloDesc ->
+                        text "Elo ▼"
+
+                    _ ->
+                        text "Elo"
+                ]
             , th [ scope "col" ]
                 [ text "" ]
             ]
