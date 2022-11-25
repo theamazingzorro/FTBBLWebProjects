@@ -21,6 +21,7 @@ import Route exposing (pushUrl)
 
 type alias Model =
     { divisions : WebData (List Division)
+    , sortingMethod : SortingMethod
     , session : Session
     , deleteError : Maybe String
     }
@@ -34,6 +35,16 @@ type Msg
     | DeleteDivisionButtonClick DivisionId
     | DivisionDeleted (Result Http.Error DeleteResponse)
     | ViewDivisionButtonClick DivisionId
+    | NameSortClick
+    | SeasonSortClick
+
+
+type SortingMethod
+    = None
+    | Name
+    | NameDesc
+    | Season
+    | SeasonDesc
 
 
 
@@ -43,6 +54,7 @@ type Msg
 init : Session -> ( Model, Cmd Msg )
 init session =
     ( { divisions = RemoteData.Loading
+      , sortingMethod = None
       , session = session
       , deleteError = Nothing
       }
@@ -81,6 +93,21 @@ update msg model =
         DivisionDeleted (Err err) ->
             ( { model | deleteError = Just (Error.buildErrorMessage err) }, Cmd.none )
 
+        NameSortClick ->
+            ( { model | sortingMethod = newSort Name NameDesc model.sortingMethod }, Cmd.none )
+
+        SeasonSortClick ->
+            ( { model | sortingMethod = newSort Season SeasonDesc model.sortingMethod }, Cmd.none )
+
+
+newSort : SortingMethod -> SortingMethod -> SortingMethod -> SortingMethod
+newSort default alt oldSort =
+    if oldSort == default then
+        alt
+
+    else
+        default
+
 
 buildDeleteError : DeleteResponse -> Maybe String
 buildDeleteError res =
@@ -105,6 +132,29 @@ deleteDivisionRequest : Maybe String -> DivisionId -> Cmd Msg
 deleteDivisionRequest token id =
     Api.deleteRequest token (Api.Division id) <|
         Http.expectJson DivisionDeleted deleteResponseDecoder
+
+
+
+-- Helper Functions --
+
+
+sortedDivs : SortingMethod -> List Division -> List Division
+sortedDivs sortingMethod divs =
+    case sortingMethod of
+        None ->
+            List.sortWith (\a b -> compare b.season a.season) divs
+
+        Name ->
+            List.sortWith (\a b -> compare a.name b.name) divs
+
+        NameDesc ->
+            List.sortWith (\a b -> compare b.name a.name) divs
+
+        Season ->
+            List.sortWith (\a b -> compare a.season b.season) divs
+
+        SeasonDesc ->
+            List.sortWith (\a b -> compare b.season a.season) divs
 
 
 
@@ -141,7 +191,7 @@ viewDivisionsOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success divisions ->
-            viewDivisions model.session divisions
+            viewDivisions model.session model.sortingMethod divisions
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -170,14 +220,15 @@ viewErrorMessage message =
             text ""
 
 
-viewDivisions : Session -> List Division -> Html Msg
-viewDivisions session divisions =
+viewDivisions : Session -> SortingMethod -> List Division -> Html Msg
+viewDivisions session sortMethod divisions =
     div []
         [ viewHeader session
         , table [ Custom.Attributes.table ]
-            [ viewTableHeader
+            [ viewTableHeader sortMethod
             , tbody [] <|
-                List.map (viewDivision session) divisions
+                List.map (viewDivision session) <|
+                    sortedDivs sortMethod divisions
             ]
         ]
 
@@ -201,14 +252,32 @@ viewToolBar =
         ]
 
 
-viewTableHeader : Html Msg
-viewTableHeader =
+viewTableHeader : SortingMethod -> Html Msg
+viewTableHeader sortMethod =
     thead []
         [ tr []
-            [ th [ scope "col" ]
-                [ text "Name" ]
-            , th [ scope "col" ]
-                [ text "Season" ]
+            [ th [ scope "col", onClick NameSortClick ]
+                [ case sortMethod of
+                    Name ->
+                        text "Name ▲"
+
+                    NameDesc ->
+                        text "Name ▼"
+
+                    _ ->
+                        text "Name"
+                ]
+            , th [ scope "col", onClick SeasonSortClick ]
+                [ case sortMethod of
+                    Season ->
+                        text "Season ▲"
+
+                    SeasonDesc ->
+                        text "Season ▼"
+
+                    _ ->
+                        text "Season"
+                ]
             , th [ scope "col" ]
                 [ text "" ]
             ]

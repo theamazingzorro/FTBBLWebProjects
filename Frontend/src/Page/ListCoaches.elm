@@ -21,6 +21,7 @@ import Route exposing (pushUrl)
 
 type alias Model =
     { coaches : WebData (List Coach)
+    , sortingMethod : SortingMethod
     , session : Session
     , deleteError : Maybe String
     }
@@ -33,6 +34,16 @@ type Msg
     | DeleteCoachButtonClick CoachId
     | EditCoachButtonClick CoachId
     | CoachDeleted (Result Http.Error DeleteResponse)
+    | NameSortClick
+    | EloSortClick
+
+
+type SortingMethod
+    = None
+    | Name
+    | NameDesc
+    | Elo
+    | EloDesc
 
 
 
@@ -42,6 +53,7 @@ type Msg
 init : Session -> ( Model, Cmd Msg )
 init session =
     ( { coaches = RemoteData.Loading
+      , sortingMethod = None
       , session = session
       , deleteError = Nothing
       }
@@ -77,6 +89,21 @@ update msg model =
         CoachDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
 
+        NameSortClick ->
+            ( { model | sortingMethod = newSort Name NameDesc model.sortingMethod }, Cmd.none )
+
+        EloSortClick ->
+            ( { model | sortingMethod = newSort Elo EloDesc model.sortingMethod }, Cmd.none )
+
+
+newSort : SortingMethod -> SortingMethod -> SortingMethod -> SortingMethod
+newSort default alt oldSort =
+    if oldSort == default then
+        alt
+
+    else
+        default
+
 
 buildDeleteError : DeleteResponse -> Maybe String
 buildDeleteError res =
@@ -101,6 +128,29 @@ deleteCoachRequest : Maybe String -> CoachId -> Cmd Msg
 deleteCoachRequest token id =
     Api.deleteRequest token (Api.Coach id) <|
         Http.expectJson CoachDeleted deleteResponseDecoder
+
+
+
+-- Helper Functions --
+
+
+sortedCoaches : SortingMethod -> List Coach -> List Coach
+sortedCoaches sortingMethod coaches =
+    case sortingMethod of
+        None ->
+            coaches
+
+        Name ->
+            List.sortWith (\a b -> compare a.name b.name) coaches
+
+        NameDesc ->
+            List.sortWith (\a b -> compare b.name a.name) coaches
+
+        Elo ->
+            List.sortWith (\a b -> compare a.elo b.elo) coaches
+
+        EloDesc ->
+            List.sortWith (\a b -> compare b.elo a.elo) coaches
 
 
 
@@ -137,7 +187,7 @@ viewCoachesOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success coaches ->
-            viewCoaches model.session coaches
+            viewCoaches model.session model.sortingMethod coaches
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -166,14 +216,15 @@ viewErrorMessage message =
             text ""
 
 
-viewCoaches : Session -> List Coach -> Html Msg
-viewCoaches session coaches =
+viewCoaches : Session -> SortingMethod -> List Coach -> Html Msg
+viewCoaches session sortMethod coaches =
     div []
         [ viewHeader session
         , table [ Custom.Attributes.table ]
-            [ viewTableHeader
+            [ viewTableHeader sortMethod
             , tbody [] <|
-                List.map (viewCoach session) coaches
+                List.map (viewCoach session) <|
+                    sortedCoaches sortMethod coaches
             ]
         ]
 
@@ -197,14 +248,32 @@ viewToolBar =
         ]
 
 
-viewTableHeader : Html Msg
-viewTableHeader =
+viewTableHeader : SortingMethod -> Html Msg
+viewTableHeader sortMethod =
     thead []
         [ tr []
-            [ th [ scope "col" ]
-                [ text "Name" ]
-            , th [ scope "col" ]
-                [ text "Elo" ]
+            [ th [ scope "col", onClick NameSortClick ]
+                [ case sortMethod of
+                    Name ->
+                        text "Name ▲"
+
+                    NameDesc ->
+                        text "Name ▼"
+
+                    _ ->
+                        text "Name"
+                ]
+            , th [ scope "col", onClick EloSortClick ]
+                [ case sortMethod of
+                    Elo ->
+                        text "Elo ▲"
+
+                    EloDesc ->
+                        text "Elo ▼"
+
+                    _ ->
+                        text "Elo"
+                ]
             , th [ scope "col" ]
                 [ text "" ]
             ]
