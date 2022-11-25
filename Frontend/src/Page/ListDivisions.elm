@@ -139,7 +139,7 @@ sortedDivs : SortingMethod -> List Division -> List Division
 sortedDivs sortingMethod divs =
     case sortingMethod of
         None ->
-            divs
+            List.sortWith (\a b -> compare b.season a.season) divs
 
         Name ->
             List.sortWith (\a b -> compare a.name b.name) divs
