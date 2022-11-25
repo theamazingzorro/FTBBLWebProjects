@@ -25,6 +25,30 @@ module TeamHandler =
             }
 
 
+    let getTeamsByDiv (divId : int) : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+                logger.LogInformation $"Getting Teams for division: div id={divId}"
+                
+                let teams = TeamRepository.getByDiv divId
+
+                return! json teams next ctx
+            }
+
+
+    let getTeamsNotInDiv (divId : int) : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+                logger.LogInformation $"Getting Teams for all other divs: div id={divId}"
+                
+                let teams = TeamRepository.getNotInDiv divId
+
+                return! json teams next ctx
+            }
+
+
     let getTeam (id : int) : HttpHandler =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {
@@ -82,4 +106,17 @@ module TeamHandler =
                 TeamRepository.save { team with Id = id }
 
                 return! json team next ctx
+            }
+
+    let updateDiv (teamId, divId) : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+
+                let! team = ctx.BindJsonAsync<Team>()
+                logger.LogInformation $"Giving Team new Division: teamId={teamId}, divId={divId}"
+
+                let res = TeamRepository.updateDiv teamId divId
+
+                return! json res next ctx
             }

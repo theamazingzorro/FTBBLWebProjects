@@ -45,7 +45,7 @@ init session id =
       , division = RemoteData.Loading
       , saveError = Nothing
       }
-    , getDivisionRequest id
+    , getDivisionRequest session.token id
     )
 
 
@@ -104,7 +104,7 @@ trySaveDivision : Model -> ( Model, Cmd Msg )
 trySaveDivision model =
     case model.division of
         RemoteData.Success division ->
-            ( { model | saveError = Nothing }, saveDivision division )
+            ( { model | saveError = Nothing }, saveDivision model.session.token division )
 
         _ ->
             ( { model | saveError = Just "Cannot submit data, please refresh page and try again." }, Cmd.none )
@@ -114,15 +114,16 @@ trySaveDivision model =
 -- API Requests --
 
 
-getDivisionRequest : DivisionId -> Cmd Msg
-getDivisionRequest id =
-    Api.getRequest (Api.Division id) <|
+getDivisionRequest : Maybe String -> DivisionId -> Cmd Msg
+getDivisionRequest token id =
+    Api.getRequest token (Api.Division id) <|
         Http.expectJson (RemoteData.fromResult >> DivisionReceived) divisionDecoder
 
 
-saveDivision : Division -> Cmd Msg
-saveDivision division =
-    Api.putRequest (Api.Division division.id)
+saveDivision : Maybe String -> Division -> Cmd Msg
+saveDivision token division =
+    Api.putRequest token
+        (Api.Division division.id)
         (Http.jsonBody (divisionEncoder division))
     <|
         Http.expectJson DivisionSubmitted divisionDecoder

@@ -58,7 +58,7 @@ update msg model =
             ( { model | coach = rename model.coach }, Cmd.none )
 
         Submit ->
-            ( model, submitCoach model.coach )
+            ( model, submitCoach model.session.token model.coach )
 
         CoachSubmitted (Ok _) ->
             ( { model | coach = defaultCoach, submitError = Nothing }, Cmd.none )
@@ -71,9 +71,10 @@ update msg model =
 -- API Requests --
 
 
-submitCoach : Coach -> Cmd Msg
-submitCoach coach =
-    Api.postRequest Api.Coaches
+submitCoach : Maybe String -> Coach -> Cmd Msg
+submitCoach token coach =
+    Api.postRequest token
+        Api.Coaches
         (Http.jsonBody (newCoachEncoder coach))
     <|
         Http.expectJson CoachSubmitted coachDecoder

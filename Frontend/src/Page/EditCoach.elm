@@ -44,7 +44,7 @@ init session id =
       , coach = RemoteData.Loading
       , saveError = Nothing
       }
-    , getCoachRequest id
+    , getCoachRequest session.token id
     )
 
 
@@ -85,7 +85,7 @@ trySaveCoach : Model -> ( Model, Cmd Msg )
 trySaveCoach model =
     case model.coach of
         RemoteData.Success coach ->
-            ( { model | saveError = Nothing }, saveCoach coach )
+            ( { model | saveError = Nothing }, saveCoach model.session.token coach )
 
         _ ->
             ( { model | saveError = Just "Cannot submit data, please refresh page and try again." }, Cmd.none )
@@ -95,15 +95,16 @@ trySaveCoach model =
 -- API Requests --
 
 
-getCoachRequest : CoachId -> Cmd Msg
-getCoachRequest id =
-    Api.getRequest (Api.Coach id) <|
+getCoachRequest : Maybe String -> CoachId -> Cmd Msg
+getCoachRequest token id =
+    Api.getRequest token (Api.Coach id) <|
         Http.expectJson (RemoteData.fromResult >> CoachReceived) coachDecoder
 
 
-saveCoach : Coach -> Cmd Msg
-saveCoach coach =
-    Api.putRequest (Api.Coach coach.id)
+saveCoach : Maybe String -> Coach -> Cmd Msg
+saveCoach token coach =
+    Api.putRequest token
+        (Api.Coach coach.id)
         (Http.jsonBody (coachEncoder coach))
     <|
         Http.expectJson CoachSubmitted coachDecoder

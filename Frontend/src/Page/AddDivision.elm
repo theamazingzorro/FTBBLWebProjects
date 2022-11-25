@@ -65,7 +65,7 @@ update msg model =
             ( { model | division = reseason model.division }, Cmd.none )
 
         Submit ->
-            ( model, submitDivision model.division )
+            ( model, submitDivision model.session.token model.division )
 
         DivisionSubmitted (Ok _) ->
             ( { model | division = defaultDivision, submitError = Nothing }, Cmd.none )
@@ -78,9 +78,10 @@ update msg model =
 -- API Requests --
 
 
-submitDivision : Division -> Cmd Msg
-submitDivision div =
-    Api.postRequest Api.Divisions
+submitDivision : Maybe String -> Division -> Cmd Msg
+submitDivision token div =
+    Api.postRequest token
+        Api.Divisions
         (Http.jsonBody (newDivisionEncoder div))
     <|
         Http.expectJson DivisionSubmitted divisionDecoder

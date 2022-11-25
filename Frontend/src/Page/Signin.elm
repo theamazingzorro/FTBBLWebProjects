@@ -73,7 +73,7 @@ update msg model =
             ( { model | userPassword = repass model.userPassword }, Cmd.none, Nothing )
 
         Submit ->
-            ( model, signinAttempt model.userPassword, Nothing )
+            ( model, signinAttempt model.session.token model.userPassword, Nothing )
 
         Submitted (Ok "") ->
             ( { model | signinError = Nothing, wrongPassword = True }, Cmd.none, Nothing )
@@ -89,9 +89,10 @@ update msg model =
 -- API Requests --
 
 
-signinAttempt : UserPassword -> Cmd Msg
-signinAttempt userPassword =
-    Api.postRequest Api.Signin
+signinAttempt : Maybe String -> UserPassword -> Cmd Msg
+signinAttempt token userPassword =
+    Api.postRequest token
+        Api.Signin
         (Http.jsonBody (userPasswordEncoder userPassword))
     <|
         Http.expectString Submitted

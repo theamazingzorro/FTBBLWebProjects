@@ -1,7 +1,7 @@
 module Api exposing (Endpoint(..), deleteRequest, getRequest, postRequest, putRequest)
 
 import Env
-import Http exposing (Body, Expect)
+import Http exposing (Body, Expect, Header(..))
 import Model.Coach as Coach exposing (CoachId)
 import Model.Division as Div exposing (DivisionId)
 import Model.Race as Race exposing (RaceId)
@@ -18,6 +18,9 @@ type Endpoint
     | Divisions
     | Division DivisionId
     | Signin
+    | TeamsInDiv DivisionId
+    | TeamsNotInDiv DivisionId
+    | TeamUpdateDiv TeamId DivisionId
 
 
 baseUrl : String
@@ -55,34 +58,26 @@ stringOf endpoint =
         Signin ->
             "signin"
 
+        TeamsInDiv index ->
+            "team/bydiv/" ++ Div.idToString index
+
+        TeamsNotInDiv index ->
+            "team/notindiv/" ++ Div.idToString index
+
+        TeamUpdateDiv teamId divId ->
+            "team/updatediv/" ++ Team.idToString teamId ++ "/" ++ Div.idToString divId
+
 
 urlOf : Endpoint -> String
 urlOf endpoint =
     baseUrl ++ stringOf endpoint
 
 
-getRequest : Endpoint -> Expect msg -> Cmd msg
-getRequest endpoint expect =
-    Http.get
-        { url = urlOf endpoint
-        , expect = expect
-        }
-
-
-postRequest : Endpoint -> Body -> Expect msg -> Cmd msg
-postRequest endpoint body expect =
-    Http.post
-        { url = urlOf endpoint
-        , body = body
-        , expect = expect
-        }
-
-
-deleteRequest : Endpoint -> Expect msg -> Cmd msg
-deleteRequest endpoint expect =
+getRequest : Maybe String -> Endpoint -> Expect msg -> Cmd msg
+getRequest token endpoint expect =
     Http.request
-        { method = "DELETE"
-        , headers = []
+        { method = "GET"
+        , headers = [ Http.header "Authorization" <| "Bearer " ++ Maybe.withDefault "" token ]
         , url = urlOf endpoint
         , body = Http.emptyBody
         , expect = expect
@@ -91,11 +86,37 @@ deleteRequest endpoint expect =
         }
 
 
-putRequest : Endpoint -> Body -> Expect msg -> Cmd msg
-putRequest endpoint body expect =
+postRequest : Maybe String -> Endpoint -> Body -> Expect msg -> Cmd msg
+postRequest token endpoint body expect =
+    Http.request
+        { method = "POST"
+        , headers = [ Http.header "Authorization" <| "Bearer " ++ Maybe.withDefault "" token ]
+        , url = urlOf endpoint
+        , body = body
+        , expect = expect
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+deleteRequest : Maybe String -> Endpoint -> Expect msg -> Cmd msg
+deleteRequest token endpoint expect =
+    Http.request
+        { method = "DELETE"
+        , headers = [ Http.header "Authorization" <| "Bearer " ++ Maybe.withDefault "" token ]
+        , url = urlOf endpoint
+        , body = Http.emptyBody
+        , expect = expect
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+putRequest : Maybe String -> Endpoint -> Body -> Expect msg -> Cmd msg
+putRequest token endpoint body expect =
     Http.request
         { method = "PUT"
-        , headers = []
+        , headers = [ Http.header "Authorization" <| "Bearer " ++ Maybe.withDefault "" token ]
         , url = urlOf endpoint
         , body = body
         , expect = expect

@@ -29,6 +29,11 @@ let webApp =
                     routef "/team/%i" TeamHandler.getTeam
                     routef "/team/%i/" TeamHandler.getTeam
 
+                    routef "/team/bydiv/%i" TeamHandler.getTeamsByDiv
+                    routef "/team/bydiv/%i/" TeamHandler.getTeamsByDiv
+                    routef "/team/notindiv/%i" TeamHandler.getTeamsNotInDiv
+                    routef "/team/notindiv/%i/" TeamHandler.getTeamsNotInDiv
+
                     routex "/race(/?)" >=> RaceHandler.getRaces
                     routef "/race/%i" RaceHandler.getRace
                     routef "/race/%i/" RaceHandler.getRace
@@ -44,13 +49,15 @@ let webApp =
                 POST >=> choose [
                     routex "/signin(/?)" >=> SecurityHandler.signIn
 
-
                     Auth.enticate >=> choose [
                         routex "/team(/?)" >=> TeamHandler.postTeam
 
                         routex "/coach(/?)" >=> CoachHandler.postCoach
 
                         routex "/div(/?)" >=> DivisionHandler.postDivision
+
+                        routef "/team/updatediv/%i/%i" TeamHandler.updateDiv
+                        routef "/team/updatediv/%i/%i/" TeamHandler.updateDiv
                     ]
                 ]
                 PUT >=> Auth.enticate >=> choose [

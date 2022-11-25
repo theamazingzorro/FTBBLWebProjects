@@ -46,7 +46,7 @@ init session id =
       , team = RemoteData.Loading
       , saveError = Nothing
       }
-    , getTeamRequest id
+    , getTeamRequest session.token id
     )
 
 
@@ -90,7 +90,7 @@ trySaveTeam : Model -> ( Model, Cmd Msg )
 trySaveTeam model =
     case model.team of
         RemoteData.Success team ->
-            ( { model | saveError = Nothing }, saveTeam team )
+            ( { model | saveError = Nothing }, saveTeam model.session.token team )
 
         _ ->
             ( { model | saveError = Just "Cannot submit data, please refresh page and try again." }, Cmd.none )
@@ -100,15 +100,16 @@ trySaveTeam model =
 -- API Requests --
 
 
-getTeamRequest : TeamId -> Cmd Msg
-getTeamRequest id =
-    Api.getRequest (Api.Team id) <|
+getTeamRequest : Maybe String -> TeamId -> Cmd Msg
+getTeamRequest token id =
+    Api.getRequest token (Api.Team id) <|
         Http.expectJson (RemoteData.fromResult >> TeamReceived) teamDecoder
 
 
-saveTeam : Team -> Cmd Msg
-saveTeam team =
-    Api.putRequest (Api.Team team.id)
+saveTeam : Maybe String -> Team -> Cmd Msg
+saveTeam token team =
+    Api.putRequest token
+        (Api.Team team.id)
         (Http.jsonBody (teamEncoder team))
     <|
         Http.expectJson TeamSubmitted teamDecoder
