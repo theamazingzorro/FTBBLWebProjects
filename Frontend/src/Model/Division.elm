@@ -106,6 +106,6 @@ encodeId (DivisionId id) =
 
 idParser : Parser (DivisionId -> a) a
 idParser =
-    custom "POSTID" <|
-        \postId ->
-            Maybe.map DivisionId (String.toInt postId)
+    custom "DIVID" <|
+        \id ->
+            Maybe.map DivisionId (String.toInt id)

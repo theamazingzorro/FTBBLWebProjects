@@ -118,6 +118,6 @@ encodeId (TeamId id) =
 
 idParser : Parser (TeamId -> a) a
 idParser =
-    custom "POSTID" <|
-        \postId ->
-            Maybe.map TeamId (String.toInt postId)
+    custom "TEAMID" <|
+        \id ->
+            Maybe.map TeamId (String.toInt id)
