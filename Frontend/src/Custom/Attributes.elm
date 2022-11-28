@@ -58,6 +58,28 @@ navLink =
     class "nav-link"
 
 
+navDropDownContainer : Attribute msg
+navDropDownContainer =
+    class "nav-item dropdown"
+
+
+navDropDownTitleLink : List (Attribute msg)
+navDropDownTitleLink =
+    [ class "nav-link dropdown-toggle"
+    , attribute "data-bs-toggle" "dropdown"
+    ]
+
+
+navDropDownMenu : Attribute msg
+navDropDownMenu =
+    class "dropdown-menu"
+
+
+navDropDownItem : Attribute msg
+navDropDownItem =
+    class "dropdown-item"
+
+
 
 -- Tables --
 

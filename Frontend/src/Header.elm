@@ -1,10 +1,14 @@
 module Header exposing (Model, Msg, OutMsg(..), init, update, view)
 
+import Api
 import Custom.Attributes
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Http
+import Model.Division exposing (Division, DivisionId, divisionsDecoder)
 import Model.Session exposing (Session)
+import RemoteData exposing (WebData)
 import Route exposing (Route(..), pushUrl)
 
 
@@ -14,6 +18,7 @@ import Route exposing (Route(..), pushUrl)
 
 type alias Model =
     { session : Session
+    , divisions : WebData (List Division)
     }
 
 
@@ -24,6 +29,8 @@ type Msg
     | TeamIndexClicked
     | CoachIndexClicked
     | DivisionIndexClicked
+    | SpecificDivisionClicked DivisionId
+    | DivisionsRecieved (WebData (List Division))
 
 
 type OutMsg
@@ -36,7 +43,7 @@ type OutMsg
 
 init : Session -> ( Model, Cmd Msg )
 init session =
-    ( { session = session }, Cmd.none )
+    ( { session = session, divisions = RemoteData.Loading }, getDivisionsRequest session.token )
 
 
 
@@ -55,6 +62,9 @@ update msg model =
         DivisionIndexClicked ->
             ( model, pushUrl model.session.navkey Route.Divisions, Nothing )
 
+        SpecificDivisionClicked divId ->
+            ( model, pushUrl model.session.navkey <| Route.ViewDivision divId, Nothing )
+
         HomeClicked ->
             ( model, pushUrl model.session.navkey Route.Home, Nothing )
 
@@ -68,6 +78,29 @@ update msg model =
             in
             ( { model | session = updateSession model.session }, Cmd.none, Just Signout )
 
+        DivisionsRecieved (RemoteData.Success divs) ->
+            ( { model | divisions = RemoteData.Success <| cleanupDivList divs }, Cmd.none, Nothing )
+
+        DivisionsRecieved response ->
+            ( { model | divisions = response }, Cmd.none, Nothing )
+
+
+cleanupDivList : List Division -> List Division
+cleanupDivList divs =
+    List.sortBy .season divs
+        |> List.reverse
+        |> List.take 10
+
+
+
+-- API Requests --
+
+
+getDivisionsRequest : Maybe String -> Cmd Msg
+getDivisionsRequest token =
+    Api.getRequest token Api.Divisions <|
+        Http.expectJson (RemoteData.fromResult >> DivisionsRecieved) divisionsDecoder
+
 
 
 -- View --
@@ -76,7 +109,8 @@ update msg model =
 view : Model -> Html Msg
 view model =
     nav [ Custom.Attributes.mainNavBar ]
-        [ a
+        [ styleTag
+        , a
             [ Custom.Attributes.navBarBrand
             , onClick HomeClicked
             ]
@@ -86,7 +120,7 @@ view model =
             [ ul [ Custom.Attributes.navBarLinkList ]
                 [ linkElement "Teams" TeamIndexClicked
                 , linkElement "Coaches" CoachIndexClicked
-                , linkElement "Divisions" DivisionIndexClicked
+                , viewDivisionsLink model.divisions
                 , viewSignInOutLink model.session.token
                 ]
             ]
@@ -101,6 +135,17 @@ viewSignInOutLink token =
 
         Nothing ->
             linkElement "Sign In" SigninClicked
+
+
+viewDivisionsLink : WebData (List Division) -> Html Msg
+viewDivisionsLink divisions =
+    case divisions of
+        RemoteData.Success divs ->
+            dropdownLink "Divisions" DivisionIndexClicked <|
+                List.map (\div -> dropdownEntry (div.name ++ " Season " ++ String.fromInt div.season) <| SpecificDivisionClicked div.id) divs
+
+        _ ->
+            linkElement "Divisions" DivisionIndexClicked
 
 
 toggleBarButton : Html Msg
@@ -124,3 +169,45 @@ linkElement title msg =
             ]
             [ text title ]
         ]
+
+
+dropdownLink : String -> Msg -> List (Html Msg) -> Html Msg
+dropdownLink title clickEvent submenu =
+    li [ Custom.Attributes.navDropDownContainer ]
+        [ a
+            (onClick clickEvent
+                :: Custom.Attributes.navDropDownTitleLink
+            )
+            [ text title ]
+        , ul [ Custom.Attributes.navDropDownMenu ]
+            submenu
+        ]
+
+
+dropdownEntry : String -> Msg -> Html Msg
+dropdownEntry label clickEvent =
+    li
+        [ Custom.Attributes.navDropDownItem
+        , onClick clickEvent
+        ]
+        [ text label ]
+
+
+
+{- Direct css to make the hover function in both dev and live. -}
+
+
+styleTag : Html Msg
+styleTag =
+    let
+        styles =
+            """
+        @media all and (min-width: 992px) {
+            .navbar .nav-item .dropdown-menu{ display: none; }
+            .navbar .nav-item:hover .nav-link{   }
+            .navbar .nav-item:hover .dropdown-menu{ display: block; }
+            .navbar .nav-item .dropdown-menu{ margin-top:0; }
+        }
+      """
+    in
+    node "style" [] [ text styles ]
