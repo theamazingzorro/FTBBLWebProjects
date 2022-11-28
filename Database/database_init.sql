@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS Game(
     div_id INT NOT NULL,
     home_score INT,
     away_score INT,
-    week INT,
+    week INT NOT NULL,
     FOREIGN KEY ( home_team_id ) REFERENCES Team(id),
     FOREIGN KEY ( away_team_id ) REFERENCES Team(id),
     FOREIGN KEY ( div_id ) REFERENCES Division(id),
