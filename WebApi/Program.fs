@@ -45,6 +45,13 @@ let webApp =
                     routex "/div(/?)" >=> DivisionHandler.getDivisions
                     routef "/div/%i" DivisionHandler.getDivision
                     routef "/div/%i/" DivisionHandler.getDivision
+
+                    routex "/game(/?)" >=> GameHandler.getGames
+                    routef "/game/%i" GameHandler.getGame
+                    routef "/game/%i/" GameHandler.getGame
+
+                    routef "/game/bydiv/%i" GameHandler.getGamesByDiv
+                    routef "/game/bydiv/%i/" GameHandler.getGamesByDiv
                 ]
                 POST >=> choose [
                     routex "/signin(/?)" >=> SecurityHandler.signIn
@@ -55,6 +62,8 @@ let webApp =
                         routex "/coach(/?)" >=> CoachHandler.postCoach
 
                         routex "/div(/?)" >=> DivisionHandler.postDivision
+
+                        routex "/game(/?)" >=> GameHandler.postGame
 
                         routef "/team/updatediv/%i/%i" TeamHandler.updateDiv
                         routef "/team/updatediv/%i/%i/" TeamHandler.updateDiv
@@ -69,6 +78,9 @@ let webApp =
 
                     routef "/div/%i" DivisionHandler.updateDivision
                     routef "/div/%i/" DivisionHandler.updateDivision
+
+                    routef "/game/%i" GameHandler.updateGame
+                    routef "/game/%i/" GameHandler.updateGame
                 ]
                 DELETE >=> Auth.enticate >=> choose [
                     routef "/team/%i" TeamHandler.deleteTeam
@@ -79,6 +91,9 @@ let webApp =
 
                     routef "/div/%i" DivisionHandler.deleteDivision
                     routef "/div/%i/" DivisionHandler.deleteDivision
+
+                    routef "/game/%i" GameHandler.deleteGame
+                    routef "/game/%i/" GameHandler.deleteGame
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" 
