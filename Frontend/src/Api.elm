@@ -4,12 +4,16 @@ import Env
 import Http exposing (Body, Expect, Header(..))
 import Model.Coach as Coach exposing (CoachId)
 import Model.Division as Div exposing (DivisionId)
+import Model.Game as Game exposing (GameId)
 import Model.Race as Race exposing (RaceId)
 import Model.Team as Team exposing (TeamId)
 
 
 type Endpoint
     = Teams
+    | TeamsInDiv DivisionId
+    | TeamsNotInDiv DivisionId
+    | TeamUpdateDiv TeamId DivisionId
     | Team TeamId
     | Coaches
     | Coach CoachId
@@ -17,10 +21,10 @@ type Endpoint
     | Race RaceId
     | Divisions
     | Division DivisionId
+    | Games
+    | GamesInDiv DivisionId
+    | Game GameId
     | Signin
-    | TeamsInDiv DivisionId
-    | TeamsNotInDiv DivisionId
-    | TeamUpdateDiv TeamId DivisionId
 
 
 baseUrl : String
@@ -55,8 +59,17 @@ stringOf endpoint =
         Division index ->
             "div/" ++ Div.idToString index
 
+        Games ->
+            "game/"
+
+        Game index ->
+            "game/" ++ Game.idToString index
+
         Signin ->
             "signin"
+
+        GamesInDiv index ->
+            "game/bydiv/" ++ Div.idToString index
 
         TeamsInDiv index ->
             "team/bydiv/" ++ Div.idToString index
