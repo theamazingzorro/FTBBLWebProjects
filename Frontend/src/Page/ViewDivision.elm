@@ -571,12 +571,15 @@ viewWeek games thisWeek currWeek =
 
 viewWeekTitle : Int -> Html msg
 viewWeekTitle currWeek =
-    div [ style "text-align" "center" ] 
-    [ h5 [] [ text <| "Week " ++ String.fromInt currWeek ]
-    , br [] []
-     ]
+    div
+        [ style "text-align" "center" ]
+        [ h5 [] [ text <| "Week " ++ String.fromInt currWeek ]
+        , br [] []
+        ]
 
 
 viewGame : Game -> Html Msg
 viewGame game =
-    div [ style "text-align" "center" ] [ text <| game.homeTeam.name ++ " vs. " ++ game.awayTeam.name ]
+    div
+        [ style "text-align" "center" ]
+        [ text <| game.homeTeam.name ++ " vs. " ++ game.awayTeam.name ]
