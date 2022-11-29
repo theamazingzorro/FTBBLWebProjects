@@ -27,6 +27,7 @@ type alias Game =
     { id : GameId
     , homeScore : Maybe Int
     , awayScore : Maybe Int
+    , week : Int
     , division : Division
     , homeTeam : Team
     , awayTeam : Team
@@ -55,6 +56,7 @@ defaultGame =
     { id = GameId 0
     , homeScore = Nothing
     , awayScore = Nothing
+    , week = 0
     , division = defaultDivision
     , homeTeam = defaultTeam
     , awayTeam = defaultTeam
@@ -76,6 +78,7 @@ gameDecoder =
         |> required "id" gameIdDecoder
         |> optional "homeScore" (Decode.map Just int) Nothing
         |> optional "awayScore" (Decode.map Just int) Nothing
+        |> required "week" int
         |> required "division" divisionDecoder
         |> required "homeTeam" teamDecoder
         |> required "awayTeam" teamDecoder
@@ -96,6 +99,7 @@ gameEncoder game =
         [ ( "id", encodeId game.id )
         , ( "awayScore", encodeMaybeInt game.awayScore )
         , ( "homeScore", encodeMaybeInt game.homeScore )
+        , ( "week", Encode.int game.week)
         , ( "awayTeam", teamEncoder game.awayTeam )
         , ( "homeTeam", teamEncoder game.homeTeam )
         , ( "division", divisionEncoder game.division )
@@ -107,6 +111,7 @@ newGameEncoder game =
     Encode.object
         [ ( "awayScore", encodeMaybeInt game.awayScore )
         , ( "homeScore", encodeMaybeInt game.homeScore )
+        , ( "week", Encode.int game.week)
         , ( "awayTeam", teamEncoder game.awayTeam )
         , ( "homeTeam", teamEncoder game.homeTeam )
         , ( "division", divisionEncoder game.division )
