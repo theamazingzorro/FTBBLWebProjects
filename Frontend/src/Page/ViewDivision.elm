@@ -477,7 +477,7 @@ viewGamesCarousel : Model -> List Game -> Html Msg
 viewGamesCarousel model games =
     let
         thisId =
-            "gamesCarousel"
+            "games"
 
         endWeek =
             maxWeek games
