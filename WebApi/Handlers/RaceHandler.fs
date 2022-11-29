@@ -6,8 +6,7 @@ module RaceHandler =
 
     open Microsoft.AspNetCore.Http
     open Giraffe
-    open ftbbl.WebApi.Models
-    open ftbbl.WebApi.Repositories
+    open ftbbl.WebApi.Services
 
     let private getLogger (ctx : HttpContext) = 
         ctx.GetLogger "fttbl.Handlers.RaceApiHandlers"
@@ -19,9 +18,9 @@ module RaceHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Races"
                 
-                let races = RaceRepository.getAll()
+                let result = RaceService.getAll()
 
-                return! json races next ctx
+                return! json result next ctx
             }
 
 
@@ -31,7 +30,7 @@ module RaceHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Race: id={id}"
                 
-                let race = RaceRepository.getById id
+                let result = RaceService.getById id
 
-                return! json race next ctx
+                return! json result next ctx
             }

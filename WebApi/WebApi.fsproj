@@ -35,6 +35,12 @@
     <Compile Include="Repos\TeamEloHistoryRepository.fs" />
     <Compile Include="Repos\CoachEloHistoryRepository.fs" />
     <Compile Include="Services\Auth.fs" />
+    <Compile Include="Services\Elo.fs" />
+    <Compile Include="Services\DivisionService.fs" />
+    <Compile Include="Services\RaceService.fs" />
+    <Compile Include="Services\CoachService.fs" />
+    <Compile Include="Services\TeamService.fs" />
+    <Compile Include="Services\GameService.fs" />
     <Compile Include="Handlers\SecurityHandler.fs" />
     <Compile Include="Handlers\DivisionHandler.fs" />
     <Compile Include="Handlers\RaceHandler.fs" />

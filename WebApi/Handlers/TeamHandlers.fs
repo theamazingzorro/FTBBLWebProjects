@@ -8,7 +8,7 @@ module TeamHandler =
     open Microsoft.AspNetCore.Http
     open Giraffe
     open ftbbl.WebApi.Models
-    open ftbbl.WebApi.Repositories
+    open ftbbl.WebApi.Services
 
     let private getLogger (ctx : HttpContext) = 
         ctx.GetLogger "fttbl.Handlers.TeamApiHandlers"
@@ -19,9 +19,9 @@ module TeamHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Teams"
                 
-                let teams = TeamRepository.getAll()
+                let result = TeamService.getAll()
 
-                return! json teams next ctx
+                return! json result next ctx
             }
 
 
@@ -31,9 +31,9 @@ module TeamHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Teams for division: div id={divId}"
                 
-                let teams = TeamRepository.getByDiv divId
+                let result = TeamService.getByDiv divId
 
-                return! json teams next ctx
+                return! json result next ctx
             }
 
 
@@ -43,9 +43,9 @@ module TeamHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Teams for all other divs: div id={divId}"
                 
-                let teams = TeamRepository.getNotInDiv divId
+                let result = TeamService.getNotInDiv divId
 
-                return! json teams next ctx
+                return! json result next ctx
             }
 
 
@@ -55,9 +55,9 @@ module TeamHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Team: id={id}"
                 
-                let team = TeamRepository.getById id
+                let result = TeamService.getById id
 
-                return! json team next ctx
+                return! json result next ctx
             }
 
 
@@ -67,13 +67,12 @@ module TeamHandler =
                 let logger = getLogger ctx
 
                 let! team = ctx.BindJsonAsync<Team>()
-                let team = { team with Elo = 1000 }
 
                 logger.LogInformation $"Saving Team: name={team.Name}"
                 
-                TeamRepository.save(team)
+                let result = TeamService.saveNew team
 
-                return! json team next ctx
+                return! json result next ctx
             }
 
 
@@ -83,7 +82,7 @@ module TeamHandler =
                 let logger = getLogger ctx
                 
                 logger.LogInformation $"Deleting Team: id={id}"
-                let res = TeamRepository.deleteById(id)
+                let res = TeamService.deleteById id
 
                 logger.LogInformation $"{res} rows effected."
 
@@ -99,13 +98,9 @@ module TeamHandler =
                 let! team = ctx.BindJsonAsync<Team>()
                 logger.LogInformation $"Updating Team: id={id}"
 
-                let oldTeam = TeamRepository.getById(id)
-                if (oldTeam.Elo <> team.Elo) 
-                then TeamEloHistoryRepository.save({Id = 0; TeamId=id; Elo = oldTeam.Elo; Date = DateTime.Now})
+                let result = TeamService.saveOverId id team
 
-                TeamRepository.save { team with Id = id }
-
-                return! json team next ctx
+                return! json result next ctx
             }
 
     let updateDiv (teamId, divId) : HttpHandler =
@@ -116,7 +111,7 @@ module TeamHandler =
                 let! team = ctx.BindJsonAsync<Team>()
                 logger.LogInformation $"Giving Team new Division: teamId={teamId}, divId={divId}"
 
-                let res = TeamRepository.updateDiv teamId divId
+                let result = TeamService.updateDiv teamId divId
 
-                return! json res next ctx
+                return! json result next ctx
             }

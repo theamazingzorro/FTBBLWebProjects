@@ -8,7 +8,7 @@ module GameHandler =
     open Microsoft.AspNetCore.Http
     open Giraffe
     open ftbbl.WebApi.Models
-    open ftbbl.WebApi.Repositories
+    open ftbbl.WebApi.Services
 
     let private getLogger (ctx : HttpContext) = 
         ctx.GetLogger "fttbl.Handlers.GameApiHandlers"
@@ -19,9 +19,9 @@ module GameHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Games"
                 
-                let games = GameRepository.getAll()
+                let result = GameService.getAll()
 
-                return! json games next ctx
+                return! json result next ctx
             }
 
 
@@ -31,9 +31,9 @@ module GameHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Games for division: div id={divId}"
                 
-                let games = GameRepository.getByDiv divId
+                let result = GameService.getByDiv divId
 
-                return! json games next ctx
+                return! json result next ctx
             }
 
     let getGame (id : int) : HttpHandler =
@@ -42,9 +42,9 @@ module GameHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Game with id={id}"
                 
-                let game = GameRepository.getById id
+                let result = GameService.getById id
 
-                return! json game next ctx
+                return! json result next ctx
             }
 
 
@@ -57,9 +57,9 @@ module GameHandler =
 
                 logger.LogInformation $"Saving Game: id={game.Id}"
                 
-                GameRepository.save(game)
+                let result = GameService.saveChanges game
 
-                return! json game next ctx
+                return! json result next ctx
             }
 
 
@@ -69,7 +69,7 @@ module GameHandler =
                 let logger = getLogger ctx
                 
                 logger.LogInformation $"Deleting Game: id={id}"
-                let res = GameRepository.deleteById(id)
+                let res = GameService.deleteById id
 
                 logger.LogInformation $"{res} rows effected."
 
@@ -85,7 +85,7 @@ module GameHandler =
                 let! game = ctx.BindJsonAsync<Game>()
                 logger.LogInformation $"Updating Game: id={id}"
 
-                GameRepository.save { game with Id = id }
+                let result = GameService.saveOverId id game
 
-                return! json game next ctx
+                return! json result next ctx
             }

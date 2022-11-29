@@ -8,7 +8,7 @@ module CoachHandler =
     open Microsoft.AspNetCore.Http
     open Giraffe
     open ftbbl.WebApi.Models
-    open ftbbl.WebApi.Repositories
+    open ftbbl.WebApi.Services
 
     let private getLogger (ctx : HttpContext) = 
         ctx.GetLogger "fttbl.Handlers.CoachApiHandlers"
@@ -19,9 +19,9 @@ module CoachHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Coaches"
                 
-                let coachs = CoachRepository.getAll()
+                let result = CoachService.getAll()
 
-                return! json coachs next ctx
+                return! json result next ctx
             }
 
 
@@ -31,9 +31,9 @@ module CoachHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Coach: id={id}"
                 
-                let coach = CoachRepository.getById id
+                let result = CoachService.getById id
 
-                return! json coach next ctx
+                return! json result next ctx
             }
 
 
@@ -43,13 +43,12 @@ module CoachHandler =
                 let logger = getLogger ctx
 
                 let! coach = ctx.BindJsonAsync<Coach>()
-                let coach = { coach with Elo = 1000 }
 
                 logger.LogInformation $"Saving Coach: name={coach.Name}"
                 
-                CoachRepository.save(coach)
+                let result = CoachService.saveNew coach
 
-                return! json coach next ctx
+                return! json result next ctx
             }
 
 
@@ -59,7 +58,7 @@ module CoachHandler =
                 let logger = getLogger ctx
                 
                 logger.LogInformation $"Deleting Coach: id={id}"
-                let res = CoachRepository.deleteById(id)
+                let res = CoachService.deleteById id
                 logger.LogInformation $"{res} rows effected."
 
                 return! json {| Deleted = res > 0 |} next ctx
@@ -74,11 +73,7 @@ module CoachHandler =
                 let! coach = ctx.BindJsonAsync<Coach>()
                 logger.LogInformation $"Updating Coach: id={id}"
 
-                let oldCoach = CoachRepository.getById(id)
-                if (oldCoach.Elo <> coach.Elo) 
-                then CoachEloHistoryRepository.save({Id = 0; CoachId=id; Elo = oldCoach.Elo; Date = DateTime.Now})
+                let result = CoachService.saveOverId id coach
 
-                CoachRepository.save { coach with Id = id }
-
-                return! json coach next ctx
+                return! json result next ctx
             }
