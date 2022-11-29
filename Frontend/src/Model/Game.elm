@@ -99,7 +99,7 @@ gameEncoder game =
         [ ( "id", encodeId game.id )
         , ( "awayScore", encodeMaybeInt game.awayScore )
         , ( "homeScore", encodeMaybeInt game.homeScore )
-        , ( "week", Encode.int game.week)
+        , ( "week", Encode.int game.week )
         , ( "awayTeam", teamEncoder game.awayTeam )
         , ( "homeTeam", teamEncoder game.homeTeam )
         , ( "division", divisionEncoder game.division )
@@ -111,7 +111,7 @@ newGameEncoder game =
     Encode.object
         [ ( "awayScore", encodeMaybeInt game.awayScore )
         , ( "homeScore", encodeMaybeInt game.homeScore )
-        , ( "week", Encode.int game.week)
+        , ( "week", Encode.int game.week )
         , ( "awayTeam", teamEncoder game.awayTeam )
         , ( "homeTeam", teamEncoder game.homeTeam )
         , ( "division", divisionEncoder game.division )
