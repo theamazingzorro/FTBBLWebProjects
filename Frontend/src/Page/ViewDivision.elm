@@ -10,6 +10,7 @@ import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, divisionDecoder)
+import Model.Game exposing (Game, gamesDecoder)
 import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
@@ -23,8 +24,10 @@ import Url exposing (Protocol(..))
 
 type alias Model =
     { teams : WebData (List Team)
-    , sortingMethod : SortingMethod
+    , sortingMethod : TeamSortingMethod
     , division : WebData Division
+    , games : WebData (List Game)
+    , displayedWeek : Int
     , divisionId : DivisionId
     , session : Session
     , deleteError : Maybe String
@@ -34,18 +37,20 @@ type alias Model =
 type Msg
     = RefreshButtonClick
     | TeamsReceived (WebData (List Team))
+    | GamesReceived (WebData (List Game))
     | DivisionReceived (WebData Division)
     | AddTeamButtonClick
     | DeleteTeamButtonClick TeamId
     | EditTeamButtonClick TeamId
     | TeamDeleted (Result Http.Error DeleteResponse)
-    | NameSortClick
-    | RaceSortClick
-    | CoachSortClick
-    | EloSortClick
+    | TeamNameSortClick
+    | TeamRaceSortClick
+    | TeamCoachSortClick
+    | TeamEloSortClick
+    | ChangeWeek Int
 
 
-type SortingMethod
+type TeamSortingMethod
     = None
     | Name
     | NameDesc
@@ -66,6 +71,8 @@ init session id =
     ( { teams = RemoteData.Loading
       , sortingMethod = None
       , division = RemoteData.Loading
+      , games = RemoteData.Loading
+      , displayedWeek = 1
       , session = session
       , deleteError = Nothing
       , divisionId = id
@@ -73,6 +80,7 @@ init session id =
     , Cmd.batch
         [ getTeamsInDivRequest session.token id
         , getDivisionRequest session.token id
+        , getGamesRequest session.token id
         ]
     )
 
@@ -92,11 +100,15 @@ update msg model =
             , Cmd.batch
                 [ getTeamsInDivRequest model.session.token model.divisionId
                 , getDivisionRequest model.session.token model.divisionId
+                , getGamesRequest model.session.token model.divisionId
                 ]
             )
 
         TeamsReceived response ->
             ( { model | teams = response }, Cmd.none )
+
+        GamesReceived response ->
+            ( { model | games = response }, Cmd.none )
 
         DivisionReceived response ->
             ( { model | division = response }, Cmd.none )
@@ -116,20 +128,23 @@ update msg model =
         TeamDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
 
-        NameSortClick ->
+        TeamNameSortClick ->
             ( { model | sortingMethod = newSort Name NameDesc model.sortingMethod }, Cmd.none )
 
-        RaceSortClick ->
+        TeamRaceSortClick ->
             ( { model | sortingMethod = newSort Race RaceDesc model.sortingMethod }, Cmd.none )
 
-        CoachSortClick ->
+        TeamCoachSortClick ->
             ( { model | sortingMethod = newSort Coach CoachDesc model.sortingMethod }, Cmd.none )
 
-        EloSortClick ->
+        TeamEloSortClick ->
             ( { model | sortingMethod = newSort Elo EloDesc model.sortingMethod }, Cmd.none )
 
+        ChangeWeek newWeek ->
+            ( { model | displayedWeek = newWeek }, Cmd.none )
 
-newSort : SortingMethod -> SortingMethod -> SortingMethod -> SortingMethod
+
+newSort : sortMethod -> sortMethod -> sortMethod -> sortMethod
 newSort default alt oldSort =
     if oldSort == default then
         alt
@@ -157,6 +172,12 @@ getTeamsInDivRequest token divId =
         Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
 
 
+getGamesRequest : Maybe String -> DivisionId -> Cmd Msg
+getGamesRequest token divId =
+    Api.getRequest token (Api.GamesInDiv divId) <|
+        Http.expectJson (RemoteData.fromResult >> GamesReceived) gamesDecoder
+
+
 getDivisionRequest : Maybe String -> DivisionId -> Cmd Msg
 getDivisionRequest token divId =
     Api.getRequest token (Api.Division divId) <|
@@ -173,7 +194,7 @@ deleteTeamRequest token id =
 -- Helper Functions --
 
 
-sortedTeams : SortingMethod -> List Team -> List Team
+sortedTeams : TeamSortingMethod -> List Team -> List Team
 sortedTeams sortingMethod teams =
     case sortingMethod of
         None ->
@@ -204,6 +225,18 @@ sortedTeams sortingMethod teams =
             List.sortWith (\a b -> compare b.elo a.elo) teams
 
 
+gamesInWeek : Int -> List Game -> List Game
+gamesInWeek week games =
+    List.filter (\game -> game.week == week) games
+
+
+maxWeek : List Game -> Int
+maxWeek games =
+    List.map (\game -> game.week) games
+        |> List.maximum
+        |> Maybe.withDefault 0
+
+
 
 -- View --
 
@@ -228,6 +261,10 @@ viewRefreshButton =
         ]
 
 
+
+{- View ErrorHandling -}
+
+
 viewTeamsOrError : Model -> Html Msg
 viewTeamsOrError model =
     case model.teams of
@@ -238,7 +275,31 @@ viewTeamsOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success teams ->
-            viewTeams model teams
+            div []
+                [ viewHeaderOrError model.division model.session
+                , viewTeams model teams
+                , viewGamesOrError model
+                ]
+
+        RemoteData.Failure httpError ->
+            viewLoadError <| Error.buildErrorMessage httpError
+
+
+viewGamesOrError : Model -> Html Msg
+viewGamesOrError model =
+    case model.games of
+        RemoteData.NotAsked ->
+            text ""
+
+        RemoteData.Loading ->
+            h3 [] [ text "Loading..." ]
+
+        RemoteData.Success games ->
+            div []
+                [ br [] []
+                , h3 [] [ text "Scheduled Matches" ]
+                , viewGamesCarousel model games
+                ]
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -267,19 +328,6 @@ viewErrorMessage message =
             text ""
 
 
-viewTeams : Model -> List Team -> Html Msg
-viewTeams model teams =
-    div []
-        [ viewHeaderOrError model.division model.session
-        , table [ Custom.Attributes.table ]
-            [ viewTableHeader model.sortingMethod
-            , tbody [] <|
-                List.map (viewTeam model.session) <|
-                    sortedTeams model.sortingMethod teams
-            ]
-        ]
-
-
 viewHeaderOrError : WebData Division -> Session -> Html Msg
 viewHeaderOrError data session =
     case data of
@@ -294,6 +342,10 @@ viewHeaderOrError data session =
 
         RemoteData.Failure httpError ->
             viewHeader (Error.buildErrorMessage httpError) "" session
+
+
+
+{- View Header -}
 
 
 viewHeader : String -> String -> Session -> Html Msg
@@ -318,11 +370,25 @@ viewToolBar =
         ]
 
 
-viewTableHeader : SortingMethod -> Html Msg
+
+{- View Teams Table -}
+
+
+viewTeams : Model -> List Team -> Html Msg
+viewTeams model teams =
+    table [ Custom.Attributes.table ]
+        [ viewTableHeader model.sortingMethod
+        , tbody [] <|
+            List.map (viewTeamTableRow model.session) <|
+                sortedTeams model.sortingMethod teams
+        ]
+
+
+viewTableHeader : TeamSortingMethod -> Html Msg
 viewTableHeader sortMethod =
     thead []
         [ tr []
-            [ th [ scope "col", onClick NameSortClick ]
+            [ th [ scope "col", onClick TeamNameSortClick ]
                 [ case sortMethod of
                     Name ->
                         text "Name ▲"
@@ -333,7 +399,7 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Name"
                 ]
-            , th [ scope "col", onClick RaceSortClick ]
+            , th [ scope "col", onClick TeamRaceSortClick ]
                 [ case sortMethod of
                     Race ->
                         text "Race ▲"
@@ -344,7 +410,7 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Race"
                 ]
-            , th [ scope "col", onClick CoachSortClick ]
+            , th [ scope "col", onClick TeamCoachSortClick ]
                 [ case sortMethod of
                     Coach ->
                         text "Coach ▲"
@@ -355,7 +421,7 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Coach"
                 ]
-            , th [ scope "col", onClick EloSortClick ]
+            , th [ scope "col", onClick TeamEloSortClick ]
                 [ case sortMethod of
                     Elo ->
                         text "Elo ▲"
@@ -372,8 +438,8 @@ viewTableHeader sortMethod =
         ]
 
 
-viewTeam : Session -> Team -> Html Msg
-viewTeam session team =
+viewTeamTableRow : Session -> Team -> Html Msg
+viewTeamTableRow session team =
     tr []
         [ td []
             [ text team.name ]
@@ -401,3 +467,116 @@ viewEditButton team =
     button
         (onClick (EditTeamButtonClick team.id) :: Custom.Attributes.editButton)
         [ text "Edit" ]
+
+
+
+{- View Games Table -}
+
+
+viewGamesCarousel : Model -> List Game -> Html Msg
+viewGamesCarousel model games =
+    let
+        thisId =
+            "gamesCarousel"
+
+        endWeek =
+            maxWeek games
+    in
+    div
+        [ id thisId
+        , class "carousel slide"
+        , attribute "data-ride" "carousel"
+        , attribute "data-bs-interval" "false"
+        , attribute "data-bs-wrap" "false"
+        , style "background-color" "#ddd"
+        ]
+        [ carouselIndicators thisId endWeek model.displayedWeek
+        , viewGames games endWeek model.displayedWeek
+        , carouselPrev thisId model.displayedWeek
+        , carouselNext thisId model.displayedWeek endWeek
+        ]
+
+
+carouselIndicators : String -> Int -> Int -> Html Msg
+carouselIndicators id endWeek currPage =
+    ol [ class "carousel-indicators" ]
+        (List.range 1 endWeek
+            |> List.map (\week -> carouselIndicator id week currPage)
+        )
+
+
+carouselIndicator : String -> Int -> Int -> Html Msg
+carouselIndicator id week currWeek =
+    button
+        [ type_ "button"
+        , attribute "data-bs-target" <| "#" ++ id
+        , attribute "data-bs-slide-to" <| String.fromInt week
+        , onClick <| ChangeWeek week
+        , if week == currWeek then
+            class "active"
+
+          else
+            class ""
+        ]
+        []
+
+
+carouselPrev : String -> Int -> Html Msg
+carouselPrev id currWeek =
+    a
+        [ class "carousel-control-prev"
+        , href <| "#" ++ id
+        , onClick <| ChangeWeek <| Basics.max 1 (currWeek - 1)
+        ]
+        [ span [ class "carousel-control-prev-icon" ] []
+        , span [ class "visually-hidden" ] [ text "Previous" ]
+        ]
+
+
+carouselNext : String -> Int -> Int -> Html Msg
+carouselNext id currWeek endWeek =
+    a
+        [ class "carousel-control-next"
+        , href <| "#" ++ id
+        , onClick <| ChangeWeek <| Basics.min endWeek (currWeek + 1)
+        ]
+        [ span [ class "carousel-control-next-icon" ] []
+        , span [ class "visually-hidden" ] [ text "Next" ]
+        ]
+
+
+viewGames : List Game -> Int -> Int -> Html Msg
+viewGames games endWeek currWeek =
+    div [ class "carousel-inner" ]
+        (List.range 1 endWeek
+            |> List.map (\week -> viewWeek games week currWeek)
+        )
+
+
+viewWeek : List Game -> Int -> Int -> Html Msg
+viewWeek games thisWeek currWeek =
+    div
+        [ class "carousel-item"
+        , if thisWeek == currWeek then
+            class "active"
+
+          else
+            class ""
+        , style "padding" "3em 5em 5em"
+        ]
+    <|
+        viewWeekTitle thisWeek
+            :: (List.map viewGame <| gamesInWeek thisWeek games)
+
+
+viewWeekTitle : Int -> Html msg
+viewWeekTitle currWeek =
+    div [ style "text-align" "center" ] 
+    [ h5 [] [ text <| "Week " ++ String.fromInt currWeek ]
+    , br [] []
+     ]
+
+
+viewGame : Game -> Html Msg
+viewGame game =
+    div [ style "text-align" "center" ] [ text <| game.homeTeam.name ++ " vs. " ++ game.awayTeam.name ]
