@@ -28,7 +28,13 @@ INSERT INTO TeamDivision (team_id, div_id, start_date, end_date)
 
 INSERT INTO Game (home_team_id, away_team_id, div_id, week)
 	SELECT Team.id, t2.awayId, Division.id, 1 
-		FROM (Team, Division, (SELECT Team.id as awayId FROM Team where Team.name="Scooby Snacks") as t2) WHERE Team.name="The Government" AND Division.name="Div A" and Division.season=1;
+		FROM (Team, Division, (SELECT Team.id as awayId FROM Team where Team.name="Scooby Snacks") as t2) WHERE Team.name="The Government" AND Division.name="Div A" and Division.season=1 UNION ALL
+	SELECT Team.id, t2.awayId, Division.id, 2 
+		FROM (Team, Division, (SELECT Team.id as awayId FROM Team where Team.name="Scooby Snacks") as t2) WHERE Team.name="The Government" AND Division.name="Div A" and Division.season=1 UNION ALL
+	SELECT Team.id, t2.awayId, Division.id, 2 
+		FROM (Team, Division, (SELECT Team.id as awayId FROM Team where Team.name="Scooby Snacks") as t2) WHERE Team.name=" Murder Hobos" AND Division.name="Div A" and Division.season=1
+
+;
 
 
 
