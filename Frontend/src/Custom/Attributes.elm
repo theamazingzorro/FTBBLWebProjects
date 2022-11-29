@@ -6,6 +6,20 @@ import Html.Events exposing (onClick)
 
 
 
+-- General --
+
+
+centered : Attribute msg
+centered =
+    style "text-align" "center"
+
+
+visuallyHidden : Attribute msg
+visuallyHidden =
+    class "visually-hidden"
+
+
+
 -- Grid --
 
 
@@ -98,6 +112,11 @@ tableButtonColumn btnCount =
 -- Buttons --
 
 
+button : Attribute msg
+button =
+    type_ "button"
+
+
 rightSideButtons : Attribute msg
 rightSideButtons =
     class "btn-group float-end"
@@ -188,3 +207,59 @@ formInputLink thisId clickMsg otherAttributes =
         , class "btn-link"
         ]
         ++ otherAttributes
+
+
+
+-- Carousel --
+
+
+carouselContainer : List (Attribute msg)
+carouselContainer =
+    [ class "carousel slide"
+    , attribute "data-ride" "carousel"
+    , attribute "data-bs-interval" "false"
+    , attribute "data-bs-wrap" "false"
+    , style "background-color" "#ddd"
+    ]
+
+
+carouselInner : Attribute msg
+carouselInner =
+    class "carousel-inner"
+
+
+carouselIndicators : Attribute msg
+carouselIndicators =
+    class "carousel-indicators"
+
+
+dataBsTarget : String -> Attribute msg
+dataBsTarget =
+    attribute "data-bs-target"
+
+
+carouselNextButton : Attribute msg
+carouselNextButton =
+    class "carousel-control-next"
+
+
+carouselNextIcon : Attribute msg
+carouselNextIcon =
+    class "carousel-control-next-icon"
+
+
+carouselPrevButton : Attribute msg
+carouselPrevButton =
+    class "carousel-control-prev"
+
+
+carouselPrevIcon : Attribute msg
+carouselPrevIcon =
+    class "carousel-control-prev-icon"
+
+
+carouselItem : List (Attribute msg)
+carouselItem =
+    [ class "carousel-item"
+    , style "padding" "3em 5em 5em"
+    ]

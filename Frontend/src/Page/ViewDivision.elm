@@ -483,13 +483,7 @@ viewGamesCarousel model games =
             maxWeek games
     in
     div
-        [ id thisId
-        , class "carousel slide"
-        , attribute "data-ride" "carousel"
-        , attribute "data-bs-interval" "false"
-        , attribute "data-bs-wrap" "false"
-        , style "background-color" "#ddd"
-        ]
+        (id thisId :: Custom.Attributes.carouselContainer)
         [ carouselIndicators thisId endWeek model.displayedWeek
         , viewGames games endWeek model.displayedWeek
         , carouselPrev thisId model.displayedWeek
@@ -499,7 +493,7 @@ viewGamesCarousel model games =
 
 carouselIndicators : String -> Int -> Int -> Html Msg
 carouselIndicators id endWeek currPage =
-    ol [ class "carousel-indicators" ]
+    ol [ Custom.Attributes.carouselIndicators ]
         (List.range 1 endWeek
             |> List.map (\week -> carouselIndicator id week currPage)
         )
@@ -508,9 +502,8 @@ carouselIndicators id endWeek currPage =
 carouselIndicator : String -> Int -> Int -> Html Msg
 carouselIndicator id week currWeek =
     button
-        [ type_ "button"
-        , attribute "data-bs-target" <| "#" ++ id
-        , attribute "data-bs-slide-to" <| String.fromInt week
+        [ Custom.Attributes.button
+        , Custom.Attributes.dataBsTarget <| "#" ++ id
         , onClick <| ChangeWeek week
         , if week == currWeek then
             class "active"
@@ -524,30 +517,30 @@ carouselIndicator id week currWeek =
 carouselPrev : String -> Int -> Html Msg
 carouselPrev id currWeek =
     a
-        [ class "carousel-control-prev"
+        [ Custom.Attributes.carouselPrevButton
         , href <| "#" ++ id
         , onClick <| ChangeWeek <| Basics.max 1 (currWeek - 1)
         ]
-        [ span [ class "carousel-control-prev-icon" ] []
-        , span [ class "visually-hidden" ] [ text "Previous" ]
+        [ span [ Custom.Attributes.carouselPrevIcon ] []
+        , span [ Custom.Attributes.visuallyHidden ] [ text "Previous" ]
         ]
 
 
 carouselNext : String -> Int -> Int -> Html Msg
 carouselNext id currWeek endWeek =
     a
-        [ class "carousel-control-next"
+        [ Custom.Attributes.carouselNextButton
         , href <| "#" ++ id
         , onClick <| ChangeWeek <| Basics.min endWeek (currWeek + 1)
         ]
-        [ span [ class "carousel-control-next-icon" ] []
-        , span [ class "visually-hidden" ] [ text "Next" ]
+        [ span [ Custom.Attributes.carouselNextIcon ] []
+        , span [ Custom.Attributes.visuallyHidden ] [ text "Next" ]
         ]
 
 
 viewGames : List Game -> Int -> Int -> Html Msg
 viewGames games endWeek currWeek =
-    div [ class "carousel-inner" ]
+    div [ Custom.Attributes.carouselInner ]
         (List.range 1 endWeek
             |> List.map (\week -> viewWeek games week currWeek)
         )
@@ -556,14 +549,12 @@ viewGames games endWeek currWeek =
 viewWeek : List Game -> Int -> Int -> Html Msg
 viewWeek games thisWeek currWeek =
     div
-        [ class "carousel-item"
-        , if thisWeek == currWeek then
-            class "active"
+        (if thisWeek == currWeek then
+            class "active" :: Custom.Attributes.carouselItem
 
-          else
-            class ""
-        , style "padding" "3em 5em 5em"
-        ]
+         else
+            Custom.Attributes.carouselItem
+        )
     <|
         viewWeekTitle thisWeek
             :: (List.map viewGame <| gamesInWeek thisWeek games)
@@ -572,7 +563,7 @@ viewWeek games thisWeek currWeek =
 viewWeekTitle : Int -> Html msg
 viewWeekTitle currWeek =
     div
-        [ style "text-align" "center" ]
+        [ Custom.Attributes.centered ]
         [ h5 [] [ text <| "Week " ++ String.fromInt currWeek ]
         , br [] []
         ]
@@ -581,5 +572,5 @@ viewWeekTitle currWeek =
 viewGame : Game -> Html Msg
 viewGame game =
     div
-        [ style "text-align" "center" ]
+        [ Custom.Attributes.centered ]
         [ text <| game.homeTeam.name ++ " vs. " ++ game.awayTeam.name ]
