@@ -486,8 +486,8 @@ viewGamesCarousel model games =
         (id thisId :: Custom.Attributes.carouselContainer)
         [ carouselIndicators thisId endWeek model.displayedWeek
         , viewGames games endWeek model.displayedWeek
-        , carouselPrev thisId model.displayedWeek
-        , carouselNext thisId model.displayedWeek endWeek
+        , carouselPrev model.displayedWeek
+        , carouselNext model.displayedWeek endWeek
         ]
 
 
@@ -514,11 +514,10 @@ carouselIndicator id week currWeek =
         []
 
 
-carouselPrev : String -> Int -> Html Msg
-carouselPrev id currWeek =
-    a
+carouselPrev : Int -> Html Msg
+carouselPrev currWeek =
+    button
         [ Custom.Attributes.carouselPrevButton
-        , href <| "#" ++ id
         , onClick <| ChangeWeek <| Basics.max 1 (currWeek - 1)
         ]
         [ span [ Custom.Attributes.carouselPrevIcon ] []
@@ -526,11 +525,10 @@ carouselPrev id currWeek =
         ]
 
 
-carouselNext : String -> Int -> Int -> Html Msg
-carouselNext id currWeek endWeek =
-    a
+carouselNext : Int -> Int -> Html Msg
+carouselNext currWeek endWeek =
+    button
         [ Custom.Attributes.carouselNextButton
-        , href <| "#" ++ id
         , onClick <| ChangeWeek <| Basics.min endWeek (currWeek + 1)
         ]
         [ span [ Custom.Attributes.carouselNextIcon ] []
@@ -573,4 +571,4 @@ viewGame : Game -> Html Msg
 viewGame game =
     div
         [ Custom.Attributes.centered ]
-        [ text <| game.homeTeam.name ++ " vs. " ++ game.awayTeam.name ]
+        [ p [] [ text <| game.homeTeam.name ++ " vs. " ++ game.awayTeam.name ] ]

@@ -215,11 +215,10 @@ formInputLink thisId clickMsg otherAttributes =
 
 carouselContainer : List (Attribute msg)
 carouselContainer =
-    [ class "carousel slide"
-    , attribute "data-ride" "carousel"
+    [ class "carousel slide carousel-dark"
     , attribute "data-bs-interval" "false"
     , attribute "data-bs-wrap" "false"
-    , style "background-color" "#ddd"
+    , style "background-color" "#eee"
     ]
 
 
