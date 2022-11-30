@@ -22,6 +22,7 @@ type Route
     | AddDivision
     | EditDivision DivisionId
     | AddGame
+    | AddGameWithDefaults DivisionId Int
     | EditGame GameId
     | Signin
     | ViewDivision DivisionId
@@ -88,6 +89,11 @@ matchRoute =
             oneOf
                 [ s "Game" </> s "Add"
                 , s "game" </> s "add"
+                ]
+        , map AddGameWithDefaults <|
+            oneOf
+                [ s "Game" </> s "Add" </> Div.idParser </> int
+                , s "game" </> s "add" </> Div.idParser </> int
                 ]
         , map EditGame <|
             oneOf
@@ -158,6 +164,9 @@ routeToString route =
 
         AddGame ->
             "/Game/Add"
+
+        AddGameWithDefaults divId week ->
+            "/Game/Add/" ++ Div.idToString divId ++ "/" ++ String.fromInt week
 
         EditGame gameId ->
             "/Game/Edit/" ++ Game.idToString gameId

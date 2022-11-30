@@ -93,6 +93,7 @@ reWeek data week =
         _ ->
             data
 
+
 reHomeScore : WebData Game -> String -> WebData Game
 reHomeScore data score =
     case data of
@@ -102,6 +103,7 @@ reHomeScore data score =
         _ ->
             data
 
+
 reAwayScore : WebData Game -> String -> WebData Game
 reAwayScore data score =
     case data of
@@ -110,6 +112,7 @@ reAwayScore data score =
 
         _ ->
             data
+
 
 trySaveGame : Model -> ( Model, Cmd Msg )
 trySaveGame model =
@@ -185,7 +188,7 @@ viewSaveError maybeError =
     case maybeError of
         Just error ->
             div [ Custom.Attributes.errorMessage ]
-                [ h3 [] [ text "Couldn't save a coach at this time." ]
+                [ h3 [] [ text "Couldn't save a game at this time." ]
                 , text ("Error: " ++ error)
                 , br [] []
                 ]
@@ -237,6 +240,7 @@ viewWeekField val =
             )
             []
         ]
+
 
 viewHomeScoreField : Maybe Int -> Html Msg
 viewHomeScoreField val =

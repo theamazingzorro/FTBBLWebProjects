@@ -125,7 +125,12 @@ init session route =
                 |> requiresAuth session
 
         Route.AddGame ->
-            AddGame.init session
+            AddGame.init session Nothing Nothing
+                |> wrapInitWith AddGamePage AddGamePageMsg
+                |> requiresAuth session
+
+        Route.AddGameWithDefaults divId week ->
+            AddGame.init session (Just divId) (Just week)
                 |> wrapInitWith AddGamePage AddGamePageMsg
                 |> requiresAuth session
 

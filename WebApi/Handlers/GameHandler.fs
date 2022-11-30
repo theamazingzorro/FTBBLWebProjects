@@ -55,9 +55,9 @@ module GameHandler =
 
                 let! game = ctx.BindJsonAsync<Game>()
 
-                logger.LogInformation $"Saving Game: id={game.Id}"
+                logger.LogInformation $"Saving New Game: id={game.Id}, homeTeamId={game.HomeTeam.Id}, awayTeamId{game.AwayTeam.Id}, week={game.Week}"
                 
-                let result = GameService.saveChanges game
+                let result = GameService.saveNew game
 
                 return! json result next ctx
             }

@@ -35,6 +35,10 @@ module GameService =
 
         0
 
+    let saveNew (game:Game) =
+        GameRepository.save(game)
+
+        game
 
     let saveChanges (game:Game) = 
         let oldGame = GameRepository.getById game.Id

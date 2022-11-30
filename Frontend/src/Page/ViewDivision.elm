@@ -51,7 +51,7 @@ type Msg
     | ChangeWeek Int
     | DeleteGameButtonClick GameId
     | EditGameButtonClick GameId
-    | AddGameButtonClick
+    | AddGameButtonClick Int
 
 
 type TeamSortingMethod
@@ -159,8 +159,8 @@ update msg model =
         EditGameButtonClick id ->
             ( model, pushUrl model.session.navkey <| Route.EditGame id )
 
-        AddGameButtonClick ->
-            ( model, pushUrl model.session.navkey Route.AddGame )
+        AddGameButtonClick week ->
+            ( model, pushUrl model.session.navkey <| Route.AddGameWithDefaults model.divisionId week )
 
 
 newSort : sortMethod -> sortMethod -> sortMethod -> sortMethod
@@ -583,7 +583,7 @@ viewWeek session games thisWeek currWeek =
             (viewWeekTitle thisWeek
                 :: (List.map (viewGame session) <| gamesInWeek thisWeek games)
             )
-            [ requiresAuth session viewAddGameButton ]
+            [ requiresAuth session <| viewAddGameButton thisWeek ]
 
 
 viewWeekTitle : Int -> Html msg
@@ -642,13 +642,13 @@ viewGameEditButton game =
         [ text "Edit" ]
 
 
-viewAddGameButton : Html Msg
-viewAddGameButton =
+viewAddGameButton : Int -> Html Msg
+viewAddGameButton week =
     div [ Custom.Attributes.textCentered ]
         [ button
             [ Custom.Attributes.addButton
             , Custom.Attributes.centered
-            , onClick AddGameButtonClick
+            , onClick <| AddGameButtonClick week
             ]
             [ text "Add Game" ]
         ]
