@@ -8,7 +8,9 @@ type Game =
     {
         Id : int
 
+        [<Column(Name = "home_score")>]
         HomeScore : System.Nullable<int>
+        [<Column(Name = "away_score")>]
         AwayScore : System.Nullable<int>
         Week : int
 

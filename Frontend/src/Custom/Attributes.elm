@@ -9,14 +9,34 @@ import Html.Events exposing (onClick)
 -- General --
 
 
+textCentered : Attribute msg
+textCentered =
+    style "text-align" "center"
+
+
 centered : Attribute msg
 centered =
-    style "text-align" "center"
+    style "margin" "1em auto"
 
 
 visuallyHidden : Attribute msg
 visuallyHidden =
     class "visually-hidden"
+
+
+maxWidth : String -> Attribute msg
+maxWidth =
+    style "max-width"
+
+
+backgroundColor : String -> Attribute msg
+backgroundColor =
+    style "background-color"
+
+
+padding : String -> Attribute msg
+padding =
+    style "padding"
 
 
 
@@ -218,7 +238,7 @@ carouselContainer =
     [ class "carousel slide carousel-dark"
     , attribute "data-bs-interval" "false"
     , attribute "data-bs-wrap" "false"
-    , style "background-color" "#eee"
+    , backgroundColor "#eee"
     ]
 
 
@@ -261,4 +281,14 @@ carouselItem : List (Attribute msg)
 carouselItem =
     [ class "carousel-item"
     , style "padding" "3em 5em 5em"
+    ]
+
+
+carouselItemEntry : List (Attribute msg)
+carouselItemEntry =
+    [ textCentered
+    , backgroundColor "#aaa"
+    , maxWidth "70%"
+    , centered
+    , padding "0.5em"
     ]

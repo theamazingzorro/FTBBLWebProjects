@@ -5,10 +5,12 @@ import Html.Attributes exposing (..)
 import Model.Session exposing (Session)
 import Page.AddCoach as AddCoach
 import Page.AddDivision as AddDivision
+import Page.AddGame as AddGame
 import Page.AddTeam as AddTeam
 import Page.AddTeamToDiv as AddTeamToDiv
 import Page.EditCoach as EditCoach
 import Page.EditDivision as EditDivision
+import Page.EditGame as EditGame
 import Page.EditTeam as EditTeam
 import Page.ListCoaches as ListCoaches
 import Page.ListDivisions as ListDivisions
@@ -34,6 +36,8 @@ type Model
     | DivisionsPage ListDivisions.Model
     | AddDivisionPage AddDivision.Model
     | EditDivisionPage EditDivision.Model
+    | AddGamePage AddGame.Model
+    | EditGamePage EditGame.Model
     | ViewDivisionPage ViewDivision.Model
     | AddTeamToDivPage AddTeamToDiv.Model
 
@@ -49,6 +53,8 @@ type Msg
     | DivisionsPageMsg ListDivisions.Msg
     | AddDivisionPageMsg AddDivision.Msg
     | EditDivisionPageMsg EditDivision.Msg
+    | AddGamePageMsg AddGame.Msg
+    | EditGamePageMsg EditGame.Msg
     | ViewDivisionPageMsg ViewDivision.Msg
     | AddTeamToDivPageMsg AddTeamToDiv.Msg
 
@@ -116,6 +122,16 @@ init session route =
         Route.EditDivision id ->
             EditDivision.init session id
                 |> wrapInitWith EditDivisionPage EditDivisionPageMsg
+                |> requiresAuth session
+
+        Route.AddGame ->
+            AddGame.init session
+                |> wrapInitWith AddGamePage AddGamePageMsg
+                |> requiresAuth session
+
+        Route.EditGame id ->
+            EditGame.init session id
+                |> wrapInitWith EditGamePage EditGamePageMsg
                 |> requiresAuth session
 
         Route.ViewDivision id ->
@@ -206,6 +222,21 @@ update msg model =
                 |> wrapUpdateWith EditDivisionPage EditDivisionPageMsg
 
         ( EditDivisionPageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
+        {- Game CRUD pages -}
+        ( AddGamePageMsg subMsg, AddGamePage pageModel ) ->
+            AddGame.update subMsg pageModel
+                |> wrapUpdateWith AddGamePage AddGamePageMsg
+
+        ( AddGamePageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
+        ( EditGamePageMsg subMsg, EditGamePage pageModel ) ->
+            EditGame.update subMsg pageModel
+                |> wrapUpdateWith EditGamePage EditGamePageMsg
+
+        ( EditGamePageMsg _, _ ) ->
             ( model, Cmd.none, Nothing )
 
         {- Other -}
@@ -318,6 +349,14 @@ view model =
         EditDivisionPage pageModel ->
             EditDivision.view pageModel
                 |> Html.map EditDivisionPageMsg
+
+        AddGamePage pageModel ->
+            AddGame.view pageModel
+                |> Html.map AddGamePageMsg
+
+        EditGamePage pageModel ->
+            EditGame.view pageModel
+                |> Html.map EditGamePageMsg
 
         ViewDivisionPage pageModel ->
             ViewDivision.view pageModel

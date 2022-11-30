@@ -10,7 +10,7 @@ import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, divisionDecoder)
-import Model.Game exposing (Game, gamesDecoder)
+import Model.Game exposing (Game, GameId, gamesDecoder)
 import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
@@ -43,11 +43,15 @@ type Msg
     | DeleteTeamButtonClick TeamId
     | EditTeamButtonClick TeamId
     | TeamDeleted (Result Http.Error DeleteResponse)
+    | GameDeleted (Result Http.Error DeleteResponse)
     | TeamNameSortClick
     | TeamRaceSortClick
     | TeamCoachSortClick
     | TeamEloSortClick
     | ChangeWeek Int
+    | DeleteGameButtonClick GameId
+    | EditGameButtonClick GameId
+    | AddGameButtonClick
 
 
 type TeamSortingMethod
@@ -128,6 +132,12 @@ update msg model =
         TeamDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
 
+        GameDeleted (Ok res) ->
+            ( { model | deleteError = buildDeleteError res }, getGamesRequest model.session.token model.divisionId )
+
+        GameDeleted (Err err) ->
+            ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
+
         TeamNameSortClick ->
             ( { model | sortingMethod = newSort Name NameDesc model.sortingMethod }, Cmd.none )
 
@@ -142,6 +152,15 @@ update msg model =
 
         ChangeWeek newWeek ->
             ( { model | displayedWeek = newWeek }, Cmd.none )
+
+        DeleteGameButtonClick id ->
+            ( model, deleteGameRequest model.session.token id )
+
+        EditGameButtonClick id ->
+            ( model, pushUrl model.session.navkey <| Route.EditGame id )
+
+        AddGameButtonClick ->
+            ( model, pushUrl model.session.navkey Route.AddGame )
 
 
 newSort : sortMethod -> sortMethod -> sortMethod -> sortMethod
@@ -188,6 +207,12 @@ deleteTeamRequest : Maybe String -> TeamId -> Cmd Msg
 deleteTeamRequest token id =
     Api.deleteRequest token (Api.Team id) <|
         Http.expectJson TeamDeleted deleteResponseDecoder
+
+
+deleteGameRequest : Maybe String -> GameId -> Cmd Msg
+deleteGameRequest token id =
+    Api.deleteRequest token (Api.Game id) <|
+        Http.expectJson GameDeleted deleteResponseDecoder
 
 
 
@@ -335,32 +360,32 @@ viewHeaderOrError data session =
             text ""
 
         RemoteData.Loading ->
-            viewHeader "Loading..." "" session
+            viewDivHeader "Loading..." "" session
 
         RemoteData.Success division ->
-            viewHeader division.name ("Season " ++ String.fromInt division.season) session
+            viewDivHeader division.name ("Season " ++ String.fromInt division.season) session
 
         RemoteData.Failure httpError ->
-            viewHeader (Error.buildErrorMessage httpError) "" session
+            viewDivHeader (Error.buildErrorMessage httpError) "" session
 
 
 
 {- View Header -}
 
 
-viewHeader : String -> String -> Session -> Html Msg
-viewHeader title subtitle session =
+viewDivHeader : String -> String -> Session -> Html Msg
+viewDivHeader title subtitle session =
     div Custom.Attributes.row
         [ div [ Custom.Attributes.col ]
             [ h3 [] [ text title ]
             , h6 [] [ text subtitle ]
             ]
-        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
+        , div [ Custom.Attributes.col ] [ requiresAuth session viewAddTeamButton ]
         ]
 
 
-viewToolBar : Html Msg
-viewToolBar =
+viewAddTeamButton : Html Msg
+viewAddTeamButton =
     div [ Custom.Attributes.rightSideButtons ]
         [ button
             [ Custom.Attributes.addButton
@@ -451,19 +476,19 @@ viewTeamTableRow session team =
             [ text <| String.fromInt team.elo ]
         , requiresAuth session <|
             td [ Custom.Attributes.tableButtonColumn 2 ]
-                [ viewEditButton team, viewDeleteButton team ]
+                [ viewTeamEditButton team, viewTeamDeleteButton team ]
         ]
 
 
-viewDeleteButton : Team -> Html Msg
-viewDeleteButton team =
+viewTeamDeleteButton : Team -> Html Msg
+viewTeamDeleteButton team =
     button
         (onClick (DeleteTeamButtonClick team.id) :: Custom.Attributes.deleteButton)
         [ text "Delete" ]
 
 
-viewEditButton : Team -> Html Msg
-viewEditButton team =
+viewTeamEditButton : Team -> Html Msg
+viewTeamEditButton team =
     button
         (onClick (EditTeamButtonClick team.id) :: Custom.Attributes.editButton)
         [ text "Edit" ]
@@ -485,7 +510,7 @@ viewGamesCarousel model games =
     div
         (id thisId :: Custom.Attributes.carouselContainer)
         [ carouselIndicators thisId endWeek model.displayedWeek
-        , viewGames games endWeek model.displayedWeek
+        , viewGames model.session games endWeek model.displayedWeek
         , carouselPrev model.displayedWeek
         , carouselNext model.displayedWeek endWeek
         ]
@@ -536,16 +561,16 @@ carouselNext currWeek endWeek =
         ]
 
 
-viewGames : List Game -> Int -> Int -> Html Msg
-viewGames games endWeek currWeek =
+viewGames : Session -> List Game -> Int -> Int -> Html Msg
+viewGames session games endWeek currWeek =
     div [ Custom.Attributes.carouselInner ]
         (List.range 1 endWeek
-            |> List.map (\week -> viewWeek games week currWeek)
+            |> List.map (\week -> viewWeek session games week currWeek)
         )
 
 
-viewWeek : List Game -> Int -> Int -> Html Msg
-viewWeek games thisWeek currWeek =
+viewWeek : Session -> List Game -> Int -> Int -> Html Msg
+viewWeek session games thisWeek currWeek =
     div
         (if thisWeek == currWeek then
             class "active" :: Custom.Attributes.carouselItem
@@ -554,21 +579,76 @@ viewWeek games thisWeek currWeek =
             Custom.Attributes.carouselItem
         )
     <|
-        viewWeekTitle thisWeek
-            :: (List.map viewGame <| gamesInWeek thisWeek games)
+        List.append
+            (viewWeekTitle thisWeek
+                :: (List.map (viewGame session) <| gamesInWeek thisWeek games)
+            )
+            [ requiresAuth session viewAddGameButton ]
 
 
 viewWeekTitle : Int -> Html msg
 viewWeekTitle currWeek =
     div
-        [ Custom.Attributes.centered ]
+        [ Custom.Attributes.textCentered ]
         [ h5 [] [ text <| "Week " ++ String.fromInt currWeek ]
         , br [] []
         ]
 
 
-viewGame : Game -> Html Msg
-viewGame game =
+viewGame : Session -> Game -> Html Msg
+viewGame session game =
     div
-        [ Custom.Attributes.centered ]
-        [ p [] [ text <| game.homeTeam.name ++ " vs. " ++ game.awayTeam.name ] ]
+        Custom.Attributes.carouselItemEntry
+        [ p [] [ text <| game.homeTeam.name ++ " vs. " ++ game.awayTeam.name ]
+        , viewScore game
+        , requiresAuth session <| viewGameButtons game
+        ]
+
+
+viewScore : Game -> Html Msg
+viewScore game =
+    case game.homeScore of
+        Just homeScore ->
+            case game.awayScore of
+                Just awayScore ->
+                    p [] [ text <| String.fromInt homeScore ++ " - " ++ String.fromInt awayScore ]
+
+                Nothing ->
+                    text ""
+
+        Nothing ->
+            text ""
+
+
+viewGameButtons : Game -> Html Msg
+viewGameButtons game =
+    div []
+        [ viewGameEditButton game
+        , viewGameDeleteButton game
+        ]
+
+
+viewGameDeleteButton : Game -> Html Msg
+viewGameDeleteButton game =
+    button
+        (onClick (DeleteGameButtonClick game.id) :: Custom.Attributes.deleteButton)
+        [ text "Delete" ]
+
+
+viewGameEditButton : Game -> Html Msg
+viewGameEditButton game =
+    button
+        (onClick (EditGameButtonClick game.id) :: Custom.Attributes.editButton)
+        [ text "Edit" ]
+
+
+viewAddGameButton : Html Msg
+viewAddGameButton =
+    div [ Custom.Attributes.textCentered ]
+        [ button
+            [ Custom.Attributes.addButton
+            , Custom.Attributes.centered
+            , onClick AddGameButtonClick
+            ]
+            [ text "Add Game" ]
+        ]
