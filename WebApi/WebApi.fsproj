@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup> 
+	<Content Include="appsettings.json" /> 
 	<Compile Include="Models\User.fs" /> 
 	<Compile Include="Models\Division.fs" /> 
 	<Compile Include="Models\Race.fs" /> 
@@ -49,6 +50,8 @@
     <Compile Include="Handlers\GameHandler.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
+
+  <ItemGroup />
 
   <ItemGroup>
     <None Include="web.config" CopyToOutputDirectory="PreserveNewest" />
