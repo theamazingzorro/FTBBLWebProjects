@@ -5,6 +5,7 @@
     <AssemblyName>WebApi.App</AssemblyName>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
     <UserSecretsId>b89e6699-9205-46e2-be6b-5628190c89d1</UserSecretsId>
+    <AspNetCoreModuleName>AspNetCoreModuleV2</AspNetCoreModuleName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +19,9 @@
   </ItemGroup>
 
   <ItemGroup> 
-	<Content Include="appsettings.json" /> 
+	<Content Include="appsettings.json">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</Content> 
 	<Compile Include="Models\User.fs" /> 
 	<Compile Include="Models\Division.fs" /> 
 	<Compile Include="Models\Race.fs" /> 
