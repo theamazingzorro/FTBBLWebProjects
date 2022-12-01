@@ -11,7 +11,6 @@ import Model.Division exposing (Division, DivisionId, divisionDecoder)
 import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
-import Route exposing (pushUrl)
 import Url exposing (Protocol(..))
 
 
@@ -86,7 +85,7 @@ update msg model =
             ( { model | selectedTeamId = Nothing }, trySubmit model.session.token model.selectedTeamId model.divisionId )
 
         TeamDivSubmitted (Ok _) ->
-            ( { model | saveError = Nothing }, pushUrl model.session.navkey <| Route.ViewDivision model.divisionId )
+            ( { model | saveError = Nothing }, Cmd.none )
 
         TeamDivSubmitted (Err err) ->
             ( { model | saveError = Just (buildErrorMessage err) }, Cmd.none )
