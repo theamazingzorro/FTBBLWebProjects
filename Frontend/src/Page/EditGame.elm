@@ -128,7 +128,7 @@ getNextPage : WebData Game -> Route
 getNextPage data =
     case data of
         RemoteData.Success game ->
-            Route.ViewDivision game.division.id
+            Route.ViewDivisionWeek game.division.id game.week
 
         _ ->
             Route.Divisions

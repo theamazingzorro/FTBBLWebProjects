@@ -143,7 +143,11 @@ init session route =
                 |> requiresAuth session
 
         Route.ViewDivision id ->
-            ViewDivision.init session id
+            ViewDivision.init session id Nothing
+                |> wrapInitWith ViewDivisionPage ViewDivisionPageMsg
+
+        Route.ViewDivisionWeek id week ->
+            ViewDivision.init session id (Just week)
                 |> wrapInitWith ViewDivisionPage ViewDivisionPageMsg
 
         Route.AddTeamToDivision id ->

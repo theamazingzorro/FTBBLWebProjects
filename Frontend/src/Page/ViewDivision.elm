@@ -71,13 +71,13 @@ type TeamSortingMethod
 -- Init --
 
 
-init : Session -> DivisionId -> ( Model, Cmd Msg )
-init session id =
+init : Session -> DivisionId -> Maybe Int -> ( Model, Cmd Msg )
+init session id startWeek =
     ( { teams = RemoteData.Loading
       , sortingMethod = None
       , division = RemoteData.Loading
       , games = RemoteData.Loading
-      , displayedWeek = 1
+      , displayedWeek = Maybe.withDefault 1 startWeek
       , session = session
       , deleteError = Nothing
       , divisionId = id
@@ -507,7 +507,7 @@ viewGamesHeader : List Game -> Session -> Html Msg
 viewGamesHeader games session =
     div Custom.Attributes.row
         [ div [ Custom.Attributes.col ]
-            [ h3 [] [ text "Scheduled Games" ]
+            [ h3 [ id "week" ] [ text "Scheduled Games" ]
             ]
         , div [ Custom.Attributes.col ] [ requiresAuth session <| viewAddWeekButton <| maxWeek games + 1 ]
         ]

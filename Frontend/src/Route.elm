@@ -26,6 +26,7 @@ type Route
     | EditGame GameId
     | Signin
     | ViewDivision DivisionId
+    | ViewDivisionWeek DivisionId Int
     | AddTeamToDivision DivisionId
     | AddGameWeek DivisionId Int
 
@@ -108,6 +109,12 @@ matchRoute =
                 [ s "Division" </> s "View" </> Div.idParser
                 , s "division" </> s "view" </> Div.idParser
                 ]
+        , map ViewDivisionWeek <|
+            oneOf
+                [ s "Division" </> s "View" </> Div.idParser </> int
+                , s "division" </> s "view" </> Div.idParser </> int
+                ]
+        
 
         {- More Complex Admin Pages -}
         , map AddTeamToDivision <|
@@ -180,8 +187,11 @@ routeToString route =
         ViewDivision divisionId ->
             "/Division/View/" ++ Div.idToString divisionId
 
+        ViewDivisionWeek divisionId week ->
+            "/Division/View/" ++ Div.idToString divisionId ++ "/" ++ String.fromInt week
+
         AddTeamToDivision divisionId ->
             "/Division/AddTeam/" ++ Div.idToString divisionId
 
         AddGameWeek divisionId week ->
-            "/Game/AddWeek/" ++ Div.idToString divisionId ++ "/" ++ String.fromInt week
+            "/Game/AddWeek/" ++ Div.idToString divisionId ++ "/" ++ String.fromInt week ++ "#week"

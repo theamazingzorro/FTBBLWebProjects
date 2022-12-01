@@ -101,7 +101,7 @@ update msg model =
 
                 newCmd =
                     if newSuccesses == List.length model.games then
-                        pushUrl model.session.navkey <| Route.ViewDivision model.divId
+                        pushUrl model.session.navkey <| Route.ViewDivisionWeek model.divId model.week
 
                     else
                         Cmd.none
