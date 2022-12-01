@@ -69,14 +69,20 @@ init session divId week =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        DivisionsRecieved divisions ->
+        DivisionsRecieved (RemoteData.Success divisions) ->
             let
+                openDivs =
+                    List.filter (\div -> not div.closed) divisions
+
                 newGame =
-                    reDiv model.game divisions model.defaultDivId
+                    reDiv model.game (RemoteData.Success openDivs) model.defaultDivId
             in
-            ( { model | divisionOptions = divisions, game = newGame }
+            ( { model | divisionOptions = RemoteData.Success openDivs, game = newGame }
             , getTeamsRequest model.session.token newGame.division.id
             )
+
+        DivisionsRecieved divisions ->
+            ( { model | divisionOptions = divisions }, Cmd.none )
 
         TeamsRecieved teams ->
             ( { model | teamOptions = teams }, Cmd.none )
@@ -240,7 +246,7 @@ filterWebData filterFunc =
     RemoteData.andThen (List.filter filterFunc >> RemoteData.Success)
 
 
-viewDropdown : Game -> WebData (List a) -> (Game -> List a -> Html Msg) -> Html Msg
+viewDropdown : Game -> WebData (List { a | name : comparable }) -> (Game -> List { a | name : comparable } -> Html Msg) -> Html Msg
 viewDropdown game data dropDownFunction =
     case data of
         RemoteData.NotAsked ->
@@ -254,7 +260,7 @@ viewDropdown game data dropDownFunction =
                 [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
 
         RemoteData.Success d ->
-            dropDownFunction game d
+            dropDownFunction game <| List.sortBy .name d
 
 
 divisionDropdown : Game -> List Division -> Html Msg

@@ -27,6 +27,7 @@ type Route
     | Signin
     | ViewDivision DivisionId
     | AddTeamToDivision DivisionId
+    | AddGameWeek DivisionId Int
 
 
 parseUrl : Url -> Route
@@ -114,6 +115,11 @@ matchRoute =
                 [ s "Division" </> s "AddTeam" </> Div.idParser
                 , s "division" </> s "addteam" </> Div.idParser
                 ]
+        , map AddGameWeek <|
+            oneOf
+                [ s "Game" </> s "AddWeek" </> Div.idParser </> int
+                , s "game" </> s "addweek" </> Div.idParser </> int
+                ]
         ]
 
 
@@ -176,3 +182,6 @@ routeToString route =
 
         AddTeamToDivision divisionId ->
             "/Division/AddTeam/" ++ Div.idToString divisionId
+
+        AddGameWeek divisionId week ->
+            "/Game/AddWeek/" ++ Div.idToString divisionId ++ "/" ++ String.fromInt week

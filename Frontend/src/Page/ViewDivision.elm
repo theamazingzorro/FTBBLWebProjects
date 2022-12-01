@@ -52,6 +52,7 @@ type Msg
     | DeleteGameButtonClick GameId
     | EditGameButtonClick GameId
     | AddGameButtonClick Int
+    | AddWeekButtonClick Int
 
 
 type TeamSortingMethod
@@ -161,6 +162,9 @@ update msg model =
 
         AddGameButtonClick week ->
             ( model, pushUrl model.session.navkey <| Route.AddGameWithDefaults model.divisionId week )
+
+        AddWeekButtonClick week ->
+            ( model, pushUrl model.session.navkey <| Route.AddGameWeek model.divisionId week )
 
 
 newSort : sortMethod -> sortMethod -> sortMethod -> sortMethod
@@ -322,7 +326,8 @@ viewGamesOrError model =
         RemoteData.Success games ->
             div []
                 [ br [] []
-                , h3 [] [ text "Scheduled Matches" ]
+                , viewGamesHeader games model.session
+                , br [] []
                 , viewGamesCarousel model games
                 ]
 
@@ -495,7 +500,28 @@ viewTeamEditButton team =
 
 
 
-{- View Games Table -}
+{- View Games -}
+
+
+viewGamesHeader : List Game -> Session -> Html Msg
+viewGamesHeader games session =
+    div Custom.Attributes.row
+        [ div [ Custom.Attributes.col ]
+            [ h3 [] [ text "Scheduled Games" ]
+            ]
+        , div [ Custom.Attributes.col ] [ requiresAuth session <| viewAddWeekButton <| maxWeek games + 1 ]
+        ]
+
+
+viewAddWeekButton : Int -> Html Msg
+viewAddWeekButton nextWeek =
+    div [ Custom.Attributes.rightSideButtons ]
+        [ button
+            [ Custom.Attributes.addButton
+            , onClick <| AddWeekButtonClick nextWeek
+            ]
+            [ text <| "Add Week " ++ String.fromInt nextWeek ]
+        ]
 
 
 viewGamesCarousel : Model -> List Game -> Html Msg

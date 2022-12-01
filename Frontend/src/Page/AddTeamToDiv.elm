@@ -221,7 +221,7 @@ viewLoadError errorMessage =
 viewForm : List Team -> Model -> Html Msg
 viewForm teams model =
     div []
-        [ teamDropdown model.selectedTeamId teams
+        [ teamDropdown model.selectedTeamId <| List.sortBy .name teams
         , viewSelectedTeam <| getSelectedTeam teams model.selectedTeamId
         ]
 

@@ -219,7 +219,7 @@ viewRaceField team data =
                 [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
 
         RemoteData.Success races ->
-            raceDropdown team races
+            raceDropdown team <| List.sortBy .name races
 
 
 raceDropdown : Team -> List Race -> Html Msg
@@ -250,7 +250,7 @@ viewCoachField team data =
                 [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
 
         RemoteData.Success coaches ->
-            coachDropdown team coaches
+            coachDropdown team <| List.sortBy .name coaches
 
 
 coachDropdown : Team -> List Coach -> Html Msg

@@ -6,6 +6,7 @@ import Model.Session exposing (Session)
 import Page.AddCoach as AddCoach
 import Page.AddDivision as AddDivision
 import Page.AddGame as AddGame
+import Page.AddGameWeek as AddGameWeek
 import Page.AddTeam as AddTeam
 import Page.AddTeamToDiv as AddTeamToDiv
 import Page.EditCoach as EditCoach
@@ -40,6 +41,7 @@ type Model
     | EditGamePage EditGame.Model
     | ViewDivisionPage ViewDivision.Model
     | AddTeamToDivPage AddTeamToDiv.Model
+    | AddGameWeekPage AddGameWeek.Model
 
 
 type Msg
@@ -57,6 +59,7 @@ type Msg
     | EditGamePageMsg EditGame.Msg
     | ViewDivisionPageMsg ViewDivision.Msg
     | AddTeamToDivPageMsg AddTeamToDiv.Msg
+    | AddGameWeekMsg AddGameWeek.Msg
 
 
 type OutMsg
@@ -146,6 +149,11 @@ init session route =
         Route.AddTeamToDivision id ->
             AddTeamToDiv.init session id
                 |> wrapInitWith AddTeamToDivPage AddTeamToDivPageMsg
+                |> requiresAuth session
+
+        Route.AddGameWeek id week ->
+            AddGameWeek.init session id week
+                |> wrapInitWith AddGameWeekPage AddGameWeekMsg
                 |> requiresAuth session
 
 
@@ -250,6 +258,13 @@ update msg model =
                 |> wrapUpdateWith AddTeamToDivPage AddTeamToDivPageMsg
 
         ( AddTeamToDivPageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
+        ( AddGameWeekMsg subMsg, AddGameWeekPage pageModel ) ->
+            AddGameWeek.update subMsg pageModel
+                |> wrapUpdateWith AddGameWeekPage AddGameWeekMsg
+
+        ( AddGameWeekMsg _, _ ) ->
             ( model, Cmd.none, Nothing )
 
         ( ViewDivisionPageMsg subMsg, ViewDivisionPage pageModel ) ->
@@ -370,6 +385,10 @@ view model =
         AddTeamToDivPage pageModel ->
             AddTeamToDiv.view pageModel
                 |> Html.map AddTeamToDivPageMsg
+
+        AddGameWeekPage pageModel ->
+            AddGameWeek.view pageModel
+                |> Html.map AddGameWeekMsg
 
 
 notFoundView : Html msg
