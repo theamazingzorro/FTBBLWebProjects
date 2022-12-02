@@ -297,6 +297,8 @@ viewTableHeader sortMethod =
                 ]
             , th [ scope "col" ]
                 [ text "" ]
+            , th [ scope "col" ]
+                [ text "" ]
             ]
         ]
 
@@ -308,6 +310,13 @@ viewDivision session division =
             [ text division.name ]
         , td []
             [ text <| String.fromInt division.season ]
+        , td []
+            [ if division.closed then
+                text "Closed"
+
+              else
+                text "Ongoing"
+            ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 3)
                 [ viewCloseButton division
