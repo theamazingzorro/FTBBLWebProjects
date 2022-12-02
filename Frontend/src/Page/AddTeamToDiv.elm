@@ -50,7 +50,7 @@ init session id =
       , teams = RemoteData.Loading
       }
     , Cmd.batch
-        [ getTeamsNotInDivRequest session.token id
+        [ getFreeTeamsRequest session.token
         , getDivisionRequest session.token id
         ]
     )
@@ -105,9 +105,9 @@ trySubmit token maybeTeamId divId =
 -- API Requests --
 
 
-getTeamsNotInDivRequest : Maybe String -> DivisionId -> Cmd Msg
-getTeamsNotInDivRequest token divId =
-    Api.getRequest token (Api.TeamsNotInDiv divId) <|
+getFreeTeamsRequest : Maybe String -> Cmd Msg
+getFreeTeamsRequest token =
+    Api.getRequest token Api.FreeTeams <|
         Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
 
 

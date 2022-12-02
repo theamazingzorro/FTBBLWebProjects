@@ -11,6 +11,7 @@ import Model.Team as Team exposing (TeamId)
 
 type Endpoint
     = Teams
+    | FreeTeams
     | TeamsInDiv DivisionId
     | TeamsNotInDiv DivisionId
     | TeamUpdateDiv TeamId DivisionId
@@ -38,6 +39,9 @@ stringOf endpoint =
     case endpoint of
         Teams ->
             "team"
+
+        FreeTeams ->
+            "team/free/"
 
         Team index ->
             "team/" ++ Team.idToString index
