@@ -123,9 +123,11 @@ table =
     class "table table-striped table-hover"
 
 
-tableButtonColumn : Int -> Attribute msg
+tableButtonColumn : Int -> List (Attribute msg)
 tableButtonColumn btnCount =
-    width <| btnCount * 100
+    [ width <| btnCount * 100
+    , style "text-align" "right"
+    ]
 
 
 

@@ -480,7 +480,7 @@ viewTeamTableRow session team =
         , td []
             [ text <| String.fromInt team.elo ]
         , requiresAuth session <|
-            td [ Custom.Attributes.tableButtonColumn 2 ]
+            td ( Custom.Attributes.tableButtonColumn 2 )
                 [ viewTeamEditButton team, viewTeamDeleteButton team ]
         ]
 
