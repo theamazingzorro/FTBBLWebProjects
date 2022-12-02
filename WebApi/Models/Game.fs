@@ -12,6 +12,12 @@ type Game =
         HomeScore : System.Nullable<int>
         [<Column(Name = "away_score")>]
         AwayScore : System.Nullable<int>
+
+        [<Ignore>]
+        HomeOdds : System.Nullable<float>
+        [<Ignore>]
+        AwayOdds : System.Nullable<float>
+
         Week : int
 
         [<Reference(ReferenceType.Foreign, ColumnName = "div_id", ReferenceMemberName = "Id")>]

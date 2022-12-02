@@ -17,6 +17,7 @@ import Json.Encode as Encode
 import Model.Division exposing (Division, defaultDivision, divisionDecoder, divisionEncoder)
 import Model.Team exposing (Team, defaultTeam, teamDecoder, teamEncoder)
 import Url.Parser exposing (Parser, custom)
+import Json.Decode exposing (float)
 
 
 
@@ -27,6 +28,8 @@ type alias Game =
     { id : GameId
     , homeScore : Maybe Int
     , awayScore : Maybe Int
+    , homeOdds : Maybe Float
+    , awayOdds : Maybe Float
     , week : Int
     , division : Division
     , homeTeam : Team
@@ -56,6 +59,8 @@ defaultGame =
     { id = GameId 0
     , homeScore = Nothing
     , awayScore = Nothing
+    , homeOdds = Nothing
+    , awayOdds = Nothing
     , week = 0
     , division = defaultDivision
     , homeTeam = defaultTeam
@@ -78,6 +83,8 @@ gameDecoder =
         |> required "id" gameIdDecoder
         |> optional "homeScore" (Decode.map Just int) Nothing
         |> optional "awayScore" (Decode.map Just int) Nothing
+        |> optional "homeOdds" (Decode.map Just float) Nothing
+        |> optional "awayOdds" (Decode.map Just float) Nothing
         |> required "week" int
         |> required "division" divisionDecoder
         |> required "homeTeam" teamDecoder

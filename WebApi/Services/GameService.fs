@@ -5,17 +5,28 @@ module GameService =
     open ftbbl.WebApi.Models
     open ftbbl.WebApi.Services
 
-    let getAll =
-        GameRepository.getAll
+    let getOdds (game:Game) : Game =
+        if Elo.resultOfGame game = Elo.gameResult.Unknown 
+        then 
+            let homeOdds = 100. * Elo.winningOdds game.HomeTeam.Elo game.AwayTeam.Elo
+            let awayOdds = 100. * Elo.winningOdds game.HomeTeam.Elo game.AwayTeam.Elo
+            { game with HomeOdds = homeOdds; AwayOdds = awayOdds }
+        else game
+
+    let getAll() =
+        GameRepository.getAll()
+            |> List.map getOdds 
 
     let getById id =
         GameRepository.getById id
+            |> getOdds
 
     let deleteById id =
         GameRepository.deleteById(id)
 
     let getByDiv divId =
         GameRepository.getByDiv divId
+            |> List.map getOdds
 
     let updateElos (game:Game) =
         let homeTeam = game.HomeTeam
