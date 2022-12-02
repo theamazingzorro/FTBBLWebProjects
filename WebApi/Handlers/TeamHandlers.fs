@@ -25,6 +25,18 @@ module TeamHandler =
             }
 
 
+    let getFreeTeams : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+                logger.LogInformation $"Getting Teams not in any Division"
+                
+                let result = TeamService.getFree()
+
+                return! json result next ctx
+            }
+
+
     let getTeamsByDiv (divId : int) : HttpHandler =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {

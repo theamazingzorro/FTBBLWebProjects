@@ -9,6 +9,9 @@ module TeamService =
     let getAll =
         TeamRepository.getAll
 
+    let getFree = 
+        TeamRepository.getFree
+
     let getById id =
         TeamRepository.getById id
 

@@ -25,6 +25,24 @@ module TeamRepository =
             |> List.ofSeq
 
 
+    let getFree() =  
+        use connection = new MySqlConnection(connStr)
+        connection.Open()
+
+        use db = new Database(connection)
+
+        db.Fetch<Team>("""
+                SELECT * FROM Team
+                JOIN Race ON Team.race_id=Race.id
+                JOIN Coach ON Team.coach_id=Coach.id
+                WHERE Team.id NOT IN 
+	                (SELECT Team.id FROM Team
+	                JOIN TeamDivision ON Team.id = TeamDivision.team_id
+	                WHERE TeamDivision.end_date is null)
+                """)
+            |> List.ofSeq
+
+
     let getByDiv (divId : int) =
         use connection = new MySqlConnection(connStr)
         connection.Open()
