@@ -7,8 +7,8 @@ module Model.Game exposing
     , gamesDecoder
     , idParser
     , idToString
-    , oddsToString
     , newGameEncoder
+    , oddsToString
     )
 
 import Html.Attributes exposing (id)
