@@ -85,7 +85,7 @@ update msg model =
             ( { model | selectedTeamId = Nothing }, trySubmit model.session.token model.selectedTeamId model.divisionId )
 
         TeamDivSubmitted (Ok _) ->
-            ( { model | saveError = Nothing }, Cmd.none )
+            ( { model | saveError = Nothing }, getFreeTeamsRequest model.session.token )
 
         TeamDivSubmitted (Err err) ->
             ( { model | saveError = Just (buildErrorMessage err) }, Cmd.none )
