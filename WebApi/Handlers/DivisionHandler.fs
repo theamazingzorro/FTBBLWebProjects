@@ -77,3 +77,16 @@ module DivisionHandler =
 
                 return! json result next ctx
             }
+
+    let closeDiv (divId) : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+
+                let! team = ctx.BindJsonAsync<Team>()
+                logger.LogInformation $"Closing Division: divId={divId}"
+
+                let result = DivisionService.closeDiv divId
+
+                return! json result next ctx
+            }

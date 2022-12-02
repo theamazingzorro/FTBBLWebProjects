@@ -67,6 +67,9 @@ let webApp =
 
                         routef "/team/updatediv/%i/%i" TeamHandler.updateDiv
                         routef "/team/updatediv/%i/%i/" TeamHandler.updateDiv
+
+                        routef "/div/close/%i" DivisionHandler.closeDiv
+                        routef "/div/close/%i/" DivisionHandler.closeDiv
                     ]
                 ]
                 PUT >=> Auth.enticate >=> choose [

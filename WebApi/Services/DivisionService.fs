@@ -19,3 +19,6 @@ module DivisionService =
 
     let saveOverId id division =
         saveChanges { division with Id = id }
+
+    let closeDiv id =
+        DivisionRepository.closeDiv id
