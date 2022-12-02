@@ -303,19 +303,30 @@ viewTeamsOrError model =
         RemoteData.Loading ->
             h3 [] [ text "Loading..." ]
 
-        RemoteData.Success teams ->
-            div []
-                [ viewHeaderOrError model.division model.session
-                , viewTeams model teams
-                , viewGamesOrError model
-                ]
-
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
 
+        RemoteData.Success teams ->
+            case model.division of
+                RemoteData.Success division ->
+                    div []
+                        [ viewDivisionHeader division model.session
+                        , viewTeams model teams
+                        , viewGamesOrError model division
+                        ]
 
-viewGamesOrError : Model -> Html Msg
-viewGamesOrError model =
+                RemoteData.NotAsked ->
+                    text ""
+
+                RemoteData.Loading ->
+                    h3 [] [ text "Loading..." ]
+
+                RemoteData.Failure httpError ->
+                    viewLoadError <| Error.buildErrorMessage httpError
+
+
+viewGamesOrError : Model -> Division -> Html Msg
+viewGamesOrError model division =
     case model.games of
         RemoteData.NotAsked ->
             text ""
@@ -326,7 +337,7 @@ viewGamesOrError model =
         RemoteData.Success games ->
             div []
                 [ br [] []
-                , viewGamesHeader games model.session
+                , viewGamesHeader division games model.session
                 , br [] []
                 , viewGamesCarousel model games
                 ]
@@ -358,34 +369,22 @@ viewErrorMessage message =
             text ""
 
 
-viewHeaderOrError : WebData Division -> Session -> Html Msg
-viewHeaderOrError data session =
-    case data of
-        RemoteData.NotAsked ->
-            text ""
-
-        RemoteData.Loading ->
-            viewDivHeader "Loading..." "" session
-
-        RemoteData.Success division ->
-            viewDivHeader division.name ("Season " ++ String.fromInt division.season) session
-
-        RemoteData.Failure httpError ->
-            viewDivHeader (Error.buildErrorMessage httpError) "" session
-
-
 
 {- View Header -}
 
 
-viewDivHeader : String -> String -> Session -> Html Msg
-viewDivHeader title subtitle session =
+viewDivisionHeader : Division -> Session -> Html Msg
+viewDivisionHeader division session =
     div Custom.Attributes.row
         [ div [ Custom.Attributes.col ]
-            [ h3 [] [ text title ]
-            , h6 [] [ text subtitle ]
+            [ h3 [] [ text division.name ]
+            , h6 [] [ text <| "Season " ++ String.fromInt division.season ]
             ]
-        , div [ Custom.Attributes.col ] [ requiresAuth session viewAddTeamButton ]
+        , if division.closed then
+            text ""
+
+          else
+            div [ Custom.Attributes.col ] [ requiresAuth session viewAddTeamButton ]
         ]
 
 
@@ -480,7 +479,7 @@ viewTeamTableRow session team =
         , td []
             [ text <| String.fromInt team.elo ]
         , requiresAuth session <|
-            td ( Custom.Attributes.tableButtonColumn 2 )
+            td (Custom.Attributes.tableButtonColumn 2)
                 [ viewTeamEditButton team, viewTeamDeleteButton team ]
         ]
 
@@ -503,13 +502,17 @@ viewTeamEditButton team =
 {- View Games -}
 
 
-viewGamesHeader : List Game -> Session -> Html Msg
-viewGamesHeader games session =
+viewGamesHeader : Division -> List Game -> Session -> Html Msg
+viewGamesHeader division games session =
     div Custom.Attributes.row
         [ div [ Custom.Attributes.col ]
             [ h3 [ id "week" ] [ text "Scheduled Games" ]
             ]
-        , div [ Custom.Attributes.col ] [ requiresAuth session <| viewAddWeekButton <| maxWeek games + 1 ]
+        , if division.closed then
+            text ""
+
+          else
+            div [ Custom.Attributes.col ] [ requiresAuth session <| viewAddWeekButton <| maxWeek games + 1 ]
         ]
 
 
