@@ -10,7 +10,7 @@ import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, divisionDecoder)
-import Model.Game exposing (Game, GameId, gamesDecoder)
+import Model.Game as Game exposing (Game, GameId, gamesDecoder)
 import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
@@ -634,9 +634,25 @@ viewGame session game =
     div
         Custom.Attributes.carouselItemEntry
         [ p [] [ text <| game.homeTeam.name ++ " vs. " ++ game.awayTeam.name ]
+        , viewOdds game
         , viewScore game
         , requiresAuth session <| viewGameButtons game
         ]
+
+
+viewOdds : Game -> Html Msg
+viewOdds game =
+    case game.homeOdds of
+        Just homeOdds ->
+            case game.awayOdds of
+                Just awayOdds ->
+                    p [] [ text <| Game.oddsToString homeOdds ++ " - " ++ Game.oddsToString awayOdds ]
+
+                Nothing ->
+                    text ""
+
+        Nothing ->
+            text ""
 
 
 viewScore : Game -> Html Msg

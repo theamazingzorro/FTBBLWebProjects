@@ -8,10 +8,11 @@ module Model.Game exposing
     , idParser
     , idToString
     , newGameEncoder
+    , oddsToString
     )
 
 import Html.Attributes exposing (id)
-import Json.Decode as Decode exposing (Decoder, int, list)
+import Json.Decode as Decode exposing (Decoder, float, int, list)
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Model.Division exposing (Division, defaultDivision, divisionDecoder, divisionEncoder)
@@ -27,6 +28,8 @@ type alias Game =
     { id : GameId
     , homeScore : Maybe Int
     , awayScore : Maybe Int
+    , homeOdds : Maybe Float
+    , awayOdds : Maybe Float
     , week : Int
     , division : Division
     , homeTeam : Team
@@ -47,6 +50,15 @@ idToString (GameId id) =
     String.fromInt id
 
 
+oddsToString : Float -> String
+oddsToString odds =
+    let
+        trucOdds =
+            toFloat (truncate (odds * 100)) / 100
+    in
+    String.fromFloat trucOdds ++ "%"
+
+
 
 --Default--
 
@@ -56,6 +68,8 @@ defaultGame =
     { id = GameId 0
     , homeScore = Nothing
     , awayScore = Nothing
+    , homeOdds = Nothing
+    , awayOdds = Nothing
     , week = 0
     , division = defaultDivision
     , homeTeam = defaultTeam
@@ -78,6 +92,8 @@ gameDecoder =
         |> required "id" gameIdDecoder
         |> optional "homeScore" (Decode.map Just int) Nothing
         |> optional "awayScore" (Decode.map Just int) Nothing
+        |> optional "homeOdds" (Decode.map Just float) Nothing
+        |> optional "awayOdds" (Decode.map Just float) Nothing
         |> required "week" int
         |> required "division" divisionDecoder
         |> required "homeTeam" teamDecoder
