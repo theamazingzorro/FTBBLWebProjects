@@ -110,8 +110,6 @@ update msg model =
         SeasonSortClick ->
             ( { model | sortingMethod = newSort Season SeasonDesc model.sortingMethod }, Cmd.none )
 
-        
-
 
 newSort : SortingMethod -> SortingMethod -> SortingMethod -> SortingMethod
 newSort default alt oldSort =
@@ -146,10 +144,13 @@ deleteDivisionRequest token id =
     Api.deleteRequest token (Api.Division id) <|
         Http.expectJson DivisionDeleted deleteResponseDecoder
 
+
 closeDivRequest : Maybe String -> DivisionId -> Cmd Msg
 closeDivRequest token divId =
     Api.postRequest token (Api.CloseDivision divId) Http.emptyBody <|
         Http.expectString DivisionClosed
+
+
 
 -- Helper Functions --
 
@@ -311,7 +312,7 @@ viewDivision session division =
             td (Custom.Attributes.tableButtonColumn 3)
                 [ viewCloseButton division
                 , viewEditButton division
-                , viewDeleteButton division 
+                , viewDeleteButton division
                 ]
         ]
 
@@ -329,11 +330,13 @@ viewEditButton division =
         (onClick (EditDivisionButtonClick division.id) :: Custom.Attributes.editButton)
         [ text "Edit" ]
 
+
 viewCloseButton : Division -> Html Msg
 viewCloseButton division =
     if division.closed then
         text ""
-    else 
+
+    else
         button
-        (onClick (CloseDivisionButtonClick division.id) :: Custom.Attributes.editButton)
-        [ text "Close" ]
+            (onClick (CloseDivisionButtonClick division.id) :: Custom.Attributes.editButton)
+            [ text "Close" ]

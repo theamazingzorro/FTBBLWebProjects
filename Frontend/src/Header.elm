@@ -142,8 +142,8 @@ viewDivisionsLink divisions =
     case divisions of
         RemoteData.Success divs ->
             dropdownLink "Divisions" DivisionIndexClicked <|
-                List.map 
-                    (\div -> dropdownEntry (div.name ++ " Season " ++ String.fromInt div.season) <| SpecificDivisionClicked div.id) 
+                List.map
+                    (\div -> dropdownEntry (div.name ++ " Season " ++ String.fromInt div.season) <| SpecificDivisionClicked div.id)
                     (List.filter (\div -> not div.closed) divs)
 
         _ ->

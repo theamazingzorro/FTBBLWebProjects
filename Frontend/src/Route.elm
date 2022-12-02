@@ -114,7 +114,6 @@ matchRoute =
                 [ s "Division" </> s "View" </> Div.idParser </> int
                 , s "division" </> s "view" </> Div.idParser </> int
                 ]
-        
 
         {- More Complex Admin Pages -}
         , map AddTeamToDivision <|
