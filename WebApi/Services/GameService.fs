@@ -9,7 +9,7 @@ module GameService =
         if Elo.resultOfGame game = Elo.gameResult.Unknown 
         then 
             let homeOdds = 100. * Elo.winningOdds game.HomeTeam.Elo game.AwayTeam.Elo
-            let awayOdds = 100. * Elo.winningOdds game.HomeTeam.Elo game.AwayTeam.Elo
+            let awayOdds = 100. * Elo.winningOdds game.AwayTeam.Elo game.HomeTeam.Elo
             { game with HomeOdds = homeOdds; AwayOdds = awayOdds }
         else game
 

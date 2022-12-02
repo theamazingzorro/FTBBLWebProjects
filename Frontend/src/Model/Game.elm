@@ -7,17 +7,17 @@ module Model.Game exposing
     , gamesDecoder
     , idParser
     , idToString
+    , oddsToString
     , newGameEncoder
     )
 
 import Html.Attributes exposing (id)
-import Json.Decode as Decode exposing (Decoder, int, list)
+import Json.Decode as Decode exposing (Decoder, float, int, list)
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Model.Division exposing (Division, defaultDivision, divisionDecoder, divisionEncoder)
 import Model.Team exposing (Team, defaultTeam, teamDecoder, teamEncoder)
 import Url.Parser exposing (Parser, custom)
-import Json.Decode exposing (float)
 
 
 
@@ -48,6 +48,15 @@ type GameId
 idToString : GameId -> String
 idToString (GameId id) =
     String.fromInt id
+
+
+oddsToString : Float -> String
+oddsToString odds =
+    let
+        trucOdds =
+            toFloat (truncate (odds * 100)) / 100
+    in
+    String.fromFloat trucOdds ++ "%"
 
 
 
