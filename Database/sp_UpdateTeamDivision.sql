@@ -1,3 +1,4 @@
+USE ftbbl;
 DROP PROCEDURE IF EXISTS sp_UpdateTeamDivision;
 DELIMITER //
 CREATE PROCEDURE sp_UpdateTeamDivision (IN i_team_id INT, IN i_div_id INT)

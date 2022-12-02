@@ -8,13 +8,11 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Division exposing (Division, DivisionId, divisionDecoder)
-import Model.Game exposing (Game, defaultGame)
+import Model.Game exposing (Game, defaultGame, gameDecoder, newGameEncoder)
 import Model.Session exposing (Session)
 import Model.Team as Team exposing (Team, defaultTeam, teamsDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
-import Model.Game exposing (newGameEncoder)
-import Model.Game exposing (gameDecoder)
 
 
 
@@ -92,7 +90,7 @@ update msg model =
             ( { model | games = changeAwayTeam gameIndex newTeam model.games }, Cmd.none )
 
         Submit ->
-            ( { model | submitErrors = []}, saveGames model.session.token model.games)
+            ( { model | submitErrors = [] }, saveGames model.session.token model.games )
 
         GameSubmitted (Ok _) ->
             let
@@ -109,7 +107,7 @@ update msg model =
             ( { model | successes = newSuccesses }, newCmd )
 
         GameSubmitted (Err err) ->
-            ( { model | submitErrors = (buildErrorMessage err) :: model.submitErrors }, Cmd.none )
+            ( { model | submitErrors = buildErrorMessage err :: model.submitErrors }, Cmd.none )
 
 
 searchByIdString : String -> (id -> String) -> { c | id : id } -> WebData (List { c | id : id }) -> { c | id : id }
@@ -160,7 +158,7 @@ tryCreateGames week divData teamsData =
                         gameCount =
                             List.length teams // 2
                     in
-                    List.repeat gameCount { defaultGame | division = div, week=week }
+                    List.repeat gameCount { defaultGame | division = div, week = week }
 
                 _ ->
                     []
@@ -197,6 +195,8 @@ saveGame token game =
         (Http.jsonBody (newGameEncoder game))
         (Http.expectJson GameSubmitted gameDecoder)
 
+
+
 -- View --
 
 
@@ -228,11 +228,12 @@ viewSubmitErrors errors =
     if List.length errors > 0 then
         div [ Custom.Attributes.errorMessage ]
             [ h3 [] [ text "Couldn't save a team at this time." ]
-            , text <| "Error: " ++ (List.foldl (\a b -> a ++ " " ++ b) "" errors )
+            , text <| "Error: " ++ List.foldl (\a b -> a ++ " " ++ b) "" errors
             , br [] []
             ]
-    else 
-    text ""
+
+    else
+        text ""
 
 
 viewForm : Model -> Html Msg

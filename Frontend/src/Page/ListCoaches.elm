@@ -288,7 +288,7 @@ viewCoach session coach =
         , td []
             [ text <| String.fromInt coach.elo ]
         , requiresAuth session <|
-            td [ Custom.Attributes.tableButtonColumn 2 ]
+            td (Custom.Attributes.tableButtonColumn 2)
                 [ viewEditButton coach, viewDeleteButton coach ]
         ]
 

@@ -53,5 +53,14 @@ module DivisionRepository =
             | :? MySqlException -> 0
 
 
+    let closeDiv (divId : int) =
+        use connection = new MySqlConnection(connStr)
+        connection.Open()
+
+        use db = new Database(connection)
+
+        db.Execute("CALL sp_CloseDivision(@0)", divId)
+
+
         
         

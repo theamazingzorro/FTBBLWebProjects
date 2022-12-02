@@ -32,8 +32,10 @@ type Msg
     | DivisionsRecieved (WebData (List Division))
     | AddDivisionButtonClick
     | EditDivisionButtonClick DivisionId
+    | CloseDivisionButtonClick DivisionId
     | DeleteDivisionButtonClick DivisionId
     | DivisionDeleted (Result Http.Error DeleteResponse)
+    | DivisionClosed (Result Http.Error String)
     | ViewDivisionButtonClick DivisionId
     | NameSortClick
     | SeasonSortClick
@@ -87,10 +89,19 @@ update msg model =
         DeleteDivisionButtonClick id ->
             ( model, deleteDivisionRequest model.session.token id )
 
+        CloseDivisionButtonClick id ->
+            ( { model | deleteError = Nothing }, closeDivRequest model.session.token id )
+
         DivisionDeleted (Ok res) ->
             ( { model | deleteError = buildDeleteError res }, getDivisionsRequest model.session.token )
 
         DivisionDeleted (Err err) ->
+            ( { model | deleteError = Just (Error.buildErrorMessage err) }, Cmd.none )
+
+        DivisionClosed (Ok _) ->
+            ( { model | deleteError = Nothing }, getDivisionsRequest model.session.token )
+
+        DivisionClosed (Err err) ->
             ( { model | deleteError = Just (Error.buildErrorMessage err) }, Cmd.none )
 
         NameSortClick ->
@@ -132,6 +143,12 @@ deleteDivisionRequest : Maybe String -> DivisionId -> Cmd Msg
 deleteDivisionRequest token id =
     Api.deleteRequest token (Api.Division id) <|
         Http.expectJson DivisionDeleted deleteResponseDecoder
+
+
+closeDivRequest : Maybe String -> DivisionId -> Cmd Msg
+closeDivRequest token divId =
+    Api.postRequest token (Api.CloseDivision divId) Http.emptyBody <|
+        Http.expectString DivisionClosed
 
 
 
@@ -280,6 +297,8 @@ viewTableHeader sortMethod =
                 ]
             , th [ scope "col" ]
                 [ text "" ]
+            , th [ scope "col" ]
+                [ text "" ]
             ]
         ]
 
@@ -291,9 +310,19 @@ viewDivision session division =
             [ text division.name ]
         , td []
             [ text <| String.fromInt division.season ]
+        , td []
+            [ if division.closed then
+                text "Closed"
+
+              else
+                text "Ongoing"
+            ]
         , requiresAuth session <|
-            td [ Custom.Attributes.tableButtonColumn 2 ]
-                [ viewEditButton division, viewDeleteButton division ]
+            td (Custom.Attributes.tableButtonColumn 3)
+                [ viewCloseButton division
+                , viewEditButton division
+                , viewDeleteButton division
+                ]
         ]
 
 
@@ -309,3 +338,14 @@ viewEditButton division =
     button
         (onClick (EditDivisionButtonClick division.id) :: Custom.Attributes.editButton)
         [ text "Edit" ]
+
+
+viewCloseButton : Division -> Html Msg
+viewCloseButton division =
+    if division.closed then
+        text ""
+
+    else
+        button
+            (onClick (CloseDivisionButtonClick division.id) :: Custom.Attributes.editButton)
+            [ text "Close" ]

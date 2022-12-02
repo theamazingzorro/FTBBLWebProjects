@@ -50,7 +50,7 @@ init session id =
       , teams = RemoteData.Loading
       }
     , Cmd.batch
-        [ getTeamsNotInDivRequest session.token id
+        [ getFreeTeamsRequest session.token
         , getDivisionRequest session.token id
         ]
     )
@@ -105,9 +105,9 @@ trySubmit token maybeTeamId divId =
 -- API Requests --
 
 
-getTeamsNotInDivRequest : Maybe String -> DivisionId -> Cmd Msg
-getTeamsNotInDivRequest token divId =
-    Api.getRequest token (Api.TeamsNotInDiv divId) <|
+getFreeTeamsRequest : Maybe String -> Cmd Msg
+getFreeTeamsRequest token =
+    Api.getRequest token Api.FreeTeams <|
         Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
 
 
@@ -168,11 +168,24 @@ view model =
                 [ h3 [] [ text <| "Add Team to " ++ division.name ]
                 , br [] []
                 , viewSaveError model.saveError
-                , viewFormOrError model
+                , if division.closed then
+                    closedDivError
+
+                  else
+                    viewFormOrError model
                 ]
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
+
+
+closedDivError : Html Msg
+closedDivError =
+    div [ Custom.Attributes.errorMessage ]
+        [ h3 [] [ text "Invalid Division" ]
+        , text "You cannot add a team to a division that has been closed."
+        , br [] []
+        ]
 
 
 viewFormOrError : Model -> Html Msg
