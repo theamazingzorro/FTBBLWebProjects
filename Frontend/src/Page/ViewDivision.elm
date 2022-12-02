@@ -339,7 +339,7 @@ viewGamesOrError model division =
                 [ br [] []
                 , viewGamesHeader division games model.session
                 , br [] []
-                , viewGamesCarousel model games
+                , viewGamesCarousel model division games
                 ]
 
         RemoteData.Failure httpError ->
@@ -527,8 +527,8 @@ viewAddWeekButton nextWeek =
         ]
 
 
-viewGamesCarousel : Model -> List Game -> Html Msg
-viewGamesCarousel model games =
+viewGamesCarousel : Model -> Division -> List Game -> Html Msg
+viewGamesCarousel model division games =
     let
         thisId =
             "games"
@@ -539,7 +539,7 @@ viewGamesCarousel model games =
     div
         (id thisId :: Custom.Attributes.carouselContainer)
         [ carouselIndicators thisId endWeek model.displayedWeek
-        , viewGames model.session games endWeek model.displayedWeek
+        , viewGames division model.session games endWeek model.displayedWeek
         , carouselPrev model.displayedWeek
         , carouselNext model.displayedWeek endWeek
         ]
@@ -590,16 +590,16 @@ carouselNext currWeek endWeek =
         ]
 
 
-viewGames : Session -> List Game -> Int -> Int -> Html Msg
-viewGames session games endWeek currWeek =
+viewGames : Division -> Session -> List Game -> Int -> Int -> Html Msg
+viewGames division session games endWeek currWeek =
     div [ Custom.Attributes.carouselInner ]
         (List.range 1 endWeek
-            |> List.map (\week -> viewWeek session games week currWeek)
+            |> List.map (\week -> viewWeek division session games week currWeek)
         )
 
 
-viewWeek : Session -> List Game -> Int -> Int -> Html Msg
-viewWeek session games thisWeek currWeek =
+viewWeek : Division -> Session -> List Game -> Int -> Int -> Html Msg
+viewWeek division session games thisWeek currWeek =
     div
         (if thisWeek == currWeek then
             class "active" :: Custom.Attributes.carouselItem
@@ -612,7 +612,12 @@ viewWeek session games thisWeek currWeek =
             (viewWeekTitle thisWeek
                 :: (List.map (viewGame session) <| gamesInWeek thisWeek games)
             )
-            [ requiresAuth session <| viewAddGameButton thisWeek ]
+            [ if division.closed then
+                text ""
+
+              else
+                requiresAuth session <| viewAddGameButton thisWeek
+            ]
 
 
 viewWeekTitle : Int -> Html msg
