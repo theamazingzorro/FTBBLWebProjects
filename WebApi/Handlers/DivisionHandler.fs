@@ -7,7 +7,7 @@ module DivisionHandler =
     open Microsoft.AspNetCore.Http
     open Giraffe
     open ftbbl.WebApi.Models
-    open ftbbl.WebApi.Repositories
+    open ftbbl.WebApi.Services
 
     let private getLogger (ctx : HttpContext) = 
         ctx.GetLogger "fttbl.Handlers.DivisionApiHandlers"
@@ -18,9 +18,9 @@ module DivisionHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Divisions"
                 
-                let divisions = DivisionRepository.getAll()
+                let result = DivisionService.getAll()
 
-                return! json divisions next ctx
+                return! json result next ctx
             }
 
 
@@ -30,9 +30,9 @@ module DivisionHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Division: id={id}"
                 
-                let division = DivisionRepository.getById id
+                let result = DivisionService.getById id
 
-                return! json division next ctx
+                return! json result next ctx
             }
 
 
@@ -45,9 +45,9 @@ module DivisionHandler =
 
                 logger.LogInformation $"Saving Division: name={division.Name}"
                 
-                DivisionRepository.save(division)
+                let result = DivisionService.saveChanges division
 
-                return! json division next ctx
+                return! json result next ctx
             }
 
 
@@ -57,11 +57,11 @@ module DivisionHandler =
                 let logger = getLogger ctx
                 
                 logger.LogInformation $"Deleting Division: id={id}"
-                let res = DivisionRepository.deleteById(id)
+                let result = DivisionService.deleteById id
 
-                logger.LogInformation $"{res} rows effected."
+                logger.LogInformation $"{result} rows effected."
 
-                return! json {| Deleted = res > 0 |} next ctx
+                return! json {| Deleted = result > 0 |} next ctx
             }
 
 
@@ -73,7 +73,7 @@ module DivisionHandler =
                 let! division = ctx.BindJsonAsync<Division>()
                 logger.LogInformation $"Updating Division: id={id}"
 
-                DivisionRepository.save { division with Id = id }
+                let result = DivisionService.saveOverId id division
 
-                return! json division next ctx
+                return! json result next ctx
             }

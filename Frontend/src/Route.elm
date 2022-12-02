@@ -3,6 +3,7 @@ module Route exposing (Route(..), parseUrl, pushUrl)
 import Browser.Navigation as Nav
 import Model.Coach as Coach exposing (CoachId)
 import Model.Division as Div exposing (DivisionId)
+import Model.Game as Game exposing (GameId)
 import Model.Team as Team exposing (TeamId)
 import Url exposing (Url)
 import Url.Parser exposing (..)
@@ -20,9 +21,14 @@ type Route
     | Divisions
     | AddDivision
     | EditDivision DivisionId
+    | AddGame
+    | AddGameWithDefaults DivisionId Int
+    | EditGame GameId
     | Signin
     | ViewDivision DivisionId
+    | ViewDivisionWeek DivisionId Int
     | AddTeamToDivision DivisionId
+    | AddGameWeek DivisionId Int
 
 
 parseUrl : Url -> Route
@@ -80,18 +86,46 @@ matchRoute =
                 , s "coach" </> s "edit" </> Coach.idParser
                 ]
 
+        {- Game CRUD -}
+        , map AddGame <|
+            oneOf
+                [ s "Game" </> s "Add"
+                , s "game" </> s "add"
+                ]
+        , map AddGameWithDefaults <|
+            oneOf
+                [ s "Game" </> s "Add" </> Div.idParser </> int
+                , s "game" </> s "add" </> Div.idParser </> int
+                ]
+        , map EditGame <|
+            oneOf
+                [ s "Game" </> s "Edit" </> Game.idParser
+                , s "game" </> s "edit" </> Game.idParser
+                ]
+
         {- More Complex Views -}
         , map ViewDivision <|
             oneOf
                 [ s "Division" </> s "View" </> Div.idParser
                 , s "division" </> s "view" </> Div.idParser
                 ]
+        , map ViewDivisionWeek <|
+            oneOf
+                [ s "Division" </> s "View" </> Div.idParser </> int
+                , s "division" </> s "view" </> Div.idParser </> int
+                ]
+        
 
         {- More Complex Admin Pages -}
         , map AddTeamToDivision <|
             oneOf
                 [ s "Division" </> s "AddTeam" </> Div.idParser
                 , s "division" </> s "addteam" </> Div.idParser
+                ]
+        , map AddGameWeek <|
+            oneOf
+                [ s "Game" </> s "AddWeek" </> Div.idParser </> int
+                , s "game" </> s "addweek" </> Div.idParser </> int
                 ]
         ]
 
@@ -141,8 +175,23 @@ routeToString route =
         EditDivision divisionId ->
             "/Division/Edit/" ++ Div.idToString divisionId
 
+        AddGame ->
+            "/Game/Add"
+
+        AddGameWithDefaults divId week ->
+            "/Game/Add/" ++ Div.idToString divId ++ "/" ++ String.fromInt week
+
+        EditGame gameId ->
+            "/Game/Edit/" ++ Game.idToString gameId
+
         ViewDivision divisionId ->
             "/Division/View/" ++ Div.idToString divisionId
 
+        ViewDivisionWeek divisionId week ->
+            "/Division/View/" ++ Div.idToString divisionId ++ "/" ++ String.fromInt week
+
         AddTeamToDivision divisionId ->
             "/Division/AddTeam/" ++ Div.idToString divisionId
+
+        AddGameWeek divisionId week ->
+            "/Game/AddWeek/" ++ Div.idToString divisionId ++ "/" ++ String.fromInt week ++ "#week"

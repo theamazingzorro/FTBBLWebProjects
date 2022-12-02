@@ -6,6 +6,40 @@ import Html.Events exposing (onClick)
 
 
 
+-- General --
+
+
+textCentered : Attribute msg
+textCentered =
+    style "text-align" "center"
+
+
+centered : Attribute msg
+centered =
+    style "margin" "1em auto"
+
+
+visuallyHidden : Attribute msg
+visuallyHidden =
+    class "visually-hidden"
+
+
+maxWidth : String -> Attribute msg
+maxWidth =
+    style "max-width"
+
+
+backgroundColor : String -> Attribute msg
+backgroundColor =
+    style "background-color"
+
+
+padding : String -> Attribute msg
+padding =
+    style "padding"
+
+
+
 -- Grid --
 
 
@@ -58,6 +92,28 @@ navLink =
     class "nav-link"
 
 
+navDropDownContainer : Attribute msg
+navDropDownContainer =
+    class "nav-item dropdown"
+
+
+navDropDownTitleLink : List (Attribute msg)
+navDropDownTitleLink =
+    [ class "nav-link dropdown-toggle"
+    , attribute "data-bs-toggle" "dropdown"
+    ]
+
+
+navDropDownMenu : Attribute msg
+navDropDownMenu =
+    class "dropdown-menu"
+
+
+navDropDownItem : Attribute msg
+navDropDownItem =
+    class "dropdown-item"
+
+
 
 -- Tables --
 
@@ -74,6 +130,11 @@ tableButtonColumn btnCount =
 
 
 -- Buttons --
+
+
+button : Attribute msg
+button =
+    type_ "button"
 
 
 rightSideButtons : Attribute msg
@@ -166,3 +227,68 @@ formInputLink thisId clickMsg otherAttributes =
         , class "btn-link"
         ]
         ++ otherAttributes
+
+
+
+-- Carousel --
+
+
+carouselContainer : List (Attribute msg)
+carouselContainer =
+    [ class "carousel slide carousel-dark"
+    , attribute "data-bs-interval" "false"
+    , attribute "data-bs-wrap" "false"
+    , backgroundColor "#eee"
+    ]
+
+
+carouselInner : Attribute msg
+carouselInner =
+    class "carousel-inner"
+
+
+carouselIndicators : Attribute msg
+carouselIndicators =
+    class "carousel-indicators"
+
+
+dataBsTarget : String -> Attribute msg
+dataBsTarget =
+    attribute "data-bs-target"
+
+
+carouselNextButton : Attribute msg
+carouselNextButton =
+    class "carousel-control-next"
+
+
+carouselNextIcon : Attribute msg
+carouselNextIcon =
+    class "carousel-control-next-icon"
+
+
+carouselPrevButton : Attribute msg
+carouselPrevButton =
+    class "carousel-control-prev"
+
+
+carouselPrevIcon : Attribute msg
+carouselPrevIcon =
+    class "carousel-control-prev-icon"
+
+
+carouselItem : List (Attribute msg)
+carouselItem =
+    [ class "carousel-item"
+    , style "padding" "3em 5em 5em"
+    ]
+
+
+carouselItemEntry : List (Attribute msg)
+carouselItemEntry =
+    [ textCentered
+    , backgroundColor "#aaa"
+    , maxWidth "70%"
+    , centered
+    , padding "0.5em"
+    ]

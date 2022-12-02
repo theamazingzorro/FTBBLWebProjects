@@ -106,6 +106,6 @@ encodeId (CoachId id) =
 
 idParser : Parser (CoachId -> a) a
 idParser =
-    custom "POSTID" <|
-        \postId ->
-            Maybe.map CoachId (String.toInt postId)
+    custom "COACHID" <|
+        \id ->
+            Maybe.map CoachId (String.toInt id)

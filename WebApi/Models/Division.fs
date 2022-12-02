@@ -6,5 +6,6 @@ type Division =
         Id : int
         Name : string
         Season : uint
+        Closed : bool
     }
 

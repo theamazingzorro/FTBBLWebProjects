@@ -13,5 +13,5 @@ baseApiUrl =
 {-
    baseApiUrl : String
    baseApiUrl =
-       "https://prod.url.here/api/"
+       "https://ftbbleloapi.azurewebsites.net/api/"
 -}

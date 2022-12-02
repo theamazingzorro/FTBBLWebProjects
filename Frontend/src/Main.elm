@@ -89,9 +89,12 @@ update msg model =
 
                 ( newPage, pageCmds ) =
                     Page.init model.session newRoute
+
+                ( headModel, headCommand ) =
+                    Header.init model.session
             in
-            ( { model | route = newRoute, page = newPage }
-            , Cmd.map PageMsg pageCmds
+            ( { model | route = newRoute, page = newPage, headerModel = headModel }
+            , Cmd.batch [ Cmd.map PageMsg pageCmds, Cmd.map HeaderMsg headCommand ]
             )
 
         HeaderMsg subMsg ->

@@ -5,10 +5,13 @@ import Html.Attributes exposing (..)
 import Model.Session exposing (Session)
 import Page.AddCoach as AddCoach
 import Page.AddDivision as AddDivision
+import Page.AddGame as AddGame
+import Page.AddGameWeek as AddGameWeek
 import Page.AddTeam as AddTeam
 import Page.AddTeamToDiv as AddTeamToDiv
 import Page.EditCoach as EditCoach
 import Page.EditDivision as EditDivision
+import Page.EditGame as EditGame
 import Page.EditTeam as EditTeam
 import Page.ListCoaches as ListCoaches
 import Page.ListDivisions as ListDivisions
@@ -34,8 +37,11 @@ type Model
     | DivisionsPage ListDivisions.Model
     | AddDivisionPage AddDivision.Model
     | EditDivisionPage EditDivision.Model
+    | AddGamePage AddGame.Model
+    | EditGamePage EditGame.Model
     | ViewDivisionPage ViewDivision.Model
     | AddTeamToDivPage AddTeamToDiv.Model
+    | AddGameWeekPage AddGameWeek.Model
 
 
 type Msg
@@ -49,8 +55,11 @@ type Msg
     | DivisionsPageMsg ListDivisions.Msg
     | AddDivisionPageMsg AddDivision.Msg
     | EditDivisionPageMsg EditDivision.Msg
+    | AddGamePageMsg AddGame.Msg
+    | EditGamePageMsg EditGame.Msg
     | ViewDivisionPageMsg ViewDivision.Msg
     | AddTeamToDivPageMsg AddTeamToDiv.Msg
+    | AddGameWeekMsg AddGameWeek.Msg
 
 
 type OutMsg
@@ -118,13 +127,37 @@ init session route =
                 |> wrapInitWith EditDivisionPage EditDivisionPageMsg
                 |> requiresAuth session
 
+        Route.AddGame ->
+            AddGame.init session Nothing Nothing
+                |> wrapInitWith AddGamePage AddGamePageMsg
+                |> requiresAuth session
+
+        Route.AddGameWithDefaults divId week ->
+            AddGame.init session (Just divId) (Just week)
+                |> wrapInitWith AddGamePage AddGamePageMsg
+                |> requiresAuth session
+
+        Route.EditGame id ->
+            EditGame.init session id
+                |> wrapInitWith EditGamePage EditGamePageMsg
+                |> requiresAuth session
+
         Route.ViewDivision id ->
-            ViewDivision.init session id
+            ViewDivision.init session id Nothing
+                |> wrapInitWith ViewDivisionPage ViewDivisionPageMsg
+
+        Route.ViewDivisionWeek id week ->
+            ViewDivision.init session id (Just week)
                 |> wrapInitWith ViewDivisionPage ViewDivisionPageMsg
 
         Route.AddTeamToDivision id ->
             AddTeamToDiv.init session id
                 |> wrapInitWith AddTeamToDivPage AddTeamToDivPageMsg
+                |> requiresAuth session
+
+        Route.AddGameWeek id week ->
+            AddGameWeek.init session id week
+                |> wrapInitWith AddGameWeekPage AddGameWeekMsg
                 |> requiresAuth session
 
 
@@ -208,12 +241,34 @@ update msg model =
         ( EditDivisionPageMsg _, _ ) ->
             ( model, Cmd.none, Nothing )
 
+        {- Game CRUD pages -}
+        ( AddGamePageMsg subMsg, AddGamePage pageModel ) ->
+            AddGame.update subMsg pageModel
+                |> wrapUpdateWith AddGamePage AddGamePageMsg
+
+        ( AddGamePageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
+        ( EditGamePageMsg subMsg, EditGamePage pageModel ) ->
+            EditGame.update subMsg pageModel
+                |> wrapUpdateWith EditGamePage EditGamePageMsg
+
+        ( EditGamePageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
         {- Other -}
         ( AddTeamToDivPageMsg subMsg, AddTeamToDivPage pageModel ) ->
             AddTeamToDiv.update subMsg pageModel
                 |> wrapUpdateWith AddTeamToDivPage AddTeamToDivPageMsg
 
         ( AddTeamToDivPageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
+        ( AddGameWeekMsg subMsg, AddGameWeekPage pageModel ) ->
+            AddGameWeek.update subMsg pageModel
+                |> wrapUpdateWith AddGameWeekPage AddGameWeekMsg
+
+        ( AddGameWeekMsg _, _ ) ->
             ( model, Cmd.none, Nothing )
 
         ( ViewDivisionPageMsg subMsg, ViewDivisionPage pageModel ) ->
@@ -319,6 +374,14 @@ view model =
             EditDivision.view pageModel
                 |> Html.map EditDivisionPageMsg
 
+        AddGamePage pageModel ->
+            AddGame.view pageModel
+                |> Html.map AddGamePageMsg
+
+        EditGamePage pageModel ->
+            EditGame.view pageModel
+                |> Html.map EditGamePageMsg
+
         ViewDivisionPage pageModel ->
             ViewDivision.view pageModel
                 |> Html.map ViewDivisionPageMsg
@@ -326,6 +389,10 @@ view model =
         AddTeamToDivPage pageModel ->
             AddTeamToDiv.view pageModel
                 |> Html.map AddTeamToDivPageMsg
+
+        AddGameWeekPage pageModel ->
+            AddGameWeek.view pageModel
+                |> Html.map AddGameWeekMsg
 
 
 notFoundView : Html msg
