@@ -9,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
+import Model.Division exposing (DivisionId)
 import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
@@ -34,11 +35,13 @@ type Msg
     | AddTeamButtonClick
     | DeleteTeamButtonClick TeamId
     | EditTeamButtonClick TeamId
+    | ViewDivisionButtonClick DivisionId
     | TeamDeleted (Result Http.Error DeleteResponse)
     | NameSortClick
     | RaceSortClick
     | CoachSortClick
     | EloSortClick
+    | DivisionSortClick
 
 
 type SortingMethod
@@ -51,6 +54,8 @@ type SortingMethod
     | CoachDesc
     | Elo
     | EloDesc
+    | Division
+    | DivisionDesc
 
 
 
@@ -96,6 +101,9 @@ update msg model =
         TeamDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
 
+        ViewDivisionButtonClick divId ->
+            ( model, pushUrl model.session.navkey <| Route.ViewDivision divId )
+
         NameSortClick ->
             ( { model | sortingMethod = newSort Name NameDesc model.sortingMethod }, Cmd.none )
 
@@ -107,6 +115,9 @@ update msg model =
 
         EloSortClick ->
             ( { model | sortingMethod = newSort Elo EloDesc model.sortingMethod }, Cmd.none )
+
+        DivisionSortClick ->
+            ( { model | sortingMethod = newSort Division DivisionDesc model.sortingMethod }, Cmd.none )
 
 
 newSort : SortingMethod -> SortingMethod -> SortingMethod -> SortingMethod
@@ -176,6 +187,62 @@ sortedTeams sortingMethod teams =
 
         EloDesc ->
             List.sortWith (\a b -> compare b.elo a.elo) teams
+
+        Division ->
+            List.sortWith (\a b -> compareDivisions a b) teams
+
+        DivisionDesc ->
+            List.sortWith (\a b -> compareDivisionsDesc a b) teams
+
+
+compareDivisions : Team -> Team -> Order
+compareDivisions a b =
+    case a.division of
+        Just aDiv ->
+            case b.division of
+                Just bDiv ->
+                    case compare aDiv.season bDiv.season of
+                        EQ ->
+                            compare aDiv.name bDiv.name
+
+                        other ->
+                            other
+
+                Nothing ->
+                    LT
+
+        Nothing ->
+            case b.division of
+                Just _ ->
+                    GT
+
+                Nothing ->
+                    EQ
+
+
+compareDivisionsDesc : Team -> Team -> Order
+compareDivisionsDesc a b =
+    case a.division of
+        Just aDiv ->
+            case b.division of
+                Just bDiv ->
+                    case compare bDiv.season aDiv.season of
+                        EQ ->
+                            compare bDiv.name aDiv.name
+
+                        other ->
+                            other
+
+                Nothing ->
+                    LT
+
+        Nothing ->
+            case b.division of
+                Just _ ->
+                    GT
+
+                Nothing ->
+                    EQ
 
 
 
@@ -310,6 +377,17 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Coach"
                 ]
+            , th [ scope "col", onClick DivisionSortClick ]
+                [ case sortMethod of
+                    Division ->
+                        text "Division ▲"
+
+                    DivisionDesc ->
+                        text "Division ▼"
+
+                    _ ->
+                        text "Division"
+                ]
             , th [ scope "col", onClick EloSortClick ]
                 [ case sortMethod of
                     Elo ->
@@ -337,11 +415,27 @@ viewTeam session team =
         , td []
             [ text team.coach.name ]
         , td []
+            [ viewDivision team ]
+        , td []
             [ text <| String.fromInt team.elo ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 2)
                 [ viewEditButton team, viewDeleteButton team ]
         ]
+
+
+viewDivision : Team -> Html Msg
+viewDivision team =
+    case team.division of
+        Just division ->
+            button
+                [ Custom.Attributes.linkButton
+                , onClick <| ViewDivisionButtonClick division.id
+                ]
+                [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
+
+        Nothing ->
+            text ""
 
 
 viewDeleteButton : Team -> Html Msg

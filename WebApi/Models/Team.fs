@@ -14,4 +14,8 @@ type Team =
         Race : Race
         [<Reference(ReferenceType.Foreign, ColumnName = "coach_id", ReferenceMemberName = "Id")>]
         Coach : Coach
+
+        [<ResultColumn>]
+        [<ComplexMapping>]
+        Division : Division
     }

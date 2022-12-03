@@ -11,9 +11,10 @@ module Model.Team exposing
     )
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
-import Json.Decode.Pipeline exposing (required)
+import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
 import Model.Coach exposing (Coach, coachDecoder, coachEncoder, defaultCoach)
+import Model.Division exposing (Division, divisionDecoder)
 import Model.Race exposing (Race, defaultRace, raceDecoder, raceEncoder)
 import Url.Parser exposing (Parser, custom)
 
@@ -28,6 +29,7 @@ type alias Team =
     , race : Race
     , coach : Coach
     , elo : Int
+    , division : Maybe Division
     }
 
 
@@ -55,6 +57,7 @@ defaultTeam =
     , race = defaultRace
     , coach = defaultCoach
     , elo = 1000
+    , division = Nothing
     }
 
 
@@ -75,6 +78,7 @@ teamDecoder =
         |> required "race" raceDecoder
         |> required "coach" coachDecoder
         |> required "elo" int
+        |> optional "division" (Decode.map Just divisionDecoder) Nothing
 
 
 teamIdDecoder : Decoder TeamId
