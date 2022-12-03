@@ -154,6 +154,11 @@ addButton =
     class "btn btn-success"
 
 
+linkButton : Attribute msg
+linkButton =
+    class "btn btn-link btn-sm"
+
+
 deleteButton : List (Attribute msg)
 deleteButton =
     [ class "btn btn-danger"

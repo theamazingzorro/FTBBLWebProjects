@@ -9,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
+import Model.Division exposing (DivisionId)
 import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
@@ -34,6 +35,7 @@ type Msg
     | AddTeamButtonClick
     | DeleteTeamButtonClick TeamId
     | EditTeamButtonClick TeamId
+    | ViewDivisionButtonClick DivisionId
     | TeamDeleted (Result Http.Error DeleteResponse)
     | NameSortClick
     | RaceSortClick
@@ -98,6 +100,9 @@ update msg model =
 
         TeamDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
+
+        ViewDivisionButtonClick divId ->
+            ( model, pushUrl model.session.navkey <| Route.ViewDivision divId )
 
         NameSortClick ->
             ( { model | sortingMethod = newSort Name NameDesc model.sortingMethod }, Cmd.none )
@@ -423,7 +428,11 @@ viewDivision : Team -> Html Msg
 viewDivision team =
     case team.division of
         Just division ->
-            text <| division.name ++ " Season " ++ String.fromInt division.season
+            button
+                [ Custom.Attributes.linkButton
+                , onClick <| ViewDivisionButtonClick division.id
+                ]
+                [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
 
         Nothing ->
             text ""
