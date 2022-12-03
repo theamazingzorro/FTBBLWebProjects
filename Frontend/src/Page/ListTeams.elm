@@ -39,6 +39,7 @@ type Msg
     | RaceSortClick
     | CoachSortClick
     | EloSortClick
+    | DivisionSortClick
 
 
 type SortingMethod
@@ -51,6 +52,8 @@ type SortingMethod
     | CoachDesc
     | Elo
     | EloDesc
+    | Division
+    | DivisionDesc
 
 
 
@@ -107,6 +110,9 @@ update msg model =
 
         EloSortClick ->
             ( { model | sortingMethod = newSort Elo EloDesc model.sortingMethod }, Cmd.none )
+
+        DivisionSortClick ->
+            ( { model | sortingMethod = newSort Division DivisionDesc model.sortingMethod }, Cmd.none )
 
 
 newSort : SortingMethod -> SortingMethod -> SortingMethod -> SortingMethod
@@ -176,6 +182,62 @@ sortedTeams sortingMethod teams =
 
         EloDesc ->
             List.sortWith (\a b -> compare b.elo a.elo) teams
+
+        Division ->
+            List.sortWith (\a b -> compareDivisions a b) teams
+
+        DivisionDesc ->
+            List.sortWith (\a b -> compareDivisionsDesc a b) teams
+
+
+compareDivisions : Team -> Team -> Order
+compareDivisions a b =
+    case a.division of
+        Just aDiv ->
+            case b.division of
+                Just bDiv ->
+                    case compare aDiv.season bDiv.season of
+                        EQ ->
+                            compare aDiv.name bDiv.name
+
+                        other ->
+                            other
+
+                Nothing ->
+                    LT
+
+        Nothing ->
+            case b.division of
+                Just _ ->
+                    GT
+
+                Nothing ->
+                    EQ
+
+
+compareDivisionsDesc : Team -> Team -> Order
+compareDivisionsDesc a b =
+    case a.division of
+        Just aDiv ->
+            case b.division of
+                Just bDiv ->
+                    case compare bDiv.season aDiv.season of
+                        EQ ->
+                            compare bDiv.name aDiv.name
+
+                        other ->
+                            other
+
+                Nothing ->
+                    LT
+
+        Nothing ->
+            case b.division of
+                Just _ ->
+                    GT
+
+                Nothing ->
+                    EQ
 
 
 
@@ -310,6 +372,17 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Coach"
                 ]
+            , th [ scope "col", onClick DivisionSortClick ]
+                [ case sortMethod of
+                    Division ->
+                        text "Division ▲"
+
+                    DivisionDesc ->
+                        text "Division ▼"
+
+                    _ ->
+                        text "Division"
+                ]
             , th [ scope "col", onClick EloSortClick ]
                 [ case sortMethod of
                     Elo ->
@@ -337,11 +410,23 @@ viewTeam session team =
         , td []
             [ text team.coach.name ]
         , td []
+            [ viewDivision team ]
+        , td []
             [ text <| String.fromInt team.elo ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 2)
                 [ viewEditButton team, viewDeleteButton team ]
         ]
+
+
+viewDivision : Team -> Html Msg
+viewDivision team =
+    case team.division of
+        Just division ->
+            text <| division.name ++ " Season " ++ String.fromInt division.season
+
+        Nothing ->
+            text ""
 
 
 viewDeleteButton : Team -> Html Msg
