@@ -12,10 +12,14 @@ import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, divisionDecoder)
 import Model.Game as Game exposing (Game, GameId, gamesDecoder)
 import Model.Session exposing (Session)
-import Model.Team exposing (Team, TeamId, teamsDecoder)
+import Model.Standing exposing (Standing, standingsDecoder)
+import Model.Team exposing (Team, TeamId)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 import Url exposing (Protocol(..))
+import Model.Standing exposing (getPoints)
+import Model.Standing exposing (getGamesPlayed)
+import Model.Standing exposing (getTDD)
 
 
 
@@ -23,7 +27,7 @@ import Url exposing (Protocol(..))
 
 
 type alias Model =
-    { teams : WebData (List Team)
+    { standings : WebData (List Standing)
     , sortingMethod : TeamSortingMethod
     , division : WebData Division
     , games : WebData (List Game)
@@ -36,7 +40,7 @@ type alias Model =
 
 type Msg
     = RefreshButtonClick
-    | TeamsReceived (WebData (List Team))
+    | StandingsReceived (WebData (List Standing))
     | GamesReceived (WebData (List Game))
     | DivisionReceived (WebData Division)
     | AddTeamButtonClick
@@ -73,7 +77,7 @@ type TeamSortingMethod
 
 init : Session -> DivisionId -> Maybe Int -> ( Model, Cmd Msg )
 init session id startWeek =
-    ( { teams = RemoteData.Loading
+    ( { standings = RemoteData.Loading
       , sortingMethod = None
       , division = RemoteData.Loading
       , games = RemoteData.Loading
@@ -83,7 +87,7 @@ init session id startWeek =
       , divisionId = id
       }
     , Cmd.batch
-        [ getTeamsInDivRequest session.token id
+        [ getStandingsRequest session.token id
         , getDivisionRequest session.token id
         , getGamesRequest session.token id
         ]
@@ -99,18 +103,18 @@ update msg model =
     case msg of
         RefreshButtonClick ->
             ( { model
-                | teams = RemoteData.Loading
+                | standings = RemoteData.Loading
                 , division = RemoteData.Loading
               }
             , Cmd.batch
-                [ getTeamsInDivRequest model.session.token model.divisionId
+                [ getStandingsRequest model.session.token model.divisionId
                 , getDivisionRequest model.session.token model.divisionId
                 , getGamesRequest model.session.token model.divisionId
                 ]
             )
 
-        TeamsReceived response ->
-            ( { model | teams = response }, Cmd.none )
+        StandingsReceived response ->
+            ( { model | standings = response }, Cmd.none )
 
         GamesReceived response ->
             ( { model | games = response }, Cmd.none )
@@ -128,7 +132,7 @@ update msg model =
             ( model, deleteTeamRequest model.session.token id )
 
         TeamDeleted (Ok res) ->
-            ( { model | deleteError = buildDeleteError res }, getTeamsInDivRequest model.session.token model.divisionId )
+            ( { model | deleteError = buildDeleteError res }, getStandingsRequest model.session.token model.divisionId )
 
         TeamDeleted (Err err) ->
             ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
@@ -189,10 +193,10 @@ buildDeleteError res =
 -- API Requests --
 
 
-getTeamsInDivRequest : Maybe String -> DivisionId -> Cmd Msg
-getTeamsInDivRequest token divId =
-    Api.getRequest token (Api.TeamsInDiv divId) <|
-        Http.expectJson (RemoteData.fromResult >> TeamsReceived) teamsDecoder
+getStandingsRequest : Maybe String -> DivisionId -> Cmd Msg
+getStandingsRequest token divId =
+    Api.getRequest token (Api.DivStandings divId) <|
+        Http.expectJson (RemoteData.fromResult >> StandingsReceived) standingsDecoder
 
 
 getGamesRequest : Maybe String -> DivisionId -> Cmd Msg
@@ -223,35 +227,35 @@ deleteGameRequest token id =
 -- Helper Functions --
 
 
-sortedTeams : TeamSortingMethod -> List Team -> List Team
-sortedTeams sortingMethod teams =
+sortedStandings : TeamSortingMethod -> List Standing -> List Standing
+sortedStandings sortingMethod standings =
     case sortingMethod of
         None ->
-            teams
+            standings
 
         Name ->
-            List.sortWith (\a b -> compare a.name b.name) teams
+            List.sortWith (\a b -> compare a.team.name b.team.name) standings
 
         NameDesc ->
-            List.sortWith (\a b -> compare b.name a.name) teams
+            List.sortWith (\a b -> compare b.team.name a.team.name) standings
 
         Coach ->
-            List.sortWith (\a b -> compare a.coach.name b.coach.name) teams
+            List.sortWith (\a b -> compare a.team.coach.name b.team.coach.name) standings
 
         CoachDesc ->
-            List.sortWith (\a b -> compare b.coach.name a.coach.name) teams
+            List.sortWith (\a b -> compare b.team.coach.name a.team.coach.name) standings
 
         Race ->
-            List.sortWith (\a b -> compare a.race.name b.race.name) teams
+            List.sortWith (\a b -> compare a.team.race.name b.team.race.name) standings
 
         RaceDesc ->
-            List.sortWith (\a b -> compare b.race.name a.race.name) teams
+            List.sortWith (\a b -> compare b.team.race.name a.team.race.name) standings
 
         Elo ->
-            List.sortWith (\a b -> compare a.elo b.elo) teams
+            List.sortWith (\a b -> compare a.team.elo b.team.elo) standings
 
         EloDesc ->
-            List.sortWith (\a b -> compare b.elo a.elo) teams
+            List.sortWith (\a b -> compare b.team.elo a.team.elo) standings
 
 
 gamesInWeek : Int -> List Game -> List Game
@@ -275,7 +279,7 @@ view model =
     div []
         [ div Custom.Attributes.row [ viewRefreshButton ]
         , viewErrorMessage model.deleteError
-        , viewTeamsOrError model
+        , viewStandingsOrError model
         ]
 
 
@@ -294,9 +298,9 @@ viewRefreshButton =
 {- View ErrorHandling -}
 
 
-viewTeamsOrError : Model -> Html Msg
-viewTeamsOrError model =
-    case model.teams of
+viewStandingsOrError : Model -> Html Msg
+viewStandingsOrError model =
+    case model.standings of
         RemoteData.NotAsked ->
             text ""
 
@@ -311,7 +315,7 @@ viewTeamsOrError model =
                 RemoteData.Success division ->
                     div []
                         [ viewDivisionHeader division model.session
-                        , viewTeams model teams
+                        , viewStandings model teams
                         , viewGamesOrError model division
                         ]
 
@@ -403,13 +407,13 @@ viewAddTeamButton =
 {- View Teams Table -}
 
 
-viewTeams : Model -> List Team -> Html Msg
-viewTeams model teams =
+viewStandings : Model -> List Standing -> Html Msg
+viewStandings model standings =
     table [ Custom.Attributes.table ]
         [ viewTableHeader model.sortingMethod
         , tbody [] <|
-            List.map (viewTeamTableRow model.session) <|
-                sortedTeams model.sortingMethod teams
+            List.map (viewStandingTableRow model.session) <|
+                sortedStandings model.sortingMethod standings
         ]
 
 
@@ -462,25 +466,41 @@ viewTableHeader sortMethod =
                         text "Elo"
                 ]
             , th [ scope "col" ]
+                [ text "Points" ]
+            , th [ scope "col" ]
+                [ text "Games" ]
+            , th [ scope "col" ]
+                [ text "W-D-L" ]
+            , th [ scope "col" ]
+                [ text "TDD" ]
+            , th [ scope "col" ]
                 [ text "" ]
             ]
         ]
 
 
-viewTeamTableRow : Session -> Team -> Html Msg
-viewTeamTableRow session team =
+viewStandingTableRow : Session -> Standing -> Html Msg
+viewStandingTableRow session standing =
     tr []
         [ td []
-            [ text team.name ]
+            [ text standing.team.name ]
         , td []
-            [ text team.race.name ]
+            [ text standing.team.race.name ]
         , td []
-            [ text team.coach.name ]
+            [ text standing.team.coach.name ]
         , td []
-            [ text <| String.fromInt team.elo ]
+            [ text <| String.fromInt standing.team.elo ]
+        , td []
+            [ text <| String.fromInt <| getPoints standing ]
+        , td []
+            [ text <| String.fromInt <| getGamesPlayed standing ]
+        , td []
+            [ text <| String.fromInt standing.wins ++ " - " ++ String.fromInt standing.draws ++ " - " ++ String.fromInt standing.losses ]
+        , td []
+            [ text <| String.fromInt <| getTDD standing ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 2)
-                [ viewTeamEditButton team, viewTeamDeleteButton team ]
+                [ viewTeamEditButton standing.team, viewTeamDeleteButton standing.team ]
         ]
 
 

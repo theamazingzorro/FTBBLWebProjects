@@ -9,14 +9,12 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
-import Model.Division exposing (DivisionId)
+import Model.Division exposing (Division, DivisionId, compareDivisions)
 import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 import Url exposing (Protocol(..))
-import Model.Division exposing (compareDivisions)
-import Model.Division exposing (Division)
 
 
 

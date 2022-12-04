@@ -1,6 +1,7 @@
 module Model.Standing exposing
     ( Standing
     , compareStandings
+    , getGamesPlayed
     , getPoints
     , getTDD
     , standingDecoder
@@ -35,6 +36,11 @@ type alias Standing =
 getPoints : Standing -> Int
 getPoints standing =
     3 * standing.wins + standing.draws
+
+
+getGamesPlayed : Standing -> Int
+getGamesPlayed standing =
+    standing.wins + standing.losses + standing.draws
 
 
 getTDD : Standing -> Int
