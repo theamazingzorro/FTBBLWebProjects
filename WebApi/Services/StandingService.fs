@@ -7,7 +7,7 @@ module StandingService =
 
     let private getStanding (divId : int) (games : Game list) (team : Team) : Standing=
         let homeGames = List.where (fun game -> team.Id = game.HomeTeam.Id) games
-        let awayGames = List.where (fun game -> team.Id = game.HomeTeam.Id) games
+        let awayGames = List.where (fun game -> team.Id = game.AwayTeam.Id) games
         
         {
             DivId = divId; 
