@@ -28,7 +28,6 @@ let webApp =
                     routex "/team(/?)" >=> TeamHandler.getTeams
                     routef "/team/%i" TeamHandler.getTeam
                     routef "/team/%i/" TeamHandler.getTeam
-
                     routex "/team/free(/?)" >=> TeamHandler.getFreeTeams
                     routef "/team/bydiv/%i" TeamHandler.getTeamsByDiv
                     routef "/team/bydiv/%i/" TeamHandler.getTeamsByDiv
@@ -50,9 +49,13 @@ let webApp =
                     routex "/game(/?)" >=> GameHandler.getGames
                     routef "/game/%i" GameHandler.getGame
                     routef "/game/%i/" GameHandler.getGame
-
                     routef "/game/bydiv/%i" GameHandler.getGamesByDiv
                     routef "/game/bydiv/%i/" GameHandler.getGamesByDiv
+
+                    routef "/standings/%i" StandingHandler.getDivStandings
+                    routef "/standings/%i/" StandingHandler.getDivStandings
+                    routef "/standings/%i/%i" StandingHandler.getStanding
+                    routef "/standings/%i/%i/" StandingHandler.getStanding
                 ]
                 POST >=> choose [
                     routex "/signin(/?)" >=> SecurityHandler.signIn
