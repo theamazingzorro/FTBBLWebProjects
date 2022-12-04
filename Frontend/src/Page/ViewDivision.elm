@@ -2,7 +2,7 @@ module Page.ViewDivision exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes
+import Custom.Attributes exposing (textCentered)
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -79,7 +79,7 @@ init session id startWeek =
       , sortingMethod = Default
       , division = RemoteData.Loading
       , games = RemoteData.Loading
-      , displayedWeek = Maybe.withDefault 1 startWeek
+      , displayedWeek = Maybe.withDefault -1 startWeek
       , session = session
       , deleteError = Nothing
       , divisionId = id
@@ -115,7 +115,7 @@ update msg model =
             ( { model | standings = response }, Cmd.none )
 
         GamesReceived response ->
-            ( { model | games = response }, Cmd.none )
+            ( { model | games = response, displayedWeek = getStartingWeek model.displayedWeek response }, Cmd.none )
 
         DivisionReceived response ->
             ( { model | division = response }, Cmd.none )
@@ -188,6 +188,23 @@ buildDeleteError res =
 
     else
         Just "Delete Failed. Team not found."
+
+
+getStartingWeek : Int -> WebData (List Game) -> Int
+getStartingWeek default gameData =
+    if default == -1 then
+        case gameData of
+            RemoteData.Success games ->
+                List.filter (\game -> game.homeOdds /= Nothing) games
+                    |> List.map (\game -> game.week)
+                    |> List.minimum
+                    |> Maybe.withDefault (maxWeek games)
+
+            _ ->
+                default
+
+    else
+        default
 
 
 
@@ -316,7 +333,7 @@ viewStandingsOrError model =
                 RemoteData.Success division ->
                     div []
                         [ viewDivisionHeader division model.session
-                        , viewStandings model teams
+                        , viewStandings model division.closed teams
                         , viewGamesOrError model division
                         ]
 
@@ -408,18 +425,18 @@ viewAddTeamButton =
 {- View Teams Table -}
 
 
-viewStandings : Model -> List Standing -> Html Msg
-viewStandings model standings =
+viewStandings : Model -> Bool -> List Standing -> Html Msg
+viewStandings model divClosed standings =
     table [ Custom.Attributes.table ]
-        [ viewTableHeader model.sortingMethod
+        [ viewTableHeader divClosed model.sortingMethod
         , tbody [] <|
-            List.map (viewStandingTableRow model.session) <|
+            List.map (viewStandingTableRow model.session divClosed) <|
                 sortedStandings model.sortingMethod standings
         ]
 
 
-viewTableHeader : TeamSortingMethod -> Html Msg
-viewTableHeader sortMethod =
+viewTableHeader : Bool -> TeamSortingMethod -> Html Msg
+viewTableHeader divClosed sortMethod =
     thead []
         [ tr []
             [ th [ scope "col", onClick TeamNameSortClick ]
@@ -455,7 +472,7 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Coach"
                 ]
-            , th [ scope "col", onClick TeamEloSortClick ]
+            , th [ scope "col", onClick TeamEloSortClick, textCentered ]
                 [ case sortMethod of
                     Elo ->
                         text "Elo ▲"
@@ -466,22 +483,28 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Elo"
                 ]
-            , th [ scope "col", onClick DefaultSortClick ]
+            , th [ scope "col", onClick DefaultSortClick, textCentered ]
                 [ text "Points" ]
-            , th [ scope "col", onClick DefaultSortClick ]
+            , th [ scope "col", onClick DefaultSortClick, textCentered ]
                 [ text "Games" ]
-            , th [ scope "col", onClick DefaultSortClick ]
+            , th [ scope "col", onClick DefaultSortClick, textCentered ]
                 [ text "W-D-L" ]
             , th [ scope "col", onClick DefaultSortClick ]
                 [ text "TDD" ]
+            , if divClosed then
+                text ""
+
+              else
+                th [ scope "col", textCentered ]
+                    [ text "Strength of Schedule" ]
             , th [ scope "col", onClick DefaultSortClick ]
                 [ text "" ]
             ]
         ]
 
 
-viewStandingTableRow : Session -> Standing -> Html Msg
-viewStandingTableRow session standing =
+viewStandingTableRow : Session -> Bool -> Standing -> Html Msg
+viewStandingTableRow session divClosed standing =
     tr []
         [ td []
             [ text standing.team.name ]
@@ -489,16 +512,22 @@ viewStandingTableRow session standing =
             [ text standing.team.race.name ]
         , td []
             [ text standing.team.coach.name ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt standing.team.elo ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt <| getPoints standing ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt <| getGamesPlayed standing ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt standing.wins ++ " - " ++ String.fromInt standing.draws ++ " - " ++ String.fromInt standing.losses ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt <| getTDD standing ]
+        , if divClosed then
+            text ""
+
+          else
+            td [ textCentered ]
+                [ text (Maybe.andThen (String.fromInt >> Just) standing.avgRemainingElo |> Maybe.withDefault "No games remaining") ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 2)
                 [ viewTeamEditButton standing.team, viewTeamDeleteButton standing.team ]

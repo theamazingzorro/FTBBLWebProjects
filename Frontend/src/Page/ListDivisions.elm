@@ -2,14 +2,14 @@ module Page.ListDivisions exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes
+import Custom.Attributes exposing (textCentered)
 import Error
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
-import Model.Division exposing (Division, DivisionId, divisionsDecoder)
+import Model.Division exposing (Division, DivisionId, compareDivisions, divisionsDecoder)
 import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
@@ -42,7 +42,7 @@ type Msg
 
 
 type SortingMethod
-    = None
+    = Default
     | Name
     | NameDesc
     | Season
@@ -56,7 +56,7 @@ type SortingMethod
 init : Session -> ( Model, Cmd Msg )
 init session =
     ( { divisions = RemoteData.Loading
-      , sortingMethod = None
+      , sortingMethod = Default
       , session = session
       , deleteError = Nothing
       }
@@ -158,8 +158,8 @@ closeDivRequest token divId =
 sortedDivs : SortingMethod -> List Division -> List Division
 sortedDivs sortingMethod divs =
     case sortingMethod of
-        None ->
-            List.sortWith (\a b -> compare b.season a.season) divs
+        Default ->
+            List.sortWith compareDivisions divs
 
         Name ->
             List.sortWith (\a b -> compare a.name b.name) divs
@@ -284,7 +284,7 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Name"
                 ]
-            , th [ scope "col", onClick SeasonSortClick ]
+            , th [ scope "col", onClick SeasonSortClick, textCentered ]
                 [ case sortMethod of
                     Season ->
                         text "Season ▲"
@@ -308,7 +308,7 @@ viewDivision session division =
     tr []
         [ td [ class "btn-link", onClick <| ViewDivisionButtonClick division.id ]
             [ text division.name ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt division.season ]
         , td []
             [ if division.closed then

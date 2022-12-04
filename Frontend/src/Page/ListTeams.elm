@@ -2,7 +2,7 @@ module Page.ListTeams exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes
+import Custom.Attributes exposing (textCentered)
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -45,7 +45,7 @@ type Msg
 
 
 type SortingMethod
-    = None
+    = Default
     | Name
     | NameDesc
     | Race
@@ -65,7 +65,7 @@ type SortingMethod
 init : Session -> ( Model, Cmd Msg )
 init session =
     ( { teams = RemoteData.Loading
-      , sortingMethod = None
+      , sortingMethod = Default
       , session = session
       , deleteError = Nothing
       }
@@ -161,8 +161,8 @@ deleteTeamRequest token id =
 sortedTeams : SortingMethod -> List Team -> List Team
 sortedTeams sortingMethod teams =
     case sortingMethod of
-        None ->
-            teams
+        Default ->
+            List.sortWith (\a b -> compare b.elo a.elo) teams
 
         Name ->
             List.sortWith (\a b -> compare a.name b.name) teams
@@ -358,7 +358,7 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Division"
                 ]
-            , th [ scope "col", onClick EloSortClick ]
+            , th [ scope "col", onClick EloSortClick, textCentered ]
                 [ case sortMethod of
                     Elo ->
                         text "Elo ▲"
@@ -386,7 +386,7 @@ viewTeam session team =
             [ text team.coach.name ]
         , td []
             [ viewDivision team ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt team.elo ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 2)
