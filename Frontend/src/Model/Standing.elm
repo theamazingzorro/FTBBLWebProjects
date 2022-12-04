@@ -50,9 +50,9 @@ getTDD standing =
 
 compareStandings : Standing -> Standing -> Order
 compareStandings a b =
-    case compare (getPoints a) (getPoints b) of
+    case compare (getPoints b) (getPoints a) of
         EQ ->
-            compare (getTDD a) (getTDD b)
+            compare (getTDD b) (getTDD a)
 
         other ->
             other

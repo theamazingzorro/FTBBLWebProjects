@@ -12,14 +12,11 @@ import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, divisionDecoder)
 import Model.Game as Game exposing (Game, GameId, gamesDecoder)
 import Model.Session exposing (Session)
-import Model.Standing exposing (Standing, standingsDecoder)
+import Model.Standing exposing (Standing, compareStandings, getGamesPlayed, getPoints, getTDD, standingsDecoder)
 import Model.Team exposing (Team, TeamId)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 import Url exposing (Protocol(..))
-import Model.Standing exposing (getPoints)
-import Model.Standing exposing (getGamesPlayed)
-import Model.Standing exposing (getTDD)
 
 
 
@@ -52,6 +49,7 @@ type Msg
     | TeamRaceSortClick
     | TeamCoachSortClick
     | TeamEloSortClick
+    | DefaultSortClick
     | ChangeWeek Int
     | DeleteGameButtonClick GameId
     | EditGameButtonClick GameId
@@ -60,7 +58,7 @@ type Msg
 
 
 type TeamSortingMethod
-    = None
+    = Default
     | Name
     | NameDesc
     | Race
@@ -78,7 +76,7 @@ type TeamSortingMethod
 init : Session -> DivisionId -> Maybe Int -> ( Model, Cmd Msg )
 init session id startWeek =
     ( { standings = RemoteData.Loading
-      , sortingMethod = None
+      , sortingMethod = Default
       , division = RemoteData.Loading
       , games = RemoteData.Loading
       , displayedWeek = Maybe.withDefault 1 startWeek
@@ -152,8 +150,11 @@ update msg model =
         TeamCoachSortClick ->
             ( { model | sortingMethod = newSort Coach CoachDesc model.sortingMethod }, Cmd.none )
 
+        DefaultSortClick ->
+            ( { model | sortingMethod = Default }, Cmd.none )
+
         TeamEloSortClick ->
-            ( { model | sortingMethod = newSort Elo EloDesc model.sortingMethod }, Cmd.none )
+            ( { model | sortingMethod = newSort EloDesc Elo model.sortingMethod }, Cmd.none )
 
         ChangeWeek newWeek ->
             ( { model | displayedWeek = newWeek }, Cmd.none )
@@ -230,8 +231,8 @@ deleteGameRequest token id =
 sortedStandings : TeamSortingMethod -> List Standing -> List Standing
 sortedStandings sortingMethod standings =
     case sortingMethod of
-        None ->
-            standings
+        Default ->
+            List.sortWith compareStandings standings
 
         Name ->
             List.sortWith (\a b -> compare a.team.name b.team.name) standings
@@ -465,15 +466,15 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Elo"
                 ]
-            , th [ scope "col" ]
+            , th [ scope "col", onClick DefaultSortClick ]
                 [ text "Points" ]
-            , th [ scope "col" ]
+            , th [ scope "col", onClick DefaultSortClick ]
                 [ text "Games" ]
-            , th [ scope "col" ]
+            , th [ scope "col", onClick DefaultSortClick ]
                 [ text "W-D-L" ]
-            , th [ scope "col" ]
+            , th [ scope "col", onClick DefaultSortClick ]
                 [ text "TDD" ]
-            , th [ scope "col" ]
+            , th [ scope "col", onClick DefaultSortClick ]
                 [ text "" ]
             ]
         ]

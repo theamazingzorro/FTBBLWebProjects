@@ -114,7 +114,7 @@ update msg model =
             ( { model | sortingMethod = newSort Coach CoachDesc model.sortingMethod }, Cmd.none )
 
         EloSortClick ->
-            ( { model | sortingMethod = newSort Elo EloDesc model.sortingMethod }, Cmd.none )
+            ( { model | sortingMethod = newSort EloDesc Elo model.sortingMethod }, Cmd.none )
 
         DivisionSortClick ->
             ( { model | sortingMethod = newSort Division DivisionDesc model.sortingMethod }, Cmd.none )
