@@ -93,7 +93,7 @@ update msg model =
             ( { model | sortingMethod = newSort Name NameDesc model.sortingMethod }, Cmd.none )
 
         EloSortClick ->
-            ( { model | sortingMethod = newSort Elo EloDesc model.sortingMethod }, Cmd.none )
+            ( { model | sortingMethod = newSort EloDesc Elo model.sortingMethod }, Cmd.none )
 
 
 newSort : SortingMethod -> SortingMethod -> SortingMethod -> SortingMethod

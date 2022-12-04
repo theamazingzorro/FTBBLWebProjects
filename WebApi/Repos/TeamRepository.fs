@@ -64,7 +64,9 @@ module TeamRepository =
 
         use db = new Database(connection)
 
-        db.Fetch<Team>(getTeamSQL + " WHERE Division.id=@0", divId)
+        db.Fetch<Team>(getTeamSQL + """ 
+                JOIN TeamDivision on TeamDivision.team_id=Team.id
+                WHERE TeamDivision.div_id=@0""", divId)
             |> List.ofSeq
 
 

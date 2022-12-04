@@ -28,6 +28,7 @@
 	<Compile Include="Models\Coach.fs" /> 
 	<Compile Include="Models\Team.fs" /> 
 	<Compile Include="Models\Game.fs" /> 
+	<Compile Include="Models\Standing.fs" /> 
 	<Compile Include="Models\TeamEloHistory.fs" /> 
 	<Compile Include="Models\CoachEloHistory.fs" /> 
 	<Compile Include="Repos\UserRepository.fs" /> 
@@ -45,16 +46,16 @@
     <Compile Include="Services\CoachService.fs" />
     <Compile Include="Services\TeamService.fs" />
     <Compile Include="Services\GameService.fs" />
+    <Compile Include="Services\StandingService.fs" />
     <Compile Include="Handlers\SecurityHandler.fs" />
     <Compile Include="Handlers\DivisionHandler.fs" />
     <Compile Include="Handlers\RaceHandler.fs" />
     <Compile Include="Handlers\CoachHandlers.fs" />
     <Compile Include="Handlers\TeamHandlers.fs" />
     <Compile Include="Handlers\GameHandler.fs" />
+    <Compile Include="Handlers\StandingHandler.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <None Include="web.config" CopyToOutputDirectory="PreserveNewest" />

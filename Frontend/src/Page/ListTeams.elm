@@ -9,7 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
-import Model.Division exposing (DivisionId)
+import Model.Division exposing (Division, DivisionId, compareDivisions)
 import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
@@ -114,7 +114,7 @@ update msg model =
             ( { model | sortingMethod = newSort Coach CoachDesc model.sortingMethod }, Cmd.none )
 
         EloSortClick ->
-            ( { model | sortingMethod = newSort Elo EloDesc model.sortingMethod }, Cmd.none )
+            ( { model | sortingMethod = newSort EloDesc Elo model.sortingMethod }, Cmd.none )
 
         DivisionSortClick ->
             ( { model | sortingMethod = newSort Division DivisionDesc model.sortingMethod }, Cmd.none )
@@ -189,49 +189,19 @@ sortedTeams sortingMethod teams =
             List.sortWith (\a b -> compare b.elo a.elo) teams
 
         Division ->
-            List.sortWith (\a b -> compareDivisions a b) teams
+            List.sortWith (compareMaybeDiv compareDivisions) teams
 
         DivisionDesc ->
-            List.sortWith (\a b -> compareDivisionsDesc a b) teams
+            List.sortWith (compareMaybeDiv (\x y -> compareDivisions y x)) teams
 
 
-compareDivisions : Team -> Team -> Order
-compareDivisions a b =
+compareMaybeDiv : (Division -> Division -> Order) -> Team -> Team -> Order
+compareMaybeDiv comparison a b =
     case a.division of
         Just aDiv ->
             case b.division of
                 Just bDiv ->
-                    case compare aDiv.season bDiv.season of
-                        EQ ->
-                            compare aDiv.name bDiv.name
-
-                        other ->
-                            other
-
-                Nothing ->
-                    LT
-
-        Nothing ->
-            case b.division of
-                Just _ ->
-                    GT
-
-                Nothing ->
-                    EQ
-
-
-compareDivisionsDesc : Team -> Team -> Order
-compareDivisionsDesc a b =
-    case a.division of
-        Just aDiv ->
-            case b.division of
-                Just bDiv ->
-                    case compare bDiv.season aDiv.season of
-                        EQ ->
-                            compare bDiv.name aDiv.name
-
-                        other ->
-                            other
+                    comparison aDiv bDiv
 
                 Nothing ->
                     LT

@@ -3,7 +3,7 @@
 module Elo =
     open ftbbl.WebApi.Models
 
-    type gameResult = Win | Loss | Draw | Unknown
+    type gameResult = HomeWin | HomeLoss | Draw | Unknown
 
     let resultOfGame (game : Game): gameResult =
         if not game.HomeScore.HasValue || not game.AwayScore.HasValue then Unknown
@@ -12,8 +12,8 @@ module Elo =
         let homeScore : int = game.HomeScore.Value
         let awayScore : int = game.AwayScore.Value
 
-        if homeScore > awayScore then Win
-        elif homeScore < awayScore then Loss
+        if homeScore > awayScore then HomeWin
+        elif homeScore < awayScore then HomeLoss
         else Draw
 
 
@@ -31,10 +31,10 @@ module Elo =
         let prob2Wins = winningOdds r2 r1
 
         match result with
-        | Win ->
+        | HomeWin ->
             (r1 + int (K * (1. - prob1Wins)), r2 + int (K * (0. - prob2Wins)))
 
-        | Loss ->
+        | HomeLoss ->
             (r1 + int (K * (0. - prob1Wins)), r2 + int (K * (1. - prob2Wins)))
 
         | Draw ->
