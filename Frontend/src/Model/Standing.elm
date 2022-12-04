@@ -1,5 +1,8 @@
 module Model.Standing exposing
     ( Standing
+    , compareStandings
+    , getPoints
+    , getTDD
     , standingDecoder
     , standingsDecoder
     )
@@ -23,6 +26,30 @@ type alias Standing =
     , pointsScored : Int
     , pointsGiven : Int
     }
+
+
+
+-- Utils --
+
+
+getPoints : Standing -> Int
+getPoints standing =
+    3 * standing.wins + standing.draws
+
+
+getTDD : Standing -> Int
+getTDD standing =
+    standing.pointsScored - standing.pointsGiven
+
+
+compareStandings : Standing -> Standing -> Order
+compareStandings a b =
+    case compare (getPoints a) (getPoints b) of
+        EQ ->
+            compare (getTDD a) (getTDD b)
+
+        other ->
+            other
 
 
 

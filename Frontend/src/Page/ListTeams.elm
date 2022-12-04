@@ -15,6 +15,8 @@ import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 import Url exposing (Protocol(..))
+import Model.Division exposing (compareDivisions)
+import Model.Division exposing (Division)
 
 
 
@@ -189,49 +191,19 @@ sortedTeams sortingMethod teams =
             List.sortWith (\a b -> compare b.elo a.elo) teams
 
         Division ->
-            List.sortWith (\a b -> compareDivisions a b) teams
+            List.sortWith (compareMaybeDiv compareDivisions) teams
 
         DivisionDesc ->
-            List.sortWith (\a b -> compareDivisionsDesc a b) teams
+            List.sortWith (compareMaybeDiv (\x y -> compareDivisions y x)) teams
 
 
-compareDivisions : Team -> Team -> Order
-compareDivisions a b =
+compareMaybeDiv : (Division -> Division -> Order) -> Team -> Team -> Order
+compareMaybeDiv comparison a b =
     case a.division of
         Just aDiv ->
             case b.division of
                 Just bDiv ->
-                    case compare aDiv.season bDiv.season of
-                        EQ ->
-                            compare aDiv.name bDiv.name
-
-                        other ->
-                            other
-
-                Nothing ->
-                    LT
-
-        Nothing ->
-            case b.division of
-                Just _ ->
-                    GT
-
-                Nothing ->
-                    EQ
-
-
-compareDivisionsDesc : Team -> Team -> Order
-compareDivisionsDesc a b =
-    case a.division of
-        Just aDiv ->
-            case b.division of
-                Just bDiv ->
-                    case compare bDiv.season aDiv.season of
-                        EQ ->
-                            compare bDiv.name aDiv.name
-
-                        other ->
-                            other
+                    comparison aDiv bDiv
 
                 Nothing ->
                     LT

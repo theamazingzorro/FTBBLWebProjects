@@ -1,6 +1,7 @@
 module Model.Division exposing
     ( Division
     , DivisionId
+    , compareDivisions
     , defaultDivision
     , divisionDecoder
     , divisionEncoder
@@ -53,6 +54,20 @@ defaultDivision =
     , season = 0
     , closed = False
     }
+
+
+
+-- Utils --
+
+
+compareDivisions : Division -> Division -> Order
+compareDivisions a b =
+    case compare a.season b.season of
+        EQ ->
+            compare a.name b.name
+
+        other ->
+            other
 
 
 
