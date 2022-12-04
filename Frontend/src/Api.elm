@@ -102,11 +102,16 @@ urlOf endpoint =
     baseUrl ++ stringOf endpoint
 
 
+getHeaders : Maybe String -> List Header
+getHeaders token =
+    [ Http.header "Authorization" <| "Bearer " ++ Maybe.withDefault "" token ]
+
+
 getRequest : Maybe String -> Endpoint -> Expect msg -> Cmd msg
 getRequest token endpoint expect =
     Http.request
         { method = "GET"
-        , headers = [ Http.header "Authorization" <| "Bearer " ++ Maybe.withDefault "" token ]
+        , headers = getHeaders token
         , url = urlOf endpoint
         , body = Http.emptyBody
         , expect = expect
@@ -119,7 +124,7 @@ postRequest : Maybe String -> Endpoint -> Body -> Expect msg -> Cmd msg
 postRequest token endpoint body expect =
     Http.request
         { method = "POST"
-        , headers = [ Http.header "Authorization" <| "Bearer " ++ Maybe.withDefault "" token ]
+        , headers = getHeaders token
         , url = urlOf endpoint
         , body = body
         , expect = expect
@@ -132,7 +137,7 @@ deleteRequest : Maybe String -> Endpoint -> Expect msg -> Cmd msg
 deleteRequest token endpoint expect =
     Http.request
         { method = "DELETE"
-        , headers = [ Http.header "Authorization" <| "Bearer " ++ Maybe.withDefault "" token ]
+        , headers = getHeaders token
         , url = urlOf endpoint
         , body = Http.emptyBody
         , expect = expect
@@ -145,7 +150,7 @@ putRequest : Maybe String -> Endpoint -> Body -> Expect msg -> Cmd msg
 putRequest token endpoint body expect =
     Http.request
         { method = "PUT"
-        , headers = [ Http.header "Authorization" <| "Bearer " ++ Maybe.withDefault "" token ]
+        , headers = getHeaders token
         , url = urlOf endpoint
         , body = body
         , expect = expect

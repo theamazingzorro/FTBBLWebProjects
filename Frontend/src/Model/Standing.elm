@@ -4,13 +4,10 @@ module Model.Standing exposing
     , standingsDecoder
     )
 
-import Json.Decode as Decode exposing (Decoder, int, list, string)
-import Json.Decode.Pipeline exposing (optional, required)
-import Model.Division exposing (Division, divisionDecoder)
-import Model.Division exposing (DivisionId)
-import Model.Team exposing (Team)
-import Model.Division exposing (divisionIdDecoder)
-import Model.Team exposing (teamDecoder)
+import Json.Decode as Decode exposing (Decoder, int, list)
+import Json.Decode.Pipeline exposing (required)
+import Model.Division exposing (DivisionId, divisionIdDecoder)
+import Model.Team exposing (Team, teamDecoder)
 
 
 
@@ -47,5 +44,3 @@ standingDecoder =
         |> required "losses" int
         |> required "pointsScored" int
         |> required "pointsGiven" int
-
-

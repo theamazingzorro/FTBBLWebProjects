@@ -4,8 +4,8 @@ module Model.Division exposing
     , defaultDivision
     , divisionDecoder
     , divisionEncoder
-    , divisionsDecoder
     , divisionIdDecoder
+    , divisionsDecoder
     , idParser
     , idToString
     , newDivisionEncoder
