@@ -5,6 +5,7 @@ module Model.Division exposing
     , divisionDecoder
     , divisionEncoder
     , divisionsDecoder
+    , divisionIdDecoder
     , idParser
     , idToString
     , newDivisionEncoder

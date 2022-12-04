@@ -26,6 +26,8 @@ type Endpoint
     | Games
     | GamesInDiv DivisionId
     | Game GameId
+    | DivStandings DivisionId
+    | TeamStanding DivisionId TeamId
     | Signin
 
 
@@ -87,6 +89,12 @@ stringOf endpoint =
 
         CloseDivision divId ->
             "div/close/" ++ Div.idToString divId
+
+        DivStandings divId ->
+            "standings/" ++ Div.idToString divId
+
+        TeamStanding divId teamId ->
+            "standings/" ++ Div.idToString divId ++ "/" ++ Team.idToString teamId
 
 
 urlOf : Endpoint -> String
