@@ -79,7 +79,7 @@ init session id startWeek =
       , sortingMethod = Default
       , division = RemoteData.Loading
       , games = RemoteData.Loading
-      , displayedWeek = Maybe.withDefault 1 startWeek
+      , displayedWeek = Maybe.withDefault -1 startWeek
       , session = session
       , deleteError = Nothing
       , divisionId = id
@@ -115,7 +115,7 @@ update msg model =
             ( { model | standings = response }, Cmd.none )
 
         GamesReceived response ->
-            ( { model | games = response }, Cmd.none )
+            ( { model | games = response, displayedWeek = getStartingWeek model.displayedWeek response }, Cmd.none )
 
         DivisionReceived response ->
             ( { model | division = response }, Cmd.none )
@@ -188,6 +188,23 @@ buildDeleteError res =
 
     else
         Just "Delete Failed. Team not found."
+
+
+getStartingWeek : Int -> WebData (List Game) -> Int
+getStartingWeek default gameData =
+    if default == -1 then
+        case gameData of
+            RemoteData.Success games ->
+                List.filter (\game -> game.homeOdds /= Nothing) games
+                    |> List.map (\game -> game.week)
+                    |> List.minimum
+                    |> Maybe.withDefault 1
+
+            _ ->
+                default
+
+    else
+        default
 
 
 
@@ -502,7 +519,7 @@ viewStandingTableRow session standing =
         , td [ textCentered ]
             [ text <| String.fromInt <| getTDD standing ]
         , td [ textCentered ]
-            [ text (Maybe.andThen (String.fromInt >> Just) standing.avgRemainingElo |> Maybe.withDefault "") ]
+            [ text (Maybe.andThen (String.fromInt >> Just) standing.avgRemainingElo |> Maybe.withDefault "No games remaining") ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 2)
                 [ viewTeamEditButton standing.team, viewTeamDeleteButton standing.team ]
