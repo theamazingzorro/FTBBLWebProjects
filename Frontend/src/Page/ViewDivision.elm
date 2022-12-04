@@ -198,7 +198,7 @@ getStartingWeek default gameData =
                 List.filter (\game -> game.homeOdds /= Nothing) games
                     |> List.map (\game -> game.week)
                     |> List.minimum
-                    |> Maybe.withDefault 1
+                    |> Maybe.withDefault (maxWeek games)
 
             _ ->
                 default
