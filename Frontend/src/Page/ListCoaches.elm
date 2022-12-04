@@ -2,7 +2,7 @@ module Page.ListCoaches exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes
+import Custom.Attributes exposing (textCentered)
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -39,7 +39,7 @@ type Msg
 
 
 type SortingMethod
-    = None
+    = Default
     | Name
     | NameDesc
     | Elo
@@ -53,7 +53,7 @@ type SortingMethod
 init : Session -> ( Model, Cmd Msg )
 init session =
     ( { coaches = RemoteData.Loading
-      , sortingMethod = None
+      , sortingMethod = Default
       , session = session
       , deleteError = Nothing
       }
@@ -137,8 +137,8 @@ deleteCoachRequest token id =
 sortedCoaches : SortingMethod -> List Coach -> List Coach
 sortedCoaches sortingMethod coaches =
     case sortingMethod of
-        None ->
-            coaches
+        Default ->
+            List.sortWith (\a b -> compare b.elo a.elo) coaches
 
         Name ->
             List.sortWith (\a b -> compare a.name b.name) coaches
@@ -263,7 +263,7 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Name"
                 ]
-            , th [ scope "col", onClick EloSortClick ]
+            , th [ scope "col", onClick EloSortClick, textCentered ]
                 [ case sortMethod of
                     Elo ->
                         text "Elo ▲"
@@ -285,7 +285,7 @@ viewCoach session coach =
     tr []
         [ td []
             [ text coach.name ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt coach.elo ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 2)

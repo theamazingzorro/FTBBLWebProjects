@@ -2,7 +2,7 @@ module Page.ViewDivision exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes
+import Custom.Attributes exposing (textCentered)
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -455,7 +455,7 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Coach"
                 ]
-            , th [ scope "col", onClick TeamEloSortClick ]
+            , th [ scope "col", onClick TeamEloSortClick, textCentered ]
                 [ case sortMethod of
                     Elo ->
                         text "Elo ▲"
@@ -466,15 +466,15 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Elo"
                 ]
-            , th [ scope "col", onClick DefaultSortClick ]
+            , th [ scope "col", onClick DefaultSortClick, textCentered ]
                 [ text "Points" ]
-            , th [ scope "col", onClick DefaultSortClick ]
+            , th [ scope "col", onClick DefaultSortClick, textCentered ]
                 [ text "Games" ]
-            , th [ scope "col", onClick DefaultSortClick ]
+            , th [ scope "col", onClick DefaultSortClick, textCentered ]
                 [ text "W-D-L" ]
             , th [ scope "col", onClick DefaultSortClick ]
                 [ text "TDD" ]
-            , th [ scope "col" ]
+            , th [ scope "col", textCentered ]
                 [ text "Strength of Schedule" ]
             , th [ scope "col", onClick DefaultSortClick ]
                 [ text "" ]
@@ -491,17 +491,17 @@ viewStandingTableRow session standing =
             [ text standing.team.race.name ]
         , td []
             [ text standing.team.coach.name ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt standing.team.elo ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt <| getPoints standing ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt <| getGamesPlayed standing ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt standing.wins ++ " - " ++ String.fromInt standing.draws ++ " - " ++ String.fromInt standing.losses ]
-        , td []
+        , td [ textCentered ]
             [ text <| String.fromInt <| getTDD standing ]
-        , td []
+        , td [ textCentered ]
             [ text (Maybe.andThen (String.fromInt >> Just) standing.avgRemainingElo |> Maybe.withDefault "") ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 2)
