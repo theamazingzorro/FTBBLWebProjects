@@ -2,7 +2,6 @@
 
 
 module StandingService =
-    open ftbbl.WebApi.Repositories
     open ftbbl.WebApi.Models
 
     let private getStanding (divId : int) (games : Game list) (team : Team) : Standing=
@@ -30,14 +29,14 @@ module StandingService =
         }
 
     let getByDiv (divId : int) : Standing list =
-        let teams = TeamRepository.getByDiv divId
-        let games = GameRepository.getByDiv divId
+        let teams = TeamService.getByDiv divId
+        let games = GameService.getByDiv divId
 
         List.map (getStanding divId games) teams
 
     let getById (divId : int) (teamId : int) : Standing =
-        let team = TeamRepository.getById teamId
-        let games = GameRepository.getByDiv divId
+        let team = TeamService.getById teamId
+        let games = GameService.getByDiv divId
 
         getStanding divId games team
 
