@@ -15,5 +15,5 @@ type Standing =
         PointsScored : int
         PointsGiven : int
 
-        AvgRemaingElo : Nullable<int>
+        AvgRemainingElo : Nullable<int>
     }

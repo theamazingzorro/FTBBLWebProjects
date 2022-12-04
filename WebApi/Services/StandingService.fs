@@ -33,7 +33,7 @@ module StandingService =
             PointsScored = List.map (fun game -> game.HomeScore.GetValueOrDefault(0)) homeGames
                     |> List.append (List.map (fun game -> game.AwayScore.GetValueOrDefault(0)) awayGames)
                     |> List.sum;
-            AvgRemaingElo = (
+            AvgRemainingElo = (
                     if List.length remainingElos > 0 
                         then Nullable<int> (int <| List.average remainingElos)
                         else Nullable()

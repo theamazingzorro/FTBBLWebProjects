@@ -474,6 +474,8 @@ viewTableHeader sortMethod =
                 [ text "W-D-L" ]
             , th [ scope "col", onClick DefaultSortClick ]
                 [ text "TDD" ]
+            , th [ scope "col" ]
+                [ text "Strength of Schedule" ]
             , th [ scope "col", onClick DefaultSortClick ]
                 [ text "" ]
             ]
@@ -499,6 +501,8 @@ viewStandingTableRow session standing =
             [ text <| String.fromInt standing.wins ++ " - " ++ String.fromInt standing.draws ++ " - " ++ String.fromInt standing.losses ]
         , td []
             [ text <| String.fromInt <| getTDD standing ]
+        , td []
+            [ text (Maybe.andThen (String.fromInt >> Just) standing.avgRemainingElo |> Maybe.withDefault "") ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 2)
                 [ viewTeamEditButton standing.team, viewTeamDeleteButton standing.team ]

@@ -9,10 +9,9 @@ module Model.Standing exposing
     )
 
 import Json.Decode as Decode exposing (Decoder, int, list)
-import Json.Decode.Pipeline exposing (required)
+import Json.Decode.Pipeline exposing (optional, required)
 import Model.Division exposing (DivisionId, divisionIdDecoder)
 import Model.Team exposing (Team, teamDecoder)
-import Json.Decode.Pipeline exposing (optional)
 
 
 
