@@ -1,5 +1,7 @@
 ﻿namespace ftbbl.WebApi.Models
 
+open System
+
 [<CLIMutable>]
 type Standing =
     {
@@ -12,4 +14,6 @@ type Standing =
         Losses : int
         PointsScored : int
         PointsGiven : int
+
+        AvgRemaingElo : Nullable<int>
     }

@@ -12,6 +12,7 @@ import Json.Decode as Decode exposing (Decoder, int, list)
 import Json.Decode.Pipeline exposing (required)
 import Model.Division exposing (DivisionId, divisionIdDecoder)
 import Model.Team exposing (Team, teamDecoder)
+import Json.Decode.Pipeline exposing (optional)
 
 
 
@@ -26,6 +27,7 @@ type alias Standing =
     , losses : Int
     , pointsScored : Int
     , pointsGiven : Int
+    , avgRemainingElo : Maybe Int
     }
 
 
@@ -77,3 +79,4 @@ standingDecoder =
         |> required "losses" int
         |> required "pointsScored" int
         |> required "pointsGiven" int
+        |> optional "avgRemainingElo" (Decode.map Just int) Nothing
