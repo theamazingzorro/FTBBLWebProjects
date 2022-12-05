@@ -17,6 +17,9 @@ import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
 import Model.SharedIds as SharedIds
 import Url.Parser exposing (Parser)
+import Model.Accolade exposing (Accolade)
+import Model.Accolade exposing (accoladesDecoder)
+import Json.Decode.Pipeline exposing (optional)
 
 
 
@@ -27,6 +30,7 @@ type alias Coach =
     { id : CoachId
     , name : String
     , elo : Int
+    , accolades : List Accolade 
     }
 
 
@@ -52,6 +56,7 @@ defaultCoach =
     { id = SharedIds.defaultCoachId
     , name = ""
     , elo = 1000
+    , accolades = []
     }
 
 
@@ -70,6 +75,7 @@ coachDecoder =
         |> required "id" coachIdDecoder
         |> required "name" string
         |> required "elo" int
+        |> optional "accolades" accoladesDecoder []
 
 
 coachIdDecoder : Decoder CoachId

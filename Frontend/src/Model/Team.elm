@@ -20,6 +20,8 @@ import Model.Division exposing (Division, divisionDecoder)
 import Model.Race exposing (Race, defaultRace, raceDecoder, raceEncoder)
 import Model.SharedIds as SharedIds
 import Url.Parser exposing (Parser)
+import Model.Accolade exposing (Accolade)
+import Model.Accolade exposing (accoladesDecoder)
 
 
 
@@ -33,6 +35,7 @@ type alias Team =
     , coach : Coach
     , elo : Int
     , division : Maybe Division
+    , accolades : List Accolade
     }
 
 
@@ -61,6 +64,7 @@ defaultTeam =
     , coach = defaultCoach
     , elo = 1000
     , division = Nothing
+    , accolades = []
     }
 
 
@@ -82,6 +86,7 @@ teamDecoder =
         |> required "coach" coachDecoder
         |> required "elo" int
         |> optional "division" (Decode.map Just divisionDecoder) Nothing
+        |> optional "accolades" accoladesDecoder []
 
 
 teamIdDecoder : Decoder TeamId
