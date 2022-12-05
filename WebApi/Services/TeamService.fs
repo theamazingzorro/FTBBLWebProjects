@@ -3,17 +3,47 @@
 
 module TeamService =
     open ftbbl.WebApi.Repositories
+    open ftbbl.WebApi.Services
     open ftbbl.WebApi.Models
     open System
 
-    let getAll =
-        TeamRepository.getAll
+    let private populateCoachAccollades (teamId : int) (coach : Coach) : Coach =
+        if coach.AccoladeCount = 0
+        then { coach with Accolades = [] }
+        else { coach with Accolades = AccoladeService.getAllForCoachExcludeTeam teamId coach.Id }
 
-    let getFree = 
-        TeamRepository.getFree
+    let private populateAccolades (team : Team) : Team =
+        if team.AccoladeCount = 0 
+        then 
+            { team with 
+                Accolades = []; 
+                Coach = populateCoachAccollades team.Id team.Coach 
+            }
+        else 
+            { team with 
+                Accolades = AccoladeService.getAllForTeam team.Id; 
+                Coach = populateCoachAccollades team.Id team.Coach 
+            }
+
+    let getAll() =
+        TeamRepository.getAll()
+        |> List.map populateAccolades
+
+    let getFree() = 
+        TeamRepository.getFree()
+        |> List.map populateAccolades
+
+    let getByDiv divId = 
+        TeamRepository.getByDiv divId
+        |> List.map populateAccolades
+
+    let getNotInDiv divId = 
+        TeamRepository.getNotInDiv divId
+        |> List.map populateAccolades
 
     let getById id =
         TeamRepository.getById id
+        |> populateAccolades
 
     let saveChanges (team : Team)= 
         let oldTeam = TeamRepository.getById(team.Id)
@@ -40,9 +70,3 @@ module TeamService =
 
     let updateDiv teamId divId = 
         TeamRepository.updateDiv teamId divId
-
-    let getByDiv divId = 
-        TeamRepository.getByDiv divId
-
-    let getNotInDiv divId = 
-        TeamRepository.getNotInDiv divId

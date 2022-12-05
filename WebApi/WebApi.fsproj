@@ -22,6 +22,7 @@
 	<Content Include="appsettings.json">
 	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</Content> 
+	<Compile Include="Models\Accolade.fs" /> 
 	<Compile Include="Models\User.fs" /> 
 	<Compile Include="Models\Division.fs" /> 
 	<Compile Include="Models\Race.fs" /> 
@@ -31,6 +32,7 @@
 	<Compile Include="Models\Standing.fs" /> 
 	<Compile Include="Models\TeamEloHistory.fs" /> 
 	<Compile Include="Models\CoachEloHistory.fs" /> 
+	<Compile Include="Repos\AccoladeRepository.fs" /> 
 	<Compile Include="Repos\UserRepository.fs" /> 
 	<Compile Include="Repos\DivisionRepository.fs" /> 
 	<Compile Include="Repos\RaceRepository.fs" /> 
@@ -41,6 +43,7 @@
     <Compile Include="Repos\CoachEloHistoryRepository.fs" />
     <Compile Include="Services\Auth.fs" />
     <Compile Include="Services\Elo.fs" />
+    <Compile Include="Services\AccoladeService.fs" />
     <Compile Include="Services\DivisionService.fs" />
     <Compile Include="Services\RaceService.fs" />
     <Compile Include="Services\CoachService.fs" />
