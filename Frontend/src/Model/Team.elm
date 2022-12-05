@@ -2,11 +2,13 @@ module Model.Team exposing
     ( Team
     , TeamId
     , defaultTeam
+    , encodeId
     , idParser
     , idToString
     , newTeamEncoder
     , teamDecoder
     , teamEncoder
+    , teamIdDecoder
     , teamsDecoder
     )
 
