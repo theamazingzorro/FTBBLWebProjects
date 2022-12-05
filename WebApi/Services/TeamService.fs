@@ -10,7 +10,7 @@ module TeamService =
     let private populateCoachAccollades (teamId : int) (coach : Coach) : Coach =
         if coach.AccoladeCount = 0
         then { coach with Accolades = [] }
-        else { coach with Accolades = AccoladeService.getAllForCoachExcludeTeam teamId coach.Id }
+        else { coach with Accolades = AccoladeService.getAllForCoachExcludeTeam coach.Id teamId }
 
     let private populateAccolades (team : Team) : Team =
         if team.AccoladeCount = 0 
