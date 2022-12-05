@@ -13,8 +13,7 @@ module Model.Accolade exposing
 import Json.Decode as Decode exposing (Decoder, bool, int, list, string)
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
-import Model.Coach as Coach exposing (CoachId, coachIdDecoder, defaultCoach)
-import Model.Team as Team exposing (TeamId, teamIdDecoder)
+import Model.SharedIds exposing (..)
 import Url.Parser exposing (Parser, custom)
 
 
@@ -55,7 +54,7 @@ defaultAccolade : Accolade
 defaultAccolade =
     { id = AccoladeId 0
     , teamId = Nothing
-    , coachId = defaultCoach.id
+    , coachId = defaultCoachId
     , season = Nothing
     , name = ""
     , isChamp = False
@@ -99,8 +98,8 @@ accoladeEncoder : Accolade -> Encode.Value
 accoladeEncoder accolade =
     Encode.object
         [ ( "id", encodeId accolade.id )
-        , ( "teamId", encodeMaybe Team.encodeId accolade.teamId )
-        , ( "coachId", Coach.encodeId accolade.coachId )
+        , ( "teamId", encodeMaybe encodeTeamId accolade.teamId )
+        , ( "coachId", encodeCoachId accolade.coachId )
         , ( "season", encodeMaybe Encode.int accolade.season )
         , ( "name", Encode.string accolade.name )
         , ( "isChamp", Encode.bool accolade.isChamp )
@@ -112,8 +111,8 @@ accoladeEncoder accolade =
 newAccoladeEncoder : Accolade -> Encode.Value
 newAccoladeEncoder accolade =
     Encode.object
-        [ ( "teamId", encodeMaybe Team.encodeId accolade.teamId )
-        , ( "coachId", Coach.encodeId accolade.coachId )
+        [ ( "teamId", encodeMaybe encodeTeamId accolade.teamId )
+        , ( "coachId", encodeCoachId accolade.coachId )
         , ( "season", encodeMaybe Encode.int accolade.season )
         , ( "name", Encode.string accolade.name )
         , ( "isChamp", Encode.bool accolade.isChamp )

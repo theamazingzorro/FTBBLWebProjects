@@ -18,7 +18,8 @@ import Json.Encode as Encode
 import Model.Coach exposing (Coach, coachDecoder, coachEncoder, defaultCoach)
 import Model.Division exposing (Division, divisionDecoder)
 import Model.Race exposing (Race, defaultRace, raceDecoder, raceEncoder)
-import Url.Parser exposing (Parser, custom)
+import Model.SharedIds as SharedIds
+import Url.Parser exposing (Parser)
 
 
 
@@ -35,8 +36,8 @@ type alias Team =
     }
 
 
-type TeamId
-    = TeamId Int
+type alias TeamId =
+    SharedIds.TeamId
 
 
 
@@ -44,8 +45,8 @@ type TeamId
 
 
 idToString : TeamId -> String
-idToString (TeamId id) =
-    String.fromInt id
+idToString =
+    SharedIds.teamIdToString
 
 
 
@@ -54,7 +55,7 @@ idToString (TeamId id) =
 
 defaultTeam : Team
 defaultTeam =
-    { id = TeamId 0
+    { id = SharedIds.defaultTeamId
     , name = ""
     , race = defaultRace
     , coach = defaultCoach
@@ -85,7 +86,7 @@ teamDecoder =
 
 teamIdDecoder : Decoder TeamId
 teamIdDecoder =
-    Decode.map TeamId int
+    SharedIds.teamIdDecoder
 
 
 
@@ -114,8 +115,8 @@ newTeamEncoder team =
 
 
 encodeId : TeamId -> Encode.Value
-encodeId (TeamId id) =
-    Encode.int id
+encodeId =
+    SharedIds.encodeTeamId
 
 
 
@@ -124,6 +125,4 @@ encodeId (TeamId id) =
 
 idParser : Parser (TeamId -> a) a
 idParser =
-    custom "TEAMID" <|
-        \id ->
-            Maybe.map TeamId (String.toInt id)
+    SharedIds.teamIdParser
