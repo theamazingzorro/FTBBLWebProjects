@@ -8,6 +8,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
+import Model.Accolade exposing (Accolade, viewAccolade)
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, divisionDecoder)
 import Model.Game as Game exposing (Game, GameId, gamesDecoder)
@@ -507,11 +508,11 @@ viewStandingTableRow : Session -> Bool -> Standing -> Html Msg
 viewStandingTableRow session divClosed standing =
     tr []
         [ td []
-            [ text standing.team.name ]
+            [ text standing.team.name, viewAccolades standing.team.accolades ]
         , td []
             [ text standing.team.race.name ]
         , td []
-            [ text standing.team.coach.name ]
+            [ text standing.team.coach.name, viewAccolades standing.team.coach.accolades ]
         , td [ textCentered ]
             [ text <| String.fromInt standing.team.elo ]
         , td [ textCentered ]
@@ -532,6 +533,15 @@ viewStandingTableRow session divClosed standing =
             td (Custom.Attributes.tableButtonColumn 2)
                 [ viewTeamEditButton standing.team, viewTeamDeleteButton standing.team ]
         ]
+
+
+viewAccolades : List Accolade -> Html Msg
+viewAccolades accolades =
+    span []
+        (List.sortWith (\a b -> compare (Maybe.withDefault 0 b.season) (Maybe.withDefault 0 a.season)) accolades
+            |> List.take 3
+            |> List.map viewAccolade
+        )
 
 
 viewTeamDeleteButton : Team -> Html Msg

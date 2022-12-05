@@ -15,13 +15,12 @@ module Model.Team exposing
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
+import Model.Accolade exposing (Accolade, accoladesDecoder)
 import Model.Coach exposing (Coach, coachDecoder, coachEncoder, defaultCoach)
 import Model.Division exposing (Division, divisionDecoder)
 import Model.Race exposing (Race, defaultRace, raceDecoder, raceEncoder)
 import Model.SharedIds as SharedIds
 import Url.Parser exposing (Parser)
-import Model.Accolade exposing (Accolade)
-import Model.Accolade exposing (accoladesDecoder)
 
 
 

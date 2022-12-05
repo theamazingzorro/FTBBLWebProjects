@@ -13,13 +13,11 @@ module Model.Coach exposing
     )
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
-import Json.Decode.Pipeline exposing (required)
+import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
+import Model.Accolade exposing (Accolade, accoladesDecoder)
 import Model.SharedIds as SharedIds
 import Url.Parser exposing (Parser)
-import Model.Accolade exposing (Accolade)
-import Model.Accolade exposing (accoladesDecoder)
-import Json.Decode.Pipeline exposing (optional)
 
 
 
@@ -30,7 +28,7 @@ type alias Coach =
     { id : CoachId
     , name : String
     , elo : Int
-    , accolades : List Accolade 
+    , accolades : List Accolade
     }
 
 

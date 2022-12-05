@@ -8,8 +8,11 @@ module Model.Accolade exposing
     , idParser
     , idToString
     , newAccoladeEncoder
+    , viewAccolade
     )
 
+import Html exposing (Html, span, text)
+import Html.Attributes exposing (title)
 import Json.Decode as Decode exposing (Decoder, bool, int, list, string)
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
@@ -61,6 +64,27 @@ defaultAccolade =
     , isRunnerUp = False
     , isSidecup = False
     }
+
+
+
+-- Utils --
+
+
+viewAccolade : Accolade -> Html msg
+viewAccolade accolade =
+    span [ title accolade.name ]
+        [ if accolade.isChamp then
+            text "🥇"
+
+          else if accolade.isRunnerUp then
+            text "🥈"
+
+          else if accolade.isSidecup then
+            text "🏆"
+
+          else
+            text "🏅"
+        ]
 
 
 
