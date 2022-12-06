@@ -8,7 +8,6 @@ module Model.Team exposing
     , newTeamEncoder
     , teamDecoder
     , teamEncoder
-    , teamIdDecoder
     , teamsDecoder
     )
 

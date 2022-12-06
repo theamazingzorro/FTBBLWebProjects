@@ -3,7 +3,6 @@ module Model.Coach exposing
     , CoachId
     , coachDecoder
     , coachEncoder
-    , coachIdDecoder
     , coachsDecoder
     , defaultCoach
     , encodeId
