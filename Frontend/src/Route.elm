@@ -1,6 +1,7 @@
 module Route exposing (Route(..), parseUrl, pushUrl)
 
 import Browser.Navigation as Nav
+import Model.Accolade as Accolade exposing (AccoladeId)
 import Model.Coach as Coach exposing (CoachId)
 import Model.Division as Div exposing (DivisionId)
 import Model.Game as Game exposing (GameId)
@@ -29,6 +30,8 @@ type Route
     | ViewDivisionWeek DivisionId Int
     | AddTeamToDivision DivisionId
     | AddGameWeek DivisionId Int
+    | Accolades
+    | AddAccolade
 
 
 parseUrl : Url -> Route
@@ -101,6 +104,14 @@ matchRoute =
             oneOf
                 [ s "Game" </> s "Edit" </> Game.idParser
                 , s "game" </> s "edit" </> Game.idParser
+                ]
+
+        {- Accolade CRUD -}
+        , map Accolades <| oneOf [ s "Accolade", s "accolade" ]
+        , map AddAccolade <|
+            oneOf
+                [ s "Accolade" </> s "Add"
+                , s "accolade" </> s "add"
                 ]
 
         {- More Complex Views -}
@@ -194,3 +205,9 @@ routeToString route =
 
         AddGameWeek divisionId week ->
             "/Game/AddWeek/" ++ Div.idToString divisionId ++ "/" ++ String.fromInt week ++ "#week"
+
+        Accolades ->
+            "/Accolade"
+
+        AddAccolade ->
+            "/Accolade/Add"

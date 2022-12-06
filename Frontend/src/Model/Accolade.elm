@@ -70,9 +70,19 @@ defaultAccolade =
 -- Utils --
 
 
+accoladeTitle : Accolade -> String
+accoladeTitle accolade =
+    case accolade.season of
+        Just season ->
+            accolade.name ++ " Season " ++ String.fromInt season
+
+        Nothing ->
+            accolade.name
+
+
 viewAccolade : Accolade -> Html msg
 viewAccolade accolade =
-    span [ title accolade.name ]
+    span [ title <| accoladeTitle accolade ]
         [ if accolade.isChamp then
             text "🥇"
 

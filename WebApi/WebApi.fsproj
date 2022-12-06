@@ -50,6 +50,7 @@
     <Compile Include="Services\TeamService.fs" />
     <Compile Include="Services\GameService.fs" />
     <Compile Include="Services\StandingService.fs" />
+    <Compile Include="Handlers\AccoladeHandler.fs" />
     <Compile Include="Handlers\SecurityHandler.fs" />
     <Compile Include="Handlers\DivisionHandler.fs" />
     <Compile Include="Handlers\RaceHandler.fs" />

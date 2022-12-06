@@ -3,6 +3,7 @@ module Page exposing (Model, Msg, OutMsg(..), init, update, view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Model.Session exposing (Session)
+import Page.AddAccolade as AddAccolade
 import Page.AddCoach as AddCoach
 import Page.AddDivision as AddDivision
 import Page.AddGame as AddGame
@@ -13,6 +14,7 @@ import Page.EditCoach as EditCoach
 import Page.EditDivision as EditDivision
 import Page.EditGame as EditGame
 import Page.EditTeam as EditTeam
+import Page.ListAccolades as ListAccolades
 import Page.ListCoaches as ListCoaches
 import Page.ListDivisions as ListDivisions
 import Page.ListTeams as ListTeams
@@ -42,6 +44,8 @@ type Model
     | ViewDivisionPage ViewDivision.Model
     | AddTeamToDivPage AddTeamToDiv.Model
     | AddGameWeekPage AddGameWeek.Model
+    | AccoladesPage ListAccolades.Model
+    | AddAccoladePage AddAccolade.Model
 
 
 type Msg
@@ -60,6 +64,8 @@ type Msg
     | ViewDivisionPageMsg ViewDivision.Msg
     | AddTeamToDivPageMsg AddTeamToDiv.Msg
     | AddGameWeekMsg AddGameWeek.Msg
+    | AccoladesPageMsg ListAccolades.Msg
+    | AddAccoladePageMsg AddAccolade.Msg
 
 
 type OutMsg
@@ -160,6 +166,16 @@ init session route =
                 |> wrapInitWith AddGameWeekPage AddGameWeekMsg
                 |> requiresAuth session
 
+        Route.Accolades ->
+            ListAccolades.init session
+                |> wrapInitWith AccoladesPage AccoladesPageMsg
+                |> requiresAuth session
+
+        Route.AddAccolade ->
+            AddAccolade.init session
+                |> wrapInitWith AddAccoladePage AddAccoladePageMsg
+                |> requiresAuth session
+
 
 
 -- Update --
@@ -254,6 +270,21 @@ update msg model =
                 |> wrapUpdateWith EditGamePage EditGamePageMsg
 
         ( EditGamePageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
+        {- Accolade CRUD pages -}
+        ( AccoladesPageMsg subMsg, AccoladesPage pageModel ) ->
+            ListAccolades.update subMsg pageModel
+                |> wrapUpdateWith AccoladesPage AccoladesPageMsg
+
+        ( AccoladesPageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
+        ( AddAccoladePageMsg subMsg, AddAccoladePage pageModel ) ->
+            AddAccolade.update subMsg pageModel
+                |> wrapUpdateWith AddAccoladePage AddAccoladePageMsg
+
+        ( AddAccoladePageMsg _, _ ) ->
             ( model, Cmd.none, Nothing )
 
         {- Other -}
@@ -393,6 +424,14 @@ view model =
         AddGameWeekPage pageModel ->
             AddGameWeek.view pageModel
                 |> Html.map AddGameWeekMsg
+
+        AccoladesPage pageModel ->
+            ListAccolades.view pageModel
+                |> Html.map AccoladesPageMsg
+
+        AddAccoladePage pageModel ->
+            AddAccolade.view pageModel
+                |> Html.map AddAccoladePageMsg
 
 
 notFoundView : Html msg

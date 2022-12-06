@@ -211,6 +211,16 @@ formInput thisId otherAttributes =
         ++ otherAttributes
 
 
+formCheckbox : String -> List (Attribute msg) -> List (Attribute msg)
+formCheckbox thisId otherAttributes =
+    [ class "form-check-input"
+    , style "margin" "auto 15px"
+    , type_ "checkbox"
+    , id thisId
+    ]
+        ++ otherAttributes
+
+
 formPasswordInput : String -> List (Attribute msg) -> List (Attribute msg)
 formPasswordInput thisId otherAttributes =
     [ class "form-control"

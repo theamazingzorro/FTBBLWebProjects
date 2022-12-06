@@ -29,6 +29,7 @@ type Msg
     | TeamIndexClicked
     | CoachIndexClicked
     | DivisionIndexClicked
+    | AccoladeIndexClicked
     | SpecificDivisionClicked DivisionId
     | DivisionsRecieved (WebData (List Division))
 
@@ -61,6 +62,9 @@ update msg model =
 
         DivisionIndexClicked ->
             ( model, pushUrl model.session.navkey Route.Divisions, Nothing )
+
+        AccoladeIndexClicked ->
+            ( model, pushUrl model.session.navkey Route.Accolades, Nothing )
 
         SpecificDivisionClicked divId ->
             ( model, pushUrl model.session.navkey <| Route.ViewDivision divId, Nothing )
@@ -121,6 +125,7 @@ view model =
                 [ linkElement "Teams" TeamIndexClicked
                 , linkElement "Coaches" CoachIndexClicked
                 , viewDivisionsLink model.divisions
+                , viewAccoladesLink model.session.token
                 , viewSignInOutLink model.session.token
                 ]
             ]
@@ -135,6 +140,16 @@ viewSignInOutLink token =
 
         Nothing ->
             linkElement "Sign In" SigninClicked
+
+
+viewAccoladesLink : Maybe String -> Html Msg
+viewAccoladesLink token =
+    case token of
+        Just _ ->
+            linkElement "Accolades" AccoladeIndexClicked
+
+        Nothing ->
+            text ""
 
 
 viewDivisionsLink : WebData (List Division) -> Html Msg

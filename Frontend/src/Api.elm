@@ -2,6 +2,7 @@ module Api exposing (Endpoint(..), deleteRequest, getRequest, postRequest, putRe
 
 import Env
 import Http exposing (Body, Expect, Header(..))
+import Model.Accolade as Accolade exposing (AccoladeId)
 import Model.Coach as Coach exposing (CoachId)
 import Model.Division as Div exposing (DivisionId)
 import Model.Game as Game exposing (GameId)
@@ -26,6 +27,8 @@ type Endpoint
     | Games
     | GamesInDiv DivisionId
     | Game GameId
+    | Accolades
+    | Accolade AccoladeId
     | DivStandings DivisionId
     | TeamStanding DivisionId TeamId
     | Signin
@@ -71,6 +74,12 @@ stringOf endpoint =
 
         Game index ->
             "game/" ++ Game.idToString index
+
+        Accolades ->
+            "accolade/"
+
+        Accolade index ->
+            "accolade/" ++ Accolade.idToString index
 
         Signin ->
             "signin"
