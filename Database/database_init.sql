@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS Accolade(
     team_id INT NULL,
     coach_id INT NOT NULL,
     season INT NULL,
-    name VARCHAR(40) NOT NULL UNIQUE,
+    name VARCHAR(40) NOT NULL,
     championship BOOL NOT NULL,
     runnerup BOOL NOT NULL,
     sidecup BOOL NOT NULL,
