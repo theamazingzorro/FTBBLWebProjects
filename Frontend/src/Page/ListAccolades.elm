@@ -261,7 +261,7 @@ viewTableHeader =
             , th [ scope "col" ]
                 [ text "Coach" ]
             , th [ scope "col" ]
-                [text "Display"]
+                [ text "Display" ]
             , th [ scope "col" ]
                 [ text "Name" ]
             , th [ scope "col", textCentered ]
@@ -279,7 +279,7 @@ viewAccolade model accolade =
             [ text (getTeam model.teams accolade.teamId |> Maybe.andThen (.name >> Just) |> Maybe.withDefault "") ]
         , td []
             [ text (getCoach model.coaches accolade.coachId |> Maybe.andThen (.name >> Just) |> Maybe.withDefault "") ]
-        ,td [] 
+        , td []
             [ Accolade.viewAccolade accolade ]
         , td []
             [ text accolade.name ]
@@ -296,4 +296,3 @@ viewDeleteButton accolade =
     button
         (onClick (DeleteAccoladeButtonClick accolade.id) :: Custom.Attributes.deleteButton)
         [ text "Delete" ]
-
