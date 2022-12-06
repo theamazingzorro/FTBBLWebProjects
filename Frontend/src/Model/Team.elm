@@ -13,10 +13,12 @@ module Model.Team exposing
 import Json.Decode as Decode exposing (Decoder, int, list, string)
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
+import Model.Accolade exposing (Accolade, accoladesDecoder)
 import Model.Coach exposing (Coach, coachDecoder, coachEncoder, defaultCoach)
 import Model.Division exposing (Division, divisionDecoder)
 import Model.Race exposing (Race, defaultRace, raceDecoder, raceEncoder)
-import Url.Parser exposing (Parser, custom)
+import Model.SharedIds as SharedIds
+import Url.Parser exposing (Parser)
 
 
 
@@ -30,11 +32,12 @@ type alias Team =
     , coach : Coach
     , elo : Int
     , division : Maybe Division
+    , accolades : List Accolade
     }
 
 
-type TeamId
-    = TeamId Int
+type alias TeamId =
+    SharedIds.TeamId
 
 
 
@@ -42,8 +45,8 @@ type TeamId
 
 
 idToString : TeamId -> String
-idToString (TeamId id) =
-    String.fromInt id
+idToString =
+    SharedIds.teamIdToString
 
 
 
@@ -52,12 +55,13 @@ idToString (TeamId id) =
 
 defaultTeam : Team
 defaultTeam =
-    { id = TeamId 0
+    { id = SharedIds.defaultTeamId
     , name = ""
     , race = defaultRace
     , coach = defaultCoach
     , elo = 1000
     , division = Nothing
+    , accolades = []
     }
 
 
@@ -79,11 +83,12 @@ teamDecoder =
         |> required "coach" coachDecoder
         |> required "elo" int
         |> optional "division" (Decode.map Just divisionDecoder) Nothing
+        |> optional "accolades" accoladesDecoder []
 
 
 teamIdDecoder : Decoder TeamId
 teamIdDecoder =
-    Decode.map TeamId int
+    SharedIds.teamIdDecoder
 
 
 
@@ -112,8 +117,8 @@ newTeamEncoder team =
 
 
 encodeId : TeamId -> Encode.Value
-encodeId (TeamId id) =
-    Encode.int id
+encodeId =
+    SharedIds.encodeTeamId
 
 
 
@@ -122,6 +127,4 @@ encodeId (TeamId id) =
 
 idParser : Parser (TeamId -> a) a
 idParser =
-    custom "TEAMID" <|
-        \id ->
-            Maybe.map TeamId (String.toInt id)
+    SharedIds.teamIdParser

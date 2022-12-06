@@ -56,6 +56,10 @@ let webApp =
                     routef "/standings/%i/" StandingHandler.getDivStandings
                     routef "/standings/%i/%i" StandingHandler.getStanding
                     routef "/standings/%i/%i/" StandingHandler.getStanding
+
+                    routex "/accolade(/?)" >=> AccoladeHandler.getAccolades
+                    routef "/accolade/%i" AccoladeHandler.getAccolade
+                    routef "/accolade/%i/" AccoladeHandler.getAccolade
                 ]
                 POST >=> choose [
                     routex "/signin(/?)" >=> SecurityHandler.signIn
@@ -68,6 +72,8 @@ let webApp =
                         routex "/div(/?)" >=> DivisionHandler.postDivision
 
                         routex "/game(/?)" >=> GameHandler.postGame
+
+                        routex "/accolade(/?)" >=> AccoladeHandler.postAccolade
 
                         routef "/team/updatediv/%i/%i" TeamHandler.updateDiv
                         routef "/team/updatediv/%i/%i/" TeamHandler.updateDiv
@@ -88,6 +94,9 @@ let webApp =
 
                     routef "/game/%i" GameHandler.updateGame
                     routef "/game/%i/" GameHandler.updateGame
+
+                    routef "/accolade/%i" AccoladeHandler.updateAccolade
+                    routef "/accolade/%i/" AccoladeHandler.updateAccolade
                 ]
                 DELETE >=> Auth.enticate >=> choose [
                     routef "/team/%i" TeamHandler.deleteTeam
@@ -101,6 +110,9 @@ let webApp =
 
                     routef "/game/%i" GameHandler.deleteGame
                     routef "/game/%i/" GameHandler.deleteGame
+
+                    routef "/accolade/%i" AccoladeHandler.deleteAccolade
+                    routef "/accolade/%i/" AccoladeHandler.deleteAccolade
                 ]
             ])
         setStatusCode 404 >=> text "Not Found" 

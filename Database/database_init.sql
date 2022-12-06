@@ -65,6 +65,23 @@ CREATE TABLE IF NOT EXISTS Team(
 );
 
 
+-- Accolades --
+
+CREATE TABLE IF NOT EXISTS Accolade(
+	id INT NOT NULL AUTO_INCREMENT,
+    team_id INT NULL,
+    coach_id INT NOT NULL,
+    season INT NULL,
+    name VARCHAR(40) NOT NULL UNIQUE,
+    championship BOOL NOT NULL,
+    runnerup BOOL NOT NULL,
+    sidecup BOOL NOT NULL,
+    FOREIGN KEY ( team_id ) REFERENCES Team(id),
+    FOREIGN KEY ( coach_id ) REFERENCES Coach(id),
+	PRIMARY KEY ( id )
+);
+
+
 -- Divisions --
 
 CREATE TABLE IF NOT EXISTS Division(

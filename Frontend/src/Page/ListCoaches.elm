@@ -8,6 +8,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
+import Model.Accolade exposing (viewAccolade)
 import Model.Coach exposing (Coach, CoachId, coachsDecoder)
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Session exposing (Session)
@@ -284,13 +285,22 @@ viewCoach : Session -> Coach -> Html Msg
 viewCoach session coach =
     tr []
         [ td []
-            [ text coach.name ]
+            [ text coach.name, viewAccolades coach ]
         , td [ textCentered ]
             [ text <| String.fromInt coach.elo ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 2)
                 [ viewEditButton coach, viewDeleteButton coach ]
         ]
+
+
+viewAccolades : Coach -> Html Msg
+viewAccolades coach =
+    span []
+        (List.sortWith (\a b -> compare (Maybe.withDefault 0 b.season) (Maybe.withDefault 0 a.season)) coach.accolades
+            |> List.take 5
+            |> List.map viewAccolade
+        )
 
 
 viewDeleteButton : Coach -> Html Msg

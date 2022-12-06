@@ -11,9 +11,11 @@ module Model.Coach exposing
     )
 
 import Json.Decode as Decode exposing (Decoder, int, list, string)
-import Json.Decode.Pipeline exposing (required)
+import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
-import Url.Parser exposing (Parser, custom)
+import Model.Accolade exposing (Accolade, accoladesDecoder)
+import Model.SharedIds as SharedIds
+import Url.Parser exposing (Parser)
 
 
 
@@ -24,11 +26,12 @@ type alias Coach =
     { id : CoachId
     , name : String
     , elo : Int
+    , accolades : List Accolade
     }
 
 
-type CoachId
-    = CoachId Int
+type alias CoachId =
+    SharedIds.CoachId
 
 
 
@@ -36,8 +39,8 @@ type CoachId
 
 
 idToString : CoachId -> String
-idToString (CoachId id) =
-    String.fromInt id
+idToString =
+    SharedIds.coachIdToString
 
 
 
@@ -46,9 +49,10 @@ idToString (CoachId id) =
 
 defaultCoach : Coach
 defaultCoach =
-    { id = CoachId 0
+    { id = SharedIds.defaultCoachId
     , name = ""
     , elo = 1000
+    , accolades = []
     }
 
 
@@ -67,11 +71,12 @@ coachDecoder =
         |> required "id" coachIdDecoder
         |> required "name" string
         |> required "elo" int
+        |> optional "accolades" accoladesDecoder []
 
 
 coachIdDecoder : Decoder CoachId
 coachIdDecoder =
-    Decode.map CoachId int
+    SharedIds.coachIdDecoder
 
 
 
@@ -96,8 +101,8 @@ newCoachEncoder coach =
 
 
 encodeId : CoachId -> Encode.Value
-encodeId (CoachId id) =
-    Encode.int id
+encodeId =
+    SharedIds.encodeCoachId
 
 
 
@@ -106,6 +111,4 @@ encodeId (CoachId id) =
 
 idParser : Parser (CoachId -> a) a
 idParser =
-    custom "COACHID" <|
-        \id ->
-            Maybe.map CoachId (String.toInt id)
+    SharedIds.coachIdParser

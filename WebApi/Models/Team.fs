@@ -18,4 +18,9 @@ type Team =
         [<ResultColumn>]
         [<ComplexMapping>]
         Division : Division
+
+        [<ResultColumn>]
+        AccoladeCount : int
+        [<Ignore>]
+        Accolades : Accolade list
     }

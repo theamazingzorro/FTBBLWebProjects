@@ -18,7 +18,12 @@ module CoachRepository =
         use db = new Database(connection)
 
         db.Fetch<Coach>("""
-                SELECT * FROM Coach
+                SELECT 
+                    Coach.*,
+                    COUNT(Accolade.id) as AccoladeCount
+                FROM Coach
+                LEFT JOIN Accolade ON Accolade.coach_id=Coach.id
+                GROUP BY Coach.id
                 """)
             |> List.ofSeq
 
@@ -30,8 +35,12 @@ module CoachRepository =
         use db = new Database(connection)
 
         db.SingleOrDefault<Coach>("""
-            SELECT * FROM Coach
-            WHERE Coach.id=@0""", id)
+                SELECT 
+                    Coach.*,
+                    COUNT(Accolade.id) as AccoladeCount
+                FROM Coach
+                LEFT JOIN Accolade ON Accolade.coach_id=Coach.id
+                WHERE Coach.id=@0""", id)
 
 
     let save (coach : Coach) =

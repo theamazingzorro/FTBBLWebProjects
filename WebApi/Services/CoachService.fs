@@ -6,11 +6,18 @@ module CoachService =
     open ftbbl.WebApi.Models
     open System
 
-    let getAll =
-        CoachRepository.getAll
+    let private populateCoachAccollades (coach : Coach) : Coach =
+        if coach.AccoladeCount = 0
+        then { coach with Accolades = [] }
+        else { coach with Accolades = AccoladeService.getAllForCoach coach.Id }
+
+    let getAll() =
+        CoachRepository.getAll()
+        |> List.map populateCoachAccollades
 
     let getById id =
         CoachRepository.getById id
+        |> populateCoachAccollades
 
     let saveChanges (coach : Coach)= 
         let oldCoach = CoachRepository.getById(coach.Id)

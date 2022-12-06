@@ -8,6 +8,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
+import Model.Accolade exposing (Accolade, viewAccolade)
+import Model.Coach exposing (Coach)
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, compareDivisions)
 import Model.Session exposing (Session)
@@ -379,11 +381,11 @@ viewTeam : Session -> Team -> Html Msg
 viewTeam session team =
     tr []
         [ td []
-            [ text team.name ]
+            [ text team.name, viewAccolades team.accolades ]
         , td []
             [ text team.race.name ]
         , td []
-            [ text team.coach.name ]
+            [ text team.coach.name, viewAccolades team.coach.accolades ]
         , td []
             [ viewDivision team ]
         , td [ textCentered ]
@@ -392,6 +394,15 @@ viewTeam session team =
             td (Custom.Attributes.tableButtonColumn 2)
                 [ viewEditButton team, viewDeleteButton team ]
         ]
+
+
+viewAccolades : List Accolade -> Html Msg
+viewAccolades accolades =
+    span []
+        (List.sortWith (\a b -> compare (Maybe.withDefault 0 b.season) (Maybe.withDefault 0 a.season)) accolades
+            |> List.take 3
+            |> List.map viewAccolade
+        )
 
 
 viewDivision : Team -> Html Msg
