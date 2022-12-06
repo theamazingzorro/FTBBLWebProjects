@@ -5,7 +5,6 @@ module Model.Coach exposing
     , coachEncoder
     , coachsDecoder
     , defaultCoach
-    , encodeId
     , idParser
     , idToString
     , newCoachEncoder
