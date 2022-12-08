@@ -2,7 +2,7 @@ module Page.ListTeams exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes exposing (textCentered)
+import Custom.Attributes exposing (textButton, textCentered)
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -17,7 +17,6 @@ import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 import Url exposing (Protocol(..))
-import Custom.Attributes exposing (textButton)
 
 
 

@@ -44,7 +44,7 @@ type Msg
     | AddTeamButtonClick
     | DeleteTeamButtonClick TeamId
     | EditTeamButtonClick TeamId
-    | ViewTeamClick TeamId 
+    | ViewTeamClick TeamId
     | TeamDeleted (Result Http.Error DeleteResponse)
     | GameDeleted (Result Http.Error DeleteResponse)
     | TeamNameSortClick
@@ -513,7 +513,7 @@ viewStandingTableRow session divClosed standing =
     tr []
         [ td []
             [ div
-                ( Custom.Attributes.textButton <| ViewTeamClick standing.team.id)
+                (Custom.Attributes.textButton <| ViewTeamClick standing.team.id)
                 [ text standing.team.name, viewAccolades standing.team.accolades ]
             ]
         , td []

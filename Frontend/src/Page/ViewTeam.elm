@@ -267,7 +267,7 @@ viewTableRow standing =
 viewDivision : Division -> Html Msg
 viewDivision division =
     span
-        ( Custom.Attributes.textButton <| ViewDivisionButtonClick division.id )
+        (Custom.Attributes.textButton <| ViewDivisionButtonClick division.id)
         [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
 
 

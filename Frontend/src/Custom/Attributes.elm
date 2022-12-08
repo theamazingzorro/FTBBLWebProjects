@@ -172,12 +172,15 @@ submitButton : Attribute msg
 submitButton =
     class "btn btn-primary"
 
+
 textButton : msg -> List (Attribute msg)
 textButton event =
     [ onClick <| event
     , style "box-shadow" "2px 2px 2px grey"
     , style "padding" "2px"
     ]
+
+
 
 -- Errors --
 
