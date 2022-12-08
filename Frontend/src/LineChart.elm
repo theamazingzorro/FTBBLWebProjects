@@ -1,6 +1,6 @@
 module LineChart exposing (viewChart)
 
-import Axis
+import Axis exposing (tickFormat)
 import Color
 import Html exposing (Html)
 import Path exposing (Path)
@@ -59,7 +59,51 @@ getYScale data =
 
 xAxis : List ( Time.Posix, Float ) -> ContinuousScale Time.Posix -> Svg msg
 xAxis model xScale =
-    Axis.bottom [ Axis.tickCount (List.length model) ] xScale
+    Axis.bottom
+        [ Axis.tickCount (List.length model)
+        , Axis.tickFormat dateString
+        ]
+        xScale
+
+
+dateString : Time.Posix -> String
+dateString time =
+    case Time.toMonth Time.utc time of
+        Time.Jan ->
+            "1/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
+
+        Time.Feb ->
+            "2/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
+
+        Time.Mar ->
+            "3/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
+
+        Time.Apr ->
+            "4/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
+
+        Time.May ->
+            "5/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
+
+        Time.Jun ->
+            "6/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
+
+        Time.Jul ->
+            "7/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
+
+        Time.Aug ->
+            "8/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
+
+        Time.Sep ->
+            "9/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
+
+        Time.Oct ->
+            "10/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
+
+        Time.Nov ->
+            "11/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
+
+        Time.Dec ->
+            "12/" ++ (String.fromInt <| Time.toDay Time.utc time) ++ "/" ++ (String.fromInt <| Time.toYear Time.utc time - 2000)
 
 
 yAxis : ContinuousScale Float -> Svg msg
@@ -88,7 +132,9 @@ viewChart model =
             getYScale <| List.map (\( _, data ) -> data) model
     in
     svg [ viewBox 0 0 w h ]
-        [ g [ transform [ Translate (padding - 1) (h - padding) ] ]
+        [ g
+            [ transform [ Translate (padding - 1) (h - padding) ]
+            ]
             [ xAxis model xScale ]
         , g [ transform [ Translate (padding - 1) padding ] ]
             [ yAxis yScale ]
