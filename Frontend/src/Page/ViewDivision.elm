@@ -44,6 +44,7 @@ type Msg
     | AddTeamButtonClick
     | DeleteTeamButtonClick TeamId
     | EditTeamButtonClick TeamId
+    | ViewTeamClick TeamId 
     | TeamDeleted (Result Http.Error DeleteResponse)
     | GameDeleted (Result Http.Error DeleteResponse)
     | TeamNameSortClick
@@ -126,6 +127,9 @@ update msg model =
 
         EditTeamButtonClick id ->
             ( model, pushUrl model.session.navkey <| Route.EditTeam id )
+
+        ViewTeamClick id ->
+            ( model, pushUrl model.session.navkey <| Route.ViewTeam id )
 
         DeleteTeamButtonClick id ->
             ( model, deleteTeamRequest model.session.token id )
@@ -508,7 +512,10 @@ viewStandingTableRow : Session -> Bool -> Standing -> Html Msg
 viewStandingTableRow session divClosed standing =
     tr []
         [ td []
-            [ text standing.team.name, viewAccolades standing.team.accolades ]
+            [ div
+                ( Custom.Attributes.textButton <| ViewTeamClick standing.team.id)
+                [ text standing.team.name, viewAccolades standing.team.accolades ]
+            ]
         , td []
             [ text standing.team.race.name ]
         , td []

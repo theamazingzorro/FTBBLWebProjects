@@ -5,7 +5,6 @@ import Custom.Attributes
 import Error
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
 import Http
 import LineChart
 import Model.Accolade exposing (Accolade, viewAccolade)
@@ -184,12 +183,12 @@ viewTeamDetails team =
             , p [] [ text <| "Race: " ++ team.race.name ]
             , p [] [ text <| "Current Elo: " ++ String.fromInt team.elo ]
             , p [] [ text "Most Recent Division: ", Maybe.map viewDivision team.division |> Maybe.withDefault (text "N/A") ]
-        ]
+            ]
         , div [ class "col" ]
-            [if team.accolades /= [] then
+            [ if team.accolades /= [] then
                 viewAccolades team
 
-            else
+              else
                 text ""
             ]
         ]
@@ -267,10 +266,8 @@ viewTableRow standing =
 
 viewDivision : Division -> Html Msg
 viewDivision division =
-    button
-        [ Custom.Attributes.linkButton
-        , onClick <| ViewDivisionButtonClick division.id
-        ]
+    span
+        ( Custom.Attributes.textButton <| ViewDivisionButtonClick division.id )
         [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
 
 
