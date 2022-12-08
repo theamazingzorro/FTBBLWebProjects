@@ -19,11 +19,8 @@ module CoachRepository =
 
         db.Fetch<Coach>("""
                 SELECT 
-                    Coach.*,
-                    COUNT(Accolade.id) as AccoladeCount
+                    Coach.*
                 FROM Coach
-                LEFT JOIN Accolade ON Accolade.coach_id=Coach.id
-                GROUP BY Coach.id
                 """)
             |> List.ofSeq
 
@@ -36,10 +33,8 @@ module CoachRepository =
 
         db.SingleOrDefault<Coach>("""
                 SELECT 
-                    Coach.*,
-                    COUNT(Accolade.id) as AccoladeCount
+                    Coach.*
                 FROM Coach
-                LEFT JOIN Accolade ON Accolade.coach_id=Coach.id
                 WHERE Coach.id=@0""", id)
 
 

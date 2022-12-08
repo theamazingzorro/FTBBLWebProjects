@@ -9,8 +9,6 @@ type Coach =
         Name : string
         Elo : int
 
-        [<ResultColumn>]
-        AccoladeCount : int
         [<Ignore>]
         Accolades : Accolade list
     }
