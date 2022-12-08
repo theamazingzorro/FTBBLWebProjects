@@ -20,26 +20,6 @@ module AccoladeRepository =
             |> List.ofSeq
 
 
-    let getAllForTeam (id : int) =
-        use connection = new MySqlConnection(connStr)
-        connection.Open()
-
-        use db = new Database(connection)
-
-        db.Fetch<Accolade>("SELECT * FROM Accolade WHERE Accolade.team_id=@0", id)
-            |> List.ofSeq
-
-
-    let getAllForCoach (id : int) =
-        use connection = new MySqlConnection(connStr)
-        connection.Open()
-
-        use db = new Database(connection)
-
-        db.Fetch<Accolade>("SELECT * FROM Accolade WHERE Accolade.coach_id=@0", id)
-            |> List.ofSeq
-
-
     let getById (id : int) =
         use connection = new MySqlConnection(connStr)
         connection.Open()
