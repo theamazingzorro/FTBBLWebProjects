@@ -6,16 +6,6 @@ module AccoladeService =
     let getAll =
         AccoladeRepository.getAll
 
-    let getAllForTeam =
-        AccoladeRepository.getAllForTeam
-
-    let getAllForCoach =
-        AccoladeRepository.getAllForCoach
-
-    let getAllForCoachExcludeTeam (coachId:int) (teamId:int) =
-        AccoladeRepository.getAllForCoach coachId
-        |> List.filter (fun accolade -> not accolade.TeamId.HasValue || accolade.TeamId.Value <> teamId)
-
     let getById id =
         AccoladeRepository.getById id
 

@@ -16,8 +16,6 @@ module TeamRepository =
 	        , Race.*
 	        , Coach.*
 	        , Division.*
-            , COUNT(TeamAccolade.id) as AccoladeCount
-            , COUNT(CoachAccolade.id) as Coach__AccoladeCount
         FROM Team
         JOIN Race ON Team.race_id=Race.id
         JOIN Coach ON Team.coach_id=Coach.id
@@ -32,10 +30,7 @@ module TeamRepository =
 		        WHERE b.start_date IS NULL
 	        ) TD ON Team.id=TD.team_id
         LEFT JOIN Division ON TD.div_id=Division.id
-        LEFT JOIN Accolade TeamAccolade ON TeamAccolade.team_id=Team.id
-        LEFT JOIN Accolade CoachAccolade ON CoachAccolade.coach_id=Coach.id
         {whereClause}
-        GROUP BY Team.id
     """
 
 
