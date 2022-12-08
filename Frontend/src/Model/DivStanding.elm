@@ -1,6 +1,5 @@
 module Model.DivStanding exposing
-    ( Standing
-    , compareStandings
+    ( DivStanding
     , getGamesPlayed
     , getPoints
     , getTDD
@@ -18,7 +17,7 @@ import Model.Team exposing (TeamId, teamIdDecoder)
 -- Types --
 
 
-type alias Standing =
+type alias DivStanding =
     { divId : Division
     , team : TeamId
     , rank : Int
@@ -34,38 +33,33 @@ type alias Standing =
 -- Utils --
 
 
-getPoints : Standing -> Int
+getPoints : DivStanding -> Int
 getPoints standing =
     3 * standing.wins + standing.draws
 
 
-getGamesPlayed : Standing -> Int
+getGamesPlayed : DivStanding -> Int
 getGamesPlayed standing =
     standing.wins + standing.losses + standing.draws
 
 
-getTDD : Standing -> Int
+getTDD : DivStanding -> Int
 getTDD standing =
     standing.pointsScored - standing.pointsGiven
-
-
-compareStandings : Standing -> Standing -> Order
-compareStandings a b =
-    compare a.rank b.rank
 
 
 
 -- Decoders --
 
 
-standingsDecoder : Decoder (List Standing)
+standingsDecoder : Decoder (List DivStanding)
 standingsDecoder =
     list standingDecoder
 
 
-standingDecoder : Decoder Standing
+standingDecoder : Decoder DivStanding
 standingDecoder =
-    Decode.succeed Standing
+    Decode.succeed DivStanding
         |> required "divId" divisionDecoder
         |> required "team" teamIdDecoder
         |> required "rank" int
