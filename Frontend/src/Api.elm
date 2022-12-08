@@ -31,7 +31,7 @@ type Endpoint
     | Accolade AccoladeId
     | Standings DivisionId
     | TeamStanding DivisionId TeamId
-    | DivStandings TeamId 
+    | DivStandings TeamId
     | Signin
     | TeamEloHistory TeamId
     | CoachEloHistory CoachId

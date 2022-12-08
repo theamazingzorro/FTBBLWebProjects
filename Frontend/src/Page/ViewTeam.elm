@@ -5,12 +5,17 @@ import Custom.Attributes
 import Error
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Http
 import LineChart
+import Model.Accolade exposing (Accolade, viewAccolade)
+import Model.DivStanding exposing (DivStanding, divStandingsDecoder, getTDD)
+import Model.Division exposing (Division, DivisionId)
 import Model.EloHistory exposing (EloHistory, historyListDecoder)
 import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamDecoder)
 import RemoteData exposing (WebData)
+import Route exposing (pushUrl)
 
 
 
@@ -21,6 +26,7 @@ type alias Model =
     { session : Session
     , id : TeamId
     , team : WebData Team
+    , standingsHistory : WebData (List DivStanding)
     , teamHistory : WebData (List EloHistory)
     }
 
@@ -28,6 +34,8 @@ type alias Model =
 type Msg
     = TeamReceived (WebData Team)
     | HistoryReceived (WebData (List EloHistory))
+    | StandingsReceived (WebData (List DivStanding))
+    | ViewDivisionButtonClick DivisionId
 
 
 
@@ -39,11 +47,13 @@ init session id =
     ( { session = session
       , id = id
       , team = RemoteData.Loading
+      , standingsHistory = RemoteData.Loading
       , teamHistory = RemoteData.Loading
       }
     , Cmd.batch
         [ getTeamRequest session.token id
         , getTeamHistoryRequest session.token id
+        , getStandingsHistoryRequest session.token id
         ]
     )
 
@@ -61,6 +71,12 @@ update msg model =
         HistoryReceived response ->
             ( { model | teamHistory = response }, Cmd.none )
 
+        StandingsReceived response ->
+            ( { model | standingsHistory = response }, Cmd.none )
+
+        ViewDivisionButtonClick divId ->
+            ( model, pushUrl model.session.navkey <| Route.ViewDivision divId )
+
 
 
 -- API Requests --
@@ -76,6 +92,12 @@ getTeamHistoryRequest : Maybe String -> TeamId -> Cmd Msg
 getTeamHistoryRequest token id =
     Api.getRequest token (Api.TeamEloHistory id) <|
         Http.expectJson (RemoteData.fromResult >> HistoryReceived) historyListDecoder
+
+
+getStandingsHistoryRequest : Maybe String -> TeamId -> Cmd Msg
+getStandingsHistoryRequest token id =
+    Api.getRequest token (Api.DivStandings id) <|
+        Http.expectJson (RemoteData.fromResult >> StandingsReceived) divStandingsDecoder
 
 
 
@@ -114,33 +136,149 @@ viewTeam : Model -> Team -> Html Msg
 viewTeam model team =
     div []
         [ br [] []
-        , h3 [] [ text team.name ]
-        , br [] []
         , viewTeamDetails team
-        , viewTeamHistory model
+        , viewResultsHistory model
+        , viewTeamEloHistory model
         ]
 
 
-viewTeamDetails : Team -> Html Msg
-viewTeamDetails team =
-    div []
-        [ p [] [ text <| "Current Elo : " ++ String.fromInt team.elo ]
-        , p [] [ text <| "Recent Division : " ++ (Maybe.map .name team.division |> Maybe.withDefault "") ]
-        ]
-
-
-viewTeamHistory : Model -> Html Msg
-viewTeamHistory model =
-    case model.teamHistory of
+viewResultsHistory : Model -> Html Msg
+viewResultsHistory model =
+    case model.standingsHistory of
         RemoteData.Success history ->
-            List.map (\h -> ( h.date, toFloat h.elo )) history
-                |> LineChart.viewChart
+            viewPastResultsTable history
 
         RemoteData.NotAsked ->
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading History..." ]
+            h3 [] [ text "Loading Match History..." ]
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
+
+
+viewTeamEloHistory : Model -> Html Msg
+viewTeamEloHistory model =
+    case model.teamHistory of
+        RemoteData.Success history ->
+            viewTeamEloGraph history
+
+        RemoteData.NotAsked ->
+            text ""
+
+        RemoteData.Loading ->
+            h3 [] [ text "Loading Elo History..." ]
+
+        RemoteData.Failure httpError ->
+            viewLoadError <| Error.buildErrorMessage httpError
+
+
+viewTeamDetails : Team -> Html Msg
+viewTeamDetails team =
+    div [ class "row" ]
+        [ div [ class " col" ]
+            [ h3 [] [ text team.name ]
+            , br [] []
+            , p [] [ text <| "Coach: " ++ team.coach.name ]
+            , p [] [ text <| "Race: " ++ team.race.name ]
+            , p [] [ text <| "Current Elo: " ++ String.fromInt team.elo ]
+            , p [] [ text "Most Recent Division: ", Maybe.map viewDivision team.division |> Maybe.withDefault (text "N/A") ]
+        ]
+        , div [ class "col" ]
+            [if team.accolades /= [] then
+                viewAccolades team
+
+            else
+                text ""
+            ]
+        ]
+
+
+viewAccolades : Team -> Html Msg
+viewAccolades team =
+    table [ Custom.Attributes.table ]
+        [ thead []
+            [ tr []
+                [ th [ scope "col" ]
+                    [ text "" ]
+                , th [ scope "col" ]
+                    [ text "Achievements" ]
+                ]
+            ]
+        , tbody [] <|
+            List.map viewAccoladeRow team.accolades
+        ]
+
+
+viewAccoladeRow : Accolade -> Html Msg
+viewAccoladeRow accolade =
+    tr []
+        [ td []
+            [ viewAccolade accolade ]
+        , td []
+            [ text <| accolade.name ++ (Maybe.map (\season -> " Season " ++ String.fromInt season) accolade.season |> Maybe.withDefault "") ]
+        ]
+
+
+viewPastResultsTable : List DivStanding -> Html Msg
+viewPastResultsTable standings =
+    div []
+        [ br [] []
+        , br [] []
+        , h4 [] [ text "Past Results" ]
+        , table [ Custom.Attributes.table ]
+            [ viewTableHeader
+            , tbody [] <|
+                List.map viewTableRow standings
+            ]
+        ]
+
+
+viewTableHeader : Html Msg
+viewTableHeader =
+    thead []
+        [ tr []
+            [ th [ scope "col" ]
+                [ text "Div" ]
+            , th [ scope "col", Custom.Attributes.textCentered ]
+                [ text "Rank" ]
+            , th [ scope "col", Custom.Attributes.textCentered ]
+                [ text "W-D-L" ]
+            , th [ scope "col", Custom.Attributes.textCentered ]
+                [ text "TDD" ]
+            ]
+        ]
+
+
+viewTableRow : DivStanding -> Html Msg
+viewTableRow standing =
+    tr []
+        [ td []
+            [ viewDivision standing.div ]
+        , td [ Custom.Attributes.textCentered ]
+            [ text <| String.fromInt standing.rank ]
+        , td [ Custom.Attributes.textCentered ]
+            [ text <| String.fromInt standing.wins ++ " - " ++ String.fromInt standing.draws ++ " - " ++ String.fromInt standing.losses ]
+        , td [ Custom.Attributes.textCentered ]
+            [ text <| String.fromInt <| getTDD standing ]
+        ]
+
+
+viewDivision : Division -> Html Msg
+viewDivision division =
+    button
+        [ Custom.Attributes.linkButton
+        , onClick <| ViewDivisionButtonClick division.id
+        ]
+        [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
+
+
+viewTeamEloGraph : List EloHistory -> Html Msg
+viewTeamEloGraph history =
+    div []
+        [ br [] []
+        , h4 [] [ text "Elo History" ]
+        , List.map (\h -> ( h.date, toFloat h.elo )) history
+            |> LineChart.viewChart
+        ]

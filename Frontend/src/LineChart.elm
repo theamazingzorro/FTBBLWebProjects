@@ -47,7 +47,14 @@ getXScale dates =
 
 getYScale : List Float -> ContinuousScale Float
 getYScale data =
-    Scale.linear ( h - 2 * padding, 0 ) ( (List.minimum data |> Maybe.withDefault 0) * 0.9, (List.maximum data |> Maybe.withDefault 2000) * 1.1 )
+    let
+        minData =
+            List.minimum data |> Maybe.withDefault 0
+
+        maxData =
+            List.maximum data |> Maybe.withDefault 2000
+    in
+    Scale.linear ( h - 2 * padding, 0 ) ( minData - 0.2 * (maxData - minData), maxData + 0.2 * (maxData - minData) )
 
 
 xAxis : List ( Time.Posix, Float ) -> ContinuousScale Time.Posix -> Svg msg

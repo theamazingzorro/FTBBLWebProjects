@@ -1,10 +1,10 @@
 module Model.DivStanding exposing
     ( DivStanding
+    , divStandingDecoder
+    , divStandingsDecoder
     , getGamesPlayed
     , getPoints
     , getTDD
-    , standingDecoder
-    , standingsDecoder
     )
 
 import Json.Decode as Decode exposing (Decoder, int, list)
@@ -18,8 +18,8 @@ import Model.Team exposing (TeamId, teamIdDecoder)
 
 
 type alias DivStanding =
-    { divId : Division
-    , team : TeamId
+    { div : Division
+    , teamId : TeamId
     , rank : Int
     , wins : Int
     , draws : Int
@@ -52,16 +52,16 @@ getTDD standing =
 -- Decoders --
 
 
-standingsDecoder : Decoder (List DivStanding)
-standingsDecoder =
-    list standingDecoder
+divStandingsDecoder : Decoder (List DivStanding)
+divStandingsDecoder =
+    list divStandingDecoder
 
 
-standingDecoder : Decoder DivStanding
-standingDecoder =
+divStandingDecoder : Decoder DivStanding
+divStandingDecoder =
     Decode.succeed DivStanding
-        |> required "divId" divisionDecoder
-        |> required "team" teamIdDecoder
+        |> required "div" divisionDecoder
+        |> required "teamId" teamIdDecoder
         |> required "rank" int
         |> required "wins" int
         |> required "draws" int
