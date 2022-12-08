@@ -386,7 +386,7 @@ viewTeam : Session -> Team -> Html Msg
 viewTeam session team =
     tr []
         [ td []
-            [ span
+            [ div
                 (textButton <| ViewTeamClick team.id)
                 [ text team.name, viewAccolades team.accolades ]
             ]
@@ -417,7 +417,7 @@ viewDivision : Team -> Html Msg
 viewDivision team =
     case team.division of
         Just division ->
-            span
+            div
                 (Custom.Attributes.textButton <| ViewDivisionButtonClick division.id)
                 [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
 
