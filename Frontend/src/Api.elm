@@ -32,6 +32,8 @@ type Endpoint
     | DivStandings DivisionId
     | TeamStanding DivisionId TeamId
     | Signin
+    | TeamEloHistory TeamId
+    | CoachEloHistory CoachId
 
 
 baseUrl : String
@@ -104,6 +106,12 @@ stringOf endpoint =
 
         TeamStanding divId teamId ->
             "standings/" ++ Div.idToString divId ++ "/" ++ Team.idToString teamId
+
+        TeamEloHistory teamId ->
+            "history/team/" ++ Team.idToString teamId
+
+        CoachEloHistory coachId ->
+            "history/coach/" ++ Coach.idToString coachId
 
 
 urlOf : Endpoint -> String

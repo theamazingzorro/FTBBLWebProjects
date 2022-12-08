@@ -50,6 +50,7 @@
     <Compile Include="Services\TeamService.fs" />
     <Compile Include="Services\GameService.fs" />
     <Compile Include="Services\StandingService.fs" />
+    <Compile Include="Services\EloHistoryService.fs" />
     <Compile Include="Handlers\AccoladeHandler.fs" />
     <Compile Include="Handlers\SecurityHandler.fs" />
     <Compile Include="Handlers\DivisionHandler.fs" />
@@ -58,6 +59,7 @@
     <Compile Include="Handlers\TeamHandlers.fs" />
     <Compile Include="Handlers\GameHandler.fs" />
     <Compile Include="Handlers\StandingHandler.fs" />
+    <Compile Include="Handlers\EloHistoryHandler.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

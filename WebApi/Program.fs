@@ -60,6 +60,11 @@ let webApp =
                     routex "/accolade(/?)" >=> AccoladeHandler.getAccolades
                     routef "/accolade/%i" AccoladeHandler.getAccolade
                     routef "/accolade/%i/" AccoladeHandler.getAccolade
+
+                    routef "/history/team/%i" EloHistoryHandler.getTeamHistory
+                    routef "/history/team/%i/" EloHistoryHandler.getTeamHistory
+                    routef "/history/coach/%i" EloHistoryHandler.getCoachHistory
+                    routef "/history/coach/%i/" EloHistoryHandler.getCoachHistory
                 ]
                 POST >=> choose [
                     routex "/signin(/?)" >=> SecurityHandler.signIn
