@@ -21,6 +21,7 @@ import Model.Team exposing (Team, teamDecoder)
 type alias Standing =
     { divId : DivisionId
     , team : Team
+    , rank : Int
     , wins : Int
     , draws : Int
     , losses : Int
@@ -51,12 +52,7 @@ getTDD standing =
 
 compareStandings : Standing -> Standing -> Order
 compareStandings a b =
-    case compare (getPoints b) (getPoints a) of
-        EQ ->
-            compare (getTDD b) (getTDD a)
-
-        other ->
-            other
+    compare a.rank b.rank
 
 
 
@@ -73,6 +69,7 @@ standingDecoder =
     Decode.succeed Standing
         |> required "divId" divisionIdDecoder
         |> required "team" teamDecoder
+        |> required "rank" int
         |> required "wins" int
         |> required "draws" int
         |> required "losses" int

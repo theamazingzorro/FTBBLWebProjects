@@ -9,6 +9,8 @@ type Standing =
 
         Team : Team
 
+        Rank : int
+
         Wins : int
         Draws : int
         Losses : int
