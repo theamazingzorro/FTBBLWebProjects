@@ -1,7 +1,6 @@
 module Route exposing (Route(..), parseUrl, pushUrl)
 
 import Browser.Navigation as Nav
-import Model.Accolade as Accolade exposing (AccoladeId)
 import Model.Coach as Coach exposing (CoachId)
 import Model.Division as Div exposing (DivisionId)
 import Model.Game as Game exposing (GameId)
@@ -19,6 +18,7 @@ type Route
     | Teams
     | AddTeam
     | EditTeam TeamId
+    | ViewTeam TeamId
     | Divisions
     | AddDivision
     | EditDivision DivisionId
@@ -61,6 +61,11 @@ matchRoute =
             oneOf
                 [ s "Team" </> s "Edit" </> Team.idParser
                 , s "team" </> s "edit" </> Team.idParser
+                ]
+        , map ViewTeam <|
+            oneOf
+                [ s "Team" </> s "View" </> Team.idParser
+                , s "team" </> s "view" </> Team.idParser
                 ]
 
         {- Division CRUD -}
@@ -166,6 +171,9 @@ routeToString route =
 
         EditTeam id ->
             "/Team/Edit/" ++ Team.idToString id
+
+        ViewTeam id ->
+            "/Team/View/" ++ Team.idToString id
 
         Coaches ->
             "/Coach"

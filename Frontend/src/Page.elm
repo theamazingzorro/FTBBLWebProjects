@@ -20,6 +20,7 @@ import Page.ListDivisions as ListDivisions
 import Page.ListTeams as ListTeams
 import Page.Signin as Signin
 import Page.ViewDivision as ViewDivision
+import Page.ViewTeam as ViewTeam
 import Route exposing (Route(..))
 
 
@@ -33,6 +34,7 @@ type Model
     | TeamsPage ListTeams.Model
     | AddTeamPage AddTeam.Model
     | EditTeamPage EditTeam.Model
+    | ViewTeamPage ViewTeam.Model
     | CoachesPage ListCoaches.Model
     | AddCoachPage AddCoach.Model
     | EditCoachPage EditCoach.Model
@@ -53,6 +55,7 @@ type Msg
     | TeamsPageMsg ListTeams.Msg
     | AddTeamPageMsg AddTeam.Msg
     | EditTeamPageMsg EditTeam.Msg
+    | ViewTeamPageMsg ViewTeam.Msg
     | CoachesPageMsg ListCoaches.Msg
     | AddCoachPageMsg AddCoach.Msg
     | EditCoachPageMsg EditCoach.Msg
@@ -104,6 +107,10 @@ init session route =
             EditTeam.init session id
                 |> wrapInitWith EditTeamPage EditTeamPageMsg
                 |> requiresAuth session
+
+        Route.ViewTeam id ->
+            ViewTeam.init session id
+                |> wrapInitWith ViewTeamPage ViewTeamPageMsg
 
         Route.Coaches ->
             ListCoaches.init session
@@ -211,6 +218,13 @@ update msg model =
                 |> wrapUpdateWith EditTeamPage EditTeamPageMsg
 
         ( EditTeamPageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
+        ( ViewTeamPageMsg subMsg, ViewTeamPage pageModel ) ->
+            ViewTeam.update subMsg pageModel
+                |> wrapUpdateWith ViewTeamPage ViewTeamPageMsg
+
+        ( ViewTeamPageMsg _, _ ) ->
             ( model, Cmd.none, Nothing )
 
         {- Coach CRUD pages -}
@@ -380,6 +394,10 @@ view model =
         EditTeamPage pageModel ->
             EditTeam.view pageModel
                 |> Html.map EditTeamPageMsg
+
+        ViewTeamPage pageModel ->
+            ViewTeam.view pageModel
+                |> Html.map ViewTeamPageMsg
 
         CoachesPage pageModel ->
             ListCoaches.view pageModel

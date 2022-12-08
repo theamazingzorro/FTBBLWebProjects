@@ -3,11 +3,11 @@
 open System
 
 [<CLIMutable>]
-type Standing =
+type DivStanding =
     {
-        DivId : int
+        Div : Division
 
-        Team : Team
+        TeamId : int
 
         Rank : int
 
@@ -16,6 +16,4 @@ type Standing =
         Losses : int
         PointsScored : int
         PointsGiven : int
-
-        AvgRemainingElo : Nullable<int>
     }

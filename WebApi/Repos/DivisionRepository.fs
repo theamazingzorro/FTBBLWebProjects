@@ -30,6 +30,23 @@ module DivisionRepository =
         db.SingleOrDefault<Division>("""
             SELECT * FROM Division
             WHERE Division.id=@0""", id)
+
+
+    let getAllForTeam (teamId : int) =
+        use connection = new MySqlConnection(connStr)
+        connection.Open()
+
+        use db = new Database(connection)
+
+        db.Fetch<Division>("""
+                    SELECT 
+	                    Division.*
+                    FROM Division
+                    JOIN TeamDivision ON Division.id=TeamDivision.div_id
+                    WHERE TeamDivision.team_id=@0
+                    ORDER BY start_date DESC
+            """, teamId)
+            |> List.ofSeq
         
 
     let save (division : Division) =

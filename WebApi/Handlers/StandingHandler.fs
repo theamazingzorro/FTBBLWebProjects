@@ -33,3 +33,14 @@ module StandingHandler =
 
                 return! json result next ctx
             }
+
+    let getAllTeamStandings (teamId : int) : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+                logger.LogInformation $"Getting Standings for teamId={teamId}"
+                
+                let result = StandingService.getAllForTeam teamId
+
+                return! json result next ctx
+            }

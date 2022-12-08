@@ -2,7 +2,7 @@ module Page.ListTeams exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes exposing (textCentered)
+import Custom.Attributes exposing (textButton, textCentered)
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -38,6 +38,7 @@ type Msg
     | DeleteTeamButtonClick TeamId
     | EditTeamButtonClick TeamId
     | ViewDivisionButtonClick DivisionId
+    | ViewTeamClick TeamId
     | TeamDeleted (Result Http.Error DeleteResponse)
     | NameSortClick
     | RaceSortClick
@@ -96,6 +97,9 @@ update msg model =
 
         DeleteTeamButtonClick id ->
             ( model, deleteTeamRequest model.session.token id )
+
+        ViewTeamClick id ->
+            ( model, pushUrl model.session.navkey <| Route.ViewTeam id )
 
         TeamDeleted (Ok res) ->
             ( { model | deleteError = buildDeleteError res }, getTeamsRequest model.session.token )
@@ -381,7 +385,10 @@ viewTeam : Session -> Team -> Html Msg
 viewTeam session team =
     tr []
         [ td []
-            [ text team.name, viewAccolades team.accolades ]
+            [ div
+                (textButton <| ViewTeamClick team.id)
+                [ text team.name, viewAccolades team.accolades ]
+            ]
         , td []
             [ text team.race.name ]
         , td []
@@ -409,10 +416,8 @@ viewDivision : Team -> Html Msg
 viewDivision team =
     case team.division of
         Just division ->
-            button
-                [ Custom.Attributes.linkButton
-                , onClick <| ViewDivisionButtonClick division.id
-                ]
+            div
+                (Custom.Attributes.textButton <| ViewDivisionButtonClick division.id)
                 [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
 
         Nothing ->

@@ -30,6 +30,7 @@
 	<Compile Include="Models\Team.fs" /> 
 	<Compile Include="Models\Game.fs" /> 
 	<Compile Include="Models\Standing.fs" /> 
+	<Compile Include="Models\DivStanding.fs" /> 
 	<Compile Include="Models\TeamEloHistory.fs" /> 
 	<Compile Include="Models\CoachEloHistory.fs" /> 
 	<Compile Include="Repos\AccoladeRepository.fs" /> 
@@ -50,6 +51,7 @@
     <Compile Include="Services\TeamService.fs" />
     <Compile Include="Services\GameService.fs" />
     <Compile Include="Services\StandingService.fs" />
+    <Compile Include="Services\EloHistoryService.fs" />
     <Compile Include="Handlers\AccoladeHandler.fs" />
     <Compile Include="Handlers\SecurityHandler.fs" />
     <Compile Include="Handlers\DivisionHandler.fs" />
@@ -58,6 +60,7 @@
     <Compile Include="Handlers\TeamHandlers.fs" />
     <Compile Include="Handlers\GameHandler.fs" />
     <Compile Include="Handlers\StandingHandler.fs" />
+    <Compile Include="Handlers\EloHistoryHandler.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
