@@ -30,6 +30,7 @@
 	<Compile Include="Models\Team.fs" /> 
 	<Compile Include="Models\Game.fs" /> 
 	<Compile Include="Models\Standing.fs" /> 
+	<Compile Include="Models\DivStanding.fs" /> 
 	<Compile Include="Models\TeamEloHistory.fs" /> 
 	<Compile Include="Models\CoachEloHistory.fs" /> 
 	<Compile Include="Repos\AccoladeRepository.fs" /> 

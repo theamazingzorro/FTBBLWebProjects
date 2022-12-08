@@ -59,9 +59,25 @@ module StandingService =
         |> List.mapi (fun index standing -> { standing with Rank = index + 1 } )
 
     let getById (divId : int) (teamId : int) : Standing =
-        let team = TeamService.getById teamId
-        let games = GameService.getByDiv divId
+        getByDiv divId
+        |> List.filter (fun standing -> standing.Team.Id = teamId)
+        |> List.head
 
-        getStanding divId games team
+    // need to keep an eye on performance here
+    // this could make a lot of db calls for older teams
+    let getAllForTeam (teamId : int) : DivStanding list =
+        DivisionService.getAllForTeam teamId
+        |> List.map (fun div -> 
+                let standing = getById div.Id teamId
+                {   
+                    Div = div;
+                    TeamId = standing.Team.Id;
+                    Rank = standing.Rank;
+                    Wins = standing.Wins;
+                    Draws = standing.Draws;
+                    Losses = standing.Losses;
+                    PointsGiven = standing.PointsGiven;
+                    PointsScored = standing.PointsScored
+                })
 
 

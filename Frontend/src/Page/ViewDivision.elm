@@ -214,7 +214,7 @@ getStartingWeek default gameData =
 
 getStandingsRequest : Maybe String -> DivisionId -> Cmd Msg
 getStandingsRequest token divId =
-    Api.getRequest token (Api.DivStandings divId) <|
+    Api.getRequest token (Api.Standings divId) <|
         Http.expectJson (RemoteData.fromResult >> StandingsReceived) standingsDecoder
 
 

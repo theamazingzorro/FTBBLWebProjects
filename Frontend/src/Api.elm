@@ -29,8 +29,9 @@ type Endpoint
     | Game GameId
     | Accolades
     | Accolade AccoladeId
-    | DivStandings DivisionId
+    | Standings DivisionId
     | TeamStanding DivisionId TeamId
+    | DivStandings TeamId 
     | Signin
     | TeamEloHistory TeamId
     | CoachEloHistory CoachId
@@ -101,11 +102,14 @@ stringOf endpoint =
         CloseDivision divId ->
             "div/close/" ++ Div.idToString divId
 
-        DivStandings divId ->
+        Standings divId ->
             "standings/" ++ Div.idToString divId
 
         TeamStanding divId teamId ->
             "standings/" ++ Div.idToString divId ++ "/" ++ Team.idToString teamId
+
+        DivStandings teamId ->
+            "standings/team/" ++ Team.idToString teamId
 
         TeamEloHistory teamId ->
             "history/team/" ++ Team.idToString teamId

@@ -6,6 +6,9 @@ module DivisionService =
     let getAll =
         DivisionRepository.getAll
 
+    let getAllForTeam teamId = 
+        DivisionRepository.getAllForTeam teamId
+
     let getById id =
         DivisionRepository.getById id
 

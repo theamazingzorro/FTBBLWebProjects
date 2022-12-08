@@ -56,6 +56,8 @@ let webApp =
                     routef "/standings/%i/" StandingHandler.getDivStandings
                     routef "/standings/%i/%i" StandingHandler.getStanding
                     routef "/standings/%i/%i/" StandingHandler.getStanding
+                    routef "/standings/team/%i" StandingHandler.getAllTeamStandings
+                    routef "/standings/team/%i/" StandingHandler.getAllTeamStandings
 
                     routex "/accolade(/?)" >=> AccoladeHandler.getAccolades
                     routef "/accolade/%i" AccoladeHandler.getAccolade
