@@ -57,10 +57,10 @@ getYScale data =
     Scale.linear ( h - 2 * padding, 0 ) ( minData - 0.2 * (maxData - minData), maxData + 0.2 * (maxData - minData) )
 
 
-xAxis : List ( Time.Posix, Float ) -> ContinuousScale Time.Posix -> Svg msg
-xAxis model xScale =
+xAxis : ContinuousScale Time.Posix -> Svg msg
+xAxis xScale =
     Axis.bottom
-        [ Axis.tickCount (List.length model)
+        [ Axis.tickCount 10
         , Axis.tickFormat dateString
         ]
         xScale
@@ -135,7 +135,7 @@ viewChart model =
         [ g
             [ transform [ Translate (padding - 1) (h - padding) ]
             ]
-            [ xAxis model xScale ]
+            [ xAxis xScale ]
         , g [ transform [ Translate (padding - 1) padding ] ]
             [ yAxis yScale ]
         , g [ transform [ Translate padding padding ], class [ "series" ] ]
