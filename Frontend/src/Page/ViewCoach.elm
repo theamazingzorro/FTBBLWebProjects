@@ -270,6 +270,7 @@ viewTableRow team =
             [ text <| String.fromInt team.elo ]
         ]
 
+
 viewSmallAccolades : List Accolade -> Html Msg
 viewSmallAccolades accolades =
     span []
@@ -277,6 +278,7 @@ viewSmallAccolades accolades =
             |> List.take 3
             |> List.map viewAccolade
         )
+
 
 viewDivision : Maybe Division -> Html Msg
 viewDivision maybeDiv =
