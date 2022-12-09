@@ -19,6 +19,7 @@ import Page.ListCoaches as ListCoaches
 import Page.ListDivisions as ListDivisions
 import Page.ListTeams as ListTeams
 import Page.Signin as Signin
+import Page.ViewCoach as ViewCoach
 import Page.ViewDivision as ViewDivision
 import Page.ViewTeam as ViewTeam
 import Route exposing (Route(..))
@@ -38,6 +39,7 @@ type Model
     | CoachesPage ListCoaches.Model
     | AddCoachPage AddCoach.Model
     | EditCoachPage EditCoach.Model
+    | ViewCoachPage ViewCoach.Model
     | DivisionsPage ListDivisions.Model
     | AddDivisionPage AddDivision.Model
     | EditDivisionPage EditDivision.Model
@@ -59,6 +61,7 @@ type Msg
     | CoachesPageMsg ListCoaches.Msg
     | AddCoachPageMsg AddCoach.Msg
     | EditCoachPageMsg EditCoach.Msg
+    | ViewCoachPageMsg ViewCoach.Msg
     | DivisionsPageMsg ListDivisions.Msg
     | AddDivisionPageMsg AddDivision.Msg
     | EditDivisionPageMsg EditDivision.Msg
@@ -124,6 +127,11 @@ init session route =
         Route.EditCoach id ->
             EditCoach.init session id
                 |> wrapInitWith EditCoachPage EditCoachPageMsg
+                |> requiresAuth session
+
+        Route.ViewCoach id ->
+            ViewCoach.init session id
+                |> wrapInitWith ViewCoachPage ViewCoachPageMsg
                 |> requiresAuth session
 
         Route.Divisions ->
@@ -247,6 +255,13 @@ update msg model =
                 |> wrapUpdateWith EditCoachPage EditCoachPageMsg
 
         ( EditCoachPageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
+        ( ViewCoachPageMsg subMsg, ViewCoachPage pageModel ) ->
+            ViewCoach.update subMsg pageModel
+                |> wrapUpdateWith ViewCoachPage ViewCoachPageMsg
+
+        ( ViewCoachPageMsg _, _ ) ->
             ( model, Cmd.none, Nothing )
 
         {- Division CRUD pages -}
@@ -410,6 +425,10 @@ view model =
         EditCoachPage pageModel ->
             EditCoach.view pageModel
                 |> Html.map EditCoachPageMsg
+
+        ViewCoachPage pageModel ->
+            ViewCoach.view pageModel
+                |> Html.map ViewCoachPageMsg
 
         DivisionsPage pageModel ->
             ListDivisions.view pageModel

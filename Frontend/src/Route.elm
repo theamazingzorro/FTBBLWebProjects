@@ -15,6 +15,7 @@ type Route
     | Coaches
     | AddCoach
     | EditCoach CoachId
+    | ViewCoach CoachId
     | Teams
     | AddTeam
     | EditTeam TeamId
@@ -92,6 +93,11 @@ matchRoute =
             oneOf
                 [ s "Coach" </> s "Edit" </> Coach.idParser
                 , s "coach" </> s "edit" </> Coach.idParser
+                ]
+        , map ViewCoach <|
+            oneOf
+                [ s "Coach" </> s "View" </> Coach.idParser
+                , s "coach" </> s "view" </> Coach.idParser
                 ]
 
         {- Game CRUD -}
@@ -183,6 +189,9 @@ routeToString route =
 
         EditCoach coachId ->
             "/Coach/Edit/" ++ Coach.idToString coachId
+
+        ViewCoach coachId ->
+            "/Coach/View/" ++ Coach.idToString coachId
 
         Divisions ->
             "/Division"
