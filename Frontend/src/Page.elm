@@ -132,7 +132,6 @@ init session route =
         Route.ViewCoach id ->
             ViewCoach.init session id
                 |> wrapInitWith ViewCoachPage ViewCoachPageMsg
-                |> requiresAuth session
 
         Route.Divisions ->
             ListDivisions.init session

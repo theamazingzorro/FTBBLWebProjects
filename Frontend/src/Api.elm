@@ -92,7 +92,7 @@ stringOf endpoint =
             "game/bydiv/" ++ Div.idToString index
 
         TeamsWithCoach coachId ->
-            "/team/bycoach/" ++ Coach.idToString coachId
+            "team/bycoach/" ++ Coach.idToString coachId
 
         TeamsInDiv index ->
             "team/bydiv/" ++ Div.idToString index

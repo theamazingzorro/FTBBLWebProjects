@@ -15,6 +15,7 @@ import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
+import Model.Coach exposing (CoachId)
 
 
 
@@ -35,6 +36,7 @@ type Msg
     | HistoryReceived (WebData (List EloHistory))
     | StandingsReceived (WebData (List DivStanding))
     | ViewDivisionButtonClick DivisionId
+    | ViewCoachClick CoachId
 
 
 
@@ -75,6 +77,9 @@ update msg model =
 
         ViewDivisionButtonClick divId ->
             ( model, pushUrl model.session.navkey <| Route.ViewDivision divId )
+
+        ViewCoachClick id ->
+            ( model, pushUrl model.session.navkey <| Route.ViewCoach id )
 
 
 
@@ -179,7 +184,12 @@ viewTeamDetails team =
         [ div [ class " col" ]
             [ h3 [] [ text team.name ]
             , br [] []
-            , p [] [ text <| "Coach: " ++ team.coach.name ]
+            , p [] 
+                [ text "Coach: "
+                , span
+                    (Custom.Attributes.textButton <| ViewCoachClick team.coach.id)
+                    [ text team.coach.name ]
+                ]
             , p [] [ text <| "Race: " ++ team.race.name ]
             , p [] [ text <| "Current Elo: " ++ String.fromInt team.elo ]
             , p [] [ text "Most Recent Division: ", Maybe.map viewDivision team.division |> Maybe.withDefault (text "N/A") ]
