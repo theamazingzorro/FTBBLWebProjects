@@ -14,6 +14,7 @@ type Endpoint
     = Teams
     | FreeTeams
     | TeamsInDiv DivisionId
+    | TeamsWithCoach CoachId
     | TeamsNotInDiv DivisionId
     | TeamUpdateDiv TeamId DivisionId
     | Team TeamId
@@ -89,6 +90,9 @@ stringOf endpoint =
 
         GamesInDiv index ->
             "game/bydiv/" ++ Div.idToString index
+
+        TeamsWithCoach coachId ->
+            "/team/bycoach/" ++ Coach.idToString coachId
 
         TeamsInDiv index ->
             "team/bydiv/" ++ Div.idToString index

@@ -27,6 +27,12 @@ module TeamService =
         TeamRepository.getFree()
         |> List.map (populateAccolades accolades)
 
+    let getByCoach coachId = 
+        let accolades = AccoladeService.getAll()
+
+        TeamRepository.getByCoach coachId
+        |> List.map (populateAccolades accolades)
+
     let getByDiv divId = 
         let accolades = AccoladeService.getAll()
 

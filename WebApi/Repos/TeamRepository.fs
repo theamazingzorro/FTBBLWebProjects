@@ -58,6 +58,15 @@ module TeamRepository =
                 """)
             |> List.ofSeq
 
+    let getByCoach (coachId : int) =
+        use connection = new MySqlConnection(connStr)
+        connection.Open()
+
+        use db = new Database(connection)
+
+        db.Fetch<Team>(getTeamSQL " WHERE Team.coach_id=@0", coachId)
+            |> List.ofSeq
+        
 
     let getByDiv (divId : int) =
         use connection = new MySqlConnection(connStr)

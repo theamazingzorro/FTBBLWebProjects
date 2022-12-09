@@ -33,6 +33,8 @@ let webApp =
                     routef "/team/bydiv/%i/" TeamHandler.getTeamsByDiv
                     routef "/team/notindiv/%i" TeamHandler.getTeamsNotInDiv
                     routef "/team/notindiv/%i/" TeamHandler.getTeamsNotInDiv
+                    routef "/team/bycoach/%i" TeamHandler.getTeamsByCoach
+                    routef "/team/bycoach/%i/" TeamHandler.getTeamsByCoach
 
                     routex "/race(/?)" >=> RaceHandler.getRaces
                     routef "/race/%i" RaceHandler.getRace
