@@ -49,6 +49,18 @@ module TeamHandler =
             }
 
 
+    let getTeamsByCoach (coachId : int) : HttpHandler =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            task {
+                let logger = getLogger ctx
+                logger.LogInformation $"Getting Teams for coach: id={coachId}"
+                
+                let result = TeamService.getByCoach coachId
+
+                return! json result next ctx
+            }
+
+
     let getTeamsNotInDiv (divId : int) : HttpHandler =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {

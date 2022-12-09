@@ -9,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Model.Accolade exposing (Accolade, viewAccolade)
+import Model.Coach exposing (CoachId)
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, divisionDecoder)
 import Model.Game as Game exposing (Game, GameId, gamesDecoder)
@@ -45,6 +46,7 @@ type Msg
     | DeleteTeamButtonClick TeamId
     | EditTeamButtonClick TeamId
     | ViewTeamClick TeamId
+    | ViewCoachClick CoachId
     | TeamDeleted (Result Http.Error DeleteResponse)
     | GameDeleted (Result Http.Error DeleteResponse)
     | TeamNameSortClick
@@ -130,6 +132,9 @@ update msg model =
 
         ViewTeamClick id ->
             ( model, pushUrl model.session.navkey <| Route.ViewTeam id )
+
+        ViewCoachClick id ->
+            ( model, pushUrl model.session.navkey <| Route.ViewCoach id )
 
         DeleteTeamButtonClick id ->
             ( model, deleteTeamRequest model.session.token id )
@@ -512,14 +517,19 @@ viewStandingTableRow : Session -> Bool -> Standing -> Html Msg
 viewStandingTableRow session divClosed standing =
     tr []
         [ td []
-            [ div
+            [ span
                 (Custom.Attributes.textButton <| ViewTeamClick standing.team.id)
-                [ text standing.team.name, viewAccolades standing.team.accolades ]
+                [ text standing.team.name ]
+            , viewAccolades standing.team.accolades
             ]
         , td []
             [ text standing.team.race.name ]
         , td []
-            [ text standing.team.coach.name, viewAccolades standing.team.coach.accolades ]
+            [ span
+                (Custom.Attributes.textButton <| ViewCoachClick standing.team.coach.id)
+                [ text standing.team.coach.name ]
+            , viewAccolades standing.team.coach.accolades
+            ]
         , td [ textCentered ]
             [ text <| String.fromInt standing.team.elo ]
         , td [ textCentered ]

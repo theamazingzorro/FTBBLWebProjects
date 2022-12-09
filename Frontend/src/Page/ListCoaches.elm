@@ -34,6 +34,7 @@ type Msg
     | AddCoachButtonClick
     | DeleteCoachButtonClick CoachId
     | EditCoachButtonClick CoachId
+    | ViewCoachClick CoachId
     | CoachDeleted (Result Http.Error DeleteResponse)
     | NameSortClick
     | EloSortClick
@@ -80,6 +81,9 @@ update msg model =
 
         EditCoachButtonClick id ->
             ( model, pushUrl model.session.navkey <| Route.EditCoach id )
+
+        ViewCoachClick id ->
+            ( model, pushUrl model.session.navkey <| Route.ViewCoach id )
 
         DeleteCoachButtonClick id ->
             ( model, deleteCoachRequest model.session.token id )
@@ -285,7 +289,11 @@ viewCoach : Session -> Coach -> Html Msg
 viewCoach session coach =
     tr []
         [ td []
-            [ text coach.name, viewAccolades coach ]
+            [ span
+                (Custom.Attributes.textButton <| ViewCoachClick coach.id)
+                [ text coach.name ]
+            , viewAccolades coach
+            ]
         , td [ textCentered ]
             [ text <| String.fromInt coach.elo ]
         , requiresAuth session <|

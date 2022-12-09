@@ -9,7 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Model.Accolade exposing (Accolade, viewAccolade)
-import Model.Coach exposing (Coach)
+import Model.Coach exposing (Coach, CoachId)
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, compareDivisions)
 import Model.Session exposing (Session)
@@ -39,6 +39,7 @@ type Msg
     | EditTeamButtonClick TeamId
     | ViewDivisionButtonClick DivisionId
     | ViewTeamClick TeamId
+    | ViewCoachClick CoachId
     | TeamDeleted (Result Http.Error DeleteResponse)
     | NameSortClick
     | RaceSortClick
@@ -100,6 +101,9 @@ update msg model =
 
         ViewTeamClick id ->
             ( model, pushUrl model.session.navkey <| Route.ViewTeam id )
+
+        ViewCoachClick id ->
+            ( model, pushUrl model.session.navkey <| Route.ViewCoach id )
 
         TeamDeleted (Ok res) ->
             ( { model | deleteError = buildDeleteError res }, getTeamsRequest model.session.token )
@@ -385,14 +389,19 @@ viewTeam : Session -> Team -> Html Msg
 viewTeam session team =
     tr []
         [ td []
-            [ div
+            [ span
                 (textButton <| ViewTeamClick team.id)
-                [ text team.name, viewAccolades team.accolades ]
+                [ text team.name ]
+            , viewAccolades team.accolades
             ]
         , td []
             [ text team.race.name ]
         , td []
-            [ text team.coach.name, viewAccolades team.coach.accolades ]
+            [ span
+                (textButton <| ViewCoachClick team.coach.id)
+                [ text team.coach.name ]
+            , viewAccolades team.coach.accolades
+            ]
         , td []
             [ viewDivision team ]
         , td [ textCentered ]
@@ -416,7 +425,7 @@ viewDivision : Team -> Html Msg
 viewDivision team =
     case team.division of
         Just division ->
-            div
+            span
                 (Custom.Attributes.textButton <| ViewDivisionButtonClick division.id)
                 [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
 

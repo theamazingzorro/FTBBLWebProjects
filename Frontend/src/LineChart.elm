@@ -1,6 +1,6 @@
 module LineChart exposing (viewChart)
 
-import Axis exposing (tickFormat)
+import Axis
 import Color
 import Html exposing (Html)
 import Path exposing (Path)
