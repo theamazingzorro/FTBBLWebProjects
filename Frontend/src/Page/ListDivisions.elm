@@ -8,6 +8,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
+import List exposing (drop, length, take)
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, compareDivisions, divisionsDecoder)
 import Model.Session exposing (Session)
@@ -22,6 +23,7 @@ import String exposing (toLower)
 
 type alias Model =
     { divisions : WebData (List Division)
+    , page : Int
     , sortingMethod : SortingMethod
     , session : Session
     , deleteError : Maybe String
@@ -40,6 +42,10 @@ type Msg
     | ViewDivisionButtonClick DivisionId
     | NameSortClick
     | SeasonSortClick
+    | FirstPageClick
+    | PrevPageClick
+    | NextPageClick
+    | LastPageClick
 
 
 type SortingMethod
@@ -57,6 +63,7 @@ type SortingMethod
 init : Session -> ( Model, Cmd Msg )
 init session =
     ( { divisions = RemoteData.Loading
+      , page = 0
       , sortingMethod = Default
       , session = session
       , deleteError = Nothing
@@ -110,6 +117,18 @@ update msg model =
 
         SeasonSortClick ->
             ( { model | sortingMethod = newSort Season SeasonDesc model.sortingMethod }, Cmd.none )
+
+        FirstPageClick ->
+            ( { model | page = 0 }, Cmd.none )
+
+        PrevPageClick ->
+            ( { model | page = Basics.max 0 (model.page - 1) }, Cmd.none )
+
+        NextPageClick ->
+            ( { model | page = Basics.min (lastPage model.divisions) (model.page + 1) }, Cmd.none )
+
+        LastPageClick ->
+            ( { model | page = lastPage model.divisions }, Cmd.none )
 
 
 newSort : SortingMethod -> SortingMethod -> SortingMethod -> SortingMethod
@@ -180,6 +199,28 @@ compareStrIgnoreCase a b =
     compare (toLower a) (toLower b)
 
 
+pageSize : Int
+pageSize =
+    20
+
+
+pageOfList : Int -> List a -> List a
+pageOfList page list =
+    list
+        |> drop (pageSize * page)
+        |> take pageSize
+
+
+lastPage : WebData (List a) -> Int
+lastPage list =
+    case list of
+        RemoteData.Success l ->
+            length l // pageSize
+
+        _ ->
+            0
+
+
 
 -- View --
 
@@ -214,7 +255,7 @@ viewDivisionsOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success divisions ->
-            viewDivisions model.session model.sortingMethod divisions
+            viewDivisions model.session model.sortingMethod model.page divisions
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -243,16 +284,18 @@ viewErrorMessage message =
             text ""
 
 
-viewDivisions : Session -> SortingMethod -> List Division -> Html Msg
-viewDivisions session sortMethod divisions =
+viewDivisions : Session -> SortingMethod -> Int -> List Division -> Html Msg
+viewDivisions session sortMethod page divisions =
     div []
         [ viewHeader session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader sortMethod
-            , tbody [] <|
-                List.map (viewDivision session) <|
-                    sortedDivs sortMethod divisions
+            , sortedDivs sortMethod divisions
+                |> pageOfList page
+                |> List.map (viewDivision session)
+                |> tbody []
             ]
+        , viewPageSelect page (length divisions)
         ]
 
 
@@ -355,3 +398,18 @@ viewCloseButton division =
         button
             (onClick (CloseDivisionButtonClick division.id) :: Custom.Attributes.editButton)
             [ text "Close" ]
+
+
+viewPageSelect : Int -> Int -> Html Msg
+viewPageSelect page divsCount =
+    if divsCount <= pageSize then
+        text ""
+
+    else
+        div [ textCentered ]
+            [ button [ class "btn", onClick FirstPageClick ] [ text "<<" ]
+            , button [ class "btn", onClick PrevPageClick ] [ text "<" ]
+            , text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (divsCount // pageSize + 1)
+            , button [ class "btn", onClick NextPageClick ] [ text ">" ]
+            , button [ class "btn", onClick LastPageClick ] [ text ">>" ]
+            ]

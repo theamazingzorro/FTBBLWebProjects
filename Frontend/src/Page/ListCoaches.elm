@@ -8,6 +8,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
+import List exposing (drop, length, take)
 import Model.Accolade exposing (viewAccolade)
 import Model.Coach exposing (Coach, CoachId, coachsDecoder)
 import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
@@ -23,6 +24,7 @@ import String exposing (toLower)
 
 type alias Model =
     { coaches : WebData (List Coach)
+    , page : Int
     , sortingMethod : SortingMethod
     , session : Session
     , deleteError : Maybe String
@@ -39,6 +41,10 @@ type Msg
     | CoachDeleted (Result Http.Error DeleteResponse)
     | NameSortClick
     | EloSortClick
+    | FirstPageClick
+    | PrevPageClick
+    | NextPageClick
+    | LastPageClick
 
 
 type SortingMethod
@@ -56,6 +62,7 @@ type SortingMethod
 init : Session -> ( Model, Cmd Msg )
 init session =
     ( { coaches = RemoteData.Loading
+      , page = 0
       , sortingMethod = Default
       , session = session
       , deleteError = Nothing
@@ -100,6 +107,18 @@ update msg model =
 
         EloSortClick ->
             ( { model | sortingMethod = newSort EloDesc Elo model.sortingMethod }, Cmd.none )
+
+        FirstPageClick ->
+            ( { model | page = 0 }, Cmd.none )
+
+        PrevPageClick ->
+            ( { model | page = Basics.max 0 (model.page - 1) }, Cmd.none )
+
+        NextPageClick ->
+            ( { model | page = Basics.min (lastPage model.coaches) (model.page + 1) }, Cmd.none )
+
+        LastPageClick ->
+            ( { model | page = lastPage model.coaches }, Cmd.none )
 
 
 newSort : SortingMethod -> SortingMethod -> SortingMethod -> SortingMethod
@@ -164,6 +183,28 @@ compareStrIgnoreCase a b =
     compare (toLower a) (toLower b)
 
 
+pageSize : Int
+pageSize =
+    20
+
+
+pageOfList : Int -> List a -> List a
+pageOfList page list =
+    list
+        |> drop (pageSize * page)
+        |> take pageSize
+
+
+lastPage : WebData (List a) -> Int
+lastPage list =
+    case list of
+        RemoteData.Success l ->
+            length l // pageSize
+
+        _ ->
+            0
+
+
 
 -- View --
 
@@ -198,7 +239,7 @@ viewCoachesOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success coaches ->
-            viewCoaches model.session model.sortingMethod coaches
+            viewCoaches model.session model.sortingMethod model.page coaches
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -227,16 +268,18 @@ viewErrorMessage message =
             text ""
 
 
-viewCoaches : Session -> SortingMethod -> List Coach -> Html Msg
-viewCoaches session sortMethod coaches =
+viewCoaches : Session -> SortingMethod -> Int -> List Coach -> Html Msg
+viewCoaches session sortMethod page coaches =
     div []
         [ viewHeader session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader sortMethod
-            , tbody [] <|
-                List.map (viewCoach session) <|
-                    sortedCoaches sortMethod coaches
+            , sortedCoaches sortMethod coaches
+                |> pageOfList page
+                |> List.map (viewCoach session)
+                |> tbody []
             ]
+        , viewPageSelect page (length coaches)
         ]
 
 
@@ -329,3 +372,18 @@ viewEditButton coach =
     button
         (onClick (EditCoachButtonClick coach.id) :: Custom.Attributes.editButton)
         [ text "Edit" ]
+
+
+viewPageSelect : Int -> Int -> Html Msg
+viewPageSelect page coachesCount =
+    if coachesCount <= pageSize then
+        text ""
+
+    else
+        div [ textCentered ]
+            [ button [ class "btn", onClick FirstPageClick ] [ text "<<" ]
+            , button [ class "btn", onClick PrevPageClick ] [ text "<" ]
+            , text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (coachesCount // pageSize + 1)
+            , button [ class "btn", onClick NextPageClick ] [ text ">" ]
+            , button [ class "btn", onClick LastPageClick ] [ text ">>" ]
+            ]
