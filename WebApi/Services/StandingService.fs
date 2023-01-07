@@ -45,7 +45,9 @@ module StandingService =
         match compare (3*b.Wins + b.Draws) (3*a.Wins + a.Draws) with
             | 0 -> match compare (b.PointsScored - b.PointsGiven) (a.PointsScored - a.PointsGiven) with
                     | 0 -> match compare b.PointsScored a.PointsScored with
-                            | 0 -> compare b.PointsGiven a.PointsGiven
+                            | 0 -> match compare b.PointsGiven a.PointsGiven with
+                                    | 0 -> compare b.Team.Elo a.Team.Elo
+                                    | z -> z
                             | z -> z
                     | y -> y
             | x -> x
