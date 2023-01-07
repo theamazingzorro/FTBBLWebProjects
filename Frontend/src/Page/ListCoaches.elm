@@ -274,10 +274,10 @@ viewCoaches session sortMethod page coaches =
         [ viewHeader session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader sortMethod
-            , tbody [] <|
-                List.map (viewCoach session) <|
-                    pageOfList page <|
-                        sortedCoaches sortMethod coaches
+            , sortedCoaches sortMethod coaches
+                |> pageOfList page
+                |> List.map (viewCoach session)
+                |> tbody []
             ]
         , viewPageSelect page (length coaches)
         ]

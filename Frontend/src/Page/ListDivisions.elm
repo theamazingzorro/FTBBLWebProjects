@@ -290,10 +290,10 @@ viewDivisions session sortMethod page divisions =
         [ viewHeader session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader sortMethod
-            , tbody [] <|
-                List.map (viewDivision session) <|
-                    pageOfList page <|
-                        sortedDivs sortMethod divisions
+            , sortedDivs sortMethod divisions
+                |> pageOfList page
+                |> List.map (viewDivision session) 
+                |> tbody []
             ]
         , viewPageSelect page (length divisions)
         ]

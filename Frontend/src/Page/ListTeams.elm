@@ -341,10 +341,10 @@ viewTeams session sortMethod page teams =
         [ viewHeader session
         , table [ Custom.Attributes.table ]
             [ viewTableHeader sortMethod
-            , tbody [] <|
-                List.map (viewTeam session) <|
-                    pageOfList page <|
-                        sortedTeams sortMethod teams
+            , sortedTeams sortMethod teams
+                |> pageOfList page
+                |> List.map (viewTeam session)
+                |> tbody []
             ]
         , viewPageSelect page (length teams)
         ]
