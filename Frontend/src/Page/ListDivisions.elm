@@ -13,6 +13,7 @@ import Model.Division exposing (Division, DivisionId, compareDivisions, division
 import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
+import String exposing (toLower)
 
 
 
@@ -162,16 +163,21 @@ sortedDivs sortingMethod divs =
             List.sortWith compareDivisions divs
 
         Name ->
-            List.sortWith (\a b -> compare a.name b.name) divs
+            List.sortWith (\a b -> compareStrIgnoreCase a.name b.name) divs
 
         NameDesc ->
-            List.sortWith (\a b -> compare b.name a.name) divs
+            List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) divs
 
         Season ->
             List.sortWith (\a b -> compare a.season b.season) divs
 
         SeasonDesc ->
             List.sortWith (\a b -> compare b.season a.season) divs
+
+
+compareStrIgnoreCase : String -> String -> Order
+compareStrIgnoreCase a b =
+    compare (toLower a) (toLower b)
 
 
 

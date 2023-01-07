@@ -18,6 +18,7 @@ import Model.Standing exposing (Standing, compareStandings, getGamesPlayed, getP
 import Model.Team exposing (Team, TeamId)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
+import String exposing (toLower)
 import Url exposing (Protocol(..))
 
 
@@ -262,28 +263,33 @@ sortedStandings sortingMethod standings =
             List.sortWith compareStandings standings
 
         Name ->
-            List.sortWith (\a b -> compare a.team.name b.team.name) standings
+            List.sortWith (\a b -> compareStrIgnoreCase a.team.name b.team.name) standings
 
         NameDesc ->
-            List.sortWith (\a b -> compare b.team.name a.team.name) standings
+            List.sortWith (\a b -> compareStrIgnoreCase b.team.name a.team.name) standings
 
         Coach ->
-            List.sortWith (\a b -> compare a.team.coach.name b.team.coach.name) standings
+            List.sortWith (\a b -> compareStrIgnoreCase a.team.coach.name b.team.coach.name) standings
 
         CoachDesc ->
-            List.sortWith (\a b -> compare b.team.coach.name a.team.coach.name) standings
+            List.sortWith (\a b -> compareStrIgnoreCase b.team.coach.name a.team.coach.name) standings
 
         Race ->
-            List.sortWith (\a b -> compare a.team.race.name b.team.race.name) standings
+            List.sortWith (\a b -> compareStrIgnoreCase a.team.race.name b.team.race.name) standings
 
         RaceDesc ->
-            List.sortWith (\a b -> compare b.team.race.name a.team.race.name) standings
+            List.sortWith (\a b -> compareStrIgnoreCase b.team.race.name a.team.race.name) standings
 
         Elo ->
             List.sortWith (\a b -> compare a.team.elo b.team.elo) standings
 
         EloDesc ->
             List.sortWith (\a b -> compare b.team.elo a.team.elo) standings
+
+
+compareStrIgnoreCase : String -> String -> Order
+compareStrIgnoreCase a b =
+    compare (toLower a) (toLower b)
 
 
 gamesInWeek : Int -> List Game -> List Game

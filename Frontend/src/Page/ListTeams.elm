@@ -16,6 +16,7 @@ import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
+import String exposing (toLower)
 import Url exposing (Protocol(..))
 
 
@@ -175,22 +176,22 @@ sortedTeams sortingMethod teams =
             List.sortWith (\a b -> compare b.elo a.elo) teams
 
         Name ->
-            List.sortWith (\a b -> compare a.name b.name) teams
+            List.sortWith (\a b -> compareStrIgnoreCase a.name b.name) teams
 
         NameDesc ->
-            List.sortWith (\a b -> compare b.name a.name) teams
+            List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) teams
 
         Coach ->
-            List.sortWith (\a b -> compare a.coach.name b.coach.name) teams
+            List.sortWith (\a b -> compareStrIgnoreCase a.coach.name b.coach.name) teams
 
         CoachDesc ->
-            List.sortWith (\a b -> compare b.coach.name a.coach.name) teams
+            List.sortWith (\a b -> compareStrIgnoreCase b.coach.name a.coach.name) teams
 
         Race ->
-            List.sortWith (\a b -> compare a.race.name b.race.name) teams
+            List.sortWith (\a b -> compareStrIgnoreCase a.race.name b.race.name) teams
 
         RaceDesc ->
-            List.sortWith (\a b -> compare b.race.name a.race.name) teams
+            List.sortWith (\a b -> compareStrIgnoreCase b.race.name a.race.name) teams
 
         Elo ->
             List.sortWith (\a b -> compare a.elo b.elo) teams
@@ -203,6 +204,11 @@ sortedTeams sortingMethod teams =
 
         DivisionDesc ->
             List.sortWith (compareMaybeDiv (\x y -> compareDivisions y x)) teams
+
+
+compareStrIgnoreCase : String -> String -> Order
+compareStrIgnoreCase a b =
+    compare (toLower a) (toLower b)
 
 
 compareMaybeDiv : (Division -> Division -> Order) -> Team -> Team -> Order
