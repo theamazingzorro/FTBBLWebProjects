@@ -14,6 +14,7 @@ import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
+import String exposing (toLower)
 
 
 
@@ -146,16 +147,21 @@ sortedCoaches sortingMethod coaches =
             List.sortWith (\a b -> compare b.elo a.elo) coaches
 
         Name ->
-            List.sortWith (\a b -> compare a.name b.name) coaches
+            List.sortWith (\a b -> compareStrIgnoreCase a.name b.name) coaches
 
         NameDesc ->
-            List.sortWith (\a b -> compare b.name a.name) coaches
+            List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) coaches
 
         Elo ->
             List.sortWith (\a b -> compare a.elo b.elo) coaches
 
         EloDesc ->
             List.sortWith (\a b -> compare b.elo a.elo) coaches
+
+
+compareStrIgnoreCase : String -> String -> Order
+compareStrIgnoreCase a b =
+    compare (toLower a) (toLower b)
 
 
 

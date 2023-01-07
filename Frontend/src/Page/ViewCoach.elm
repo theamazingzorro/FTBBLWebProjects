@@ -9,12 +9,11 @@ import Http
 import LineChart
 import Model.Accolade exposing (Accolade, viewAccolade)
 import Model.Coach exposing (Coach, coachDecoder)
-import Model.DivStanding exposing (DivStanding, divStandingsDecoder, getTDD)
 import Model.Division exposing (Division, DivisionId)
 import Model.EloHistory exposing (EloHistory, historyListDecoder)
 import Model.Session exposing (Session)
 import Model.SharedIds exposing (CoachId)
-import Model.Team exposing (Team, TeamId, teamDecoder, teamsDecoder)
+import Model.Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 
