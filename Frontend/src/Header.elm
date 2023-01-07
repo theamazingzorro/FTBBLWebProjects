@@ -6,11 +6,10 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
-import Model.Division exposing (Division, DivisionId, divisionsDecoder)
+import Model.Division exposing (Division, DivisionId, compareDivisions, divisionsDecoder)
 import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (Route(..), pushUrl)
-import Model.Division exposing (compareDivisions)
 
 
 
@@ -160,8 +159,8 @@ viewDivisionsLink divisions =
             dropdownLink "Divisions" DivisionIndexClicked <|
                 List.map
                     (\div -> dropdownEntry (div.name ++ " Season " ++ String.fromInt div.season) <| SpecificDivisionClicked div.id)
-                    ( List.sortWith compareDivisions divs
-                        |> List.filter (\div -> not div.closed) 
+                    (List.sortWith compareDivisions divs
+                        |> List.filter (\div -> not div.closed)
                     )
 
         _ ->

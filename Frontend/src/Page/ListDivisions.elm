@@ -292,7 +292,7 @@ viewDivisions session sortMethod page divisions =
             [ viewTableHeader sortMethod
             , sortedDivs sortMethod divisions
                 |> pageOfList page
-                |> List.map (viewDivision session) 
+                |> List.map (viewDivision session)
                 |> tbody []
             ]
         , viewPageSelect page (length divisions)
