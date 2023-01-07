@@ -10,6 +10,7 @@ import Model.Division exposing (Division, DivisionId, divisionsDecoder)
 import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (Route(..), pushUrl)
+import Model.Division exposing (compareDivisions)
 
 
 
@@ -159,7 +160,9 @@ viewDivisionsLink divisions =
             dropdownLink "Divisions" DivisionIndexClicked <|
                 List.map
                     (\div -> dropdownEntry (div.name ++ " Season " ++ String.fromInt div.season) <| SpecificDivisionClicked div.id)
-                    (List.filter (\div -> not div.closed) divs)
+                    ( List.sortWith compareDivisions divs
+                        |> List.filter (\div -> not div.closed) 
+                    )
 
         _ ->
             linkElement "Divisions" DivisionIndexClicked
