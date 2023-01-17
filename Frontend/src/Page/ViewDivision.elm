@@ -2,7 +2,7 @@ module Page.ViewDivision exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes exposing (textCentered)
+import Custom.Attributes exposing (centered, padding, textCentered)
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -716,10 +716,26 @@ viewGame : Session -> Game -> Html Msg
 viewGame session game =
     div
         Custom.Attributes.carouselItemEntry
-        [ p [] [ text <| game.homeTeam.name ++ " vs. " ++ game.awayTeam.name ]
+        [ viewGameDetails game
         , viewOdds game
-        , viewScore game
         , requiresAuth session <| viewGameButtons game
+        ]
+
+
+viewGameDetails : Game -> Html Msg
+viewGameDetails game =
+    div [ class "row", padding "0.5em" ]
+        [ div [ class "col" ]
+            [ h6 [] [ text game.homeTeam.name ]
+            , p [] [ text game.homeTeam.coach.name ]
+            ]
+        , div [ class "col col-auto", centered ]
+            [ viewScore game
+            ]
+        , div [ class "col" ]
+            [ h6 [] [ text game.awayTeam.name ]
+            , p [] [ text game.awayTeam.coach.name ]
+            ]
         ]
 
 
@@ -744,13 +760,13 @@ viewScore game =
         Just homeScore ->
             case game.awayScore of
                 Just awayScore ->
-                    p [] [ text <| String.fromInt homeScore ++ " - " ++ String.fromInt awayScore ]
+                    text <| String.fromInt homeScore ++ " - " ++ String.fromInt awayScore
 
                 Nothing ->
-                    text ""
+                    text "vs"
 
         Nothing ->
-            text ""
+            text "vs"
 
 
 viewGameButtons : Game -> Html Msg
