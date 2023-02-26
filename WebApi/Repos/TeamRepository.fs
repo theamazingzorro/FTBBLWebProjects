@@ -34,17 +34,17 @@ module TeamRepository =
     """
 
 
-    let getAll() =  
+    let getAll(leagueId : int) =  
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
         use db = new Database(connection)
 
-        db.Fetch<Team>(getTeamSQL "")
+        db.Fetch<Team>(getTeamSQL " WHERE Team.league_id = @0", leagueId)
             |> List.ofSeq
 
 
-    let getFree() =  
+    let getFree(leagueId : int) =  
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
@@ -55,7 +55,8 @@ module TeamRepository =
 	                (SELECT Team.id FROM Team
 	                JOIN TeamDivision ON Team.id = TeamDivision.team_id
 	                WHERE TeamDivision.end_date is null)
-                """)
+                AND Team.league_id = @0
+                """, leagueId)
             |> List.ofSeq
 
     let getByCoach (coachId : int) =
@@ -80,7 +81,7 @@ module TeamRepository =
             |> List.ofSeq
 
 
-    let getNotInDiv (divId : int) =
+    let getNotInDiv (leagueId : int, divId : int) =
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
@@ -91,7 +92,8 @@ module TeamRepository =
 	                (SELECT Team.id FROM Team
 	                JOIN TeamDivision ON Team.id = TeamDivision.team_id
 	                WHERE TeamDivision.div_id=@0)
-                """, divId)
+                AND Team.league_id=@1
+                """, divId, leagueId)
             |> List.ofSeq
 
 

@@ -11,7 +11,7 @@ module CoachRepository =
 
     let connStr = WebApplication.CreateBuilder().Configuration["ConnString"]
 
-    let getAll() =  
+    let getAll(leagueId : int) =  
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
@@ -21,7 +21,8 @@ module CoachRepository =
                 SELECT 
                     Coach.*
                 FROM Coach
-                """)
+                WHERE Coach.league_id=@0
+                """, leagueId)
             |> List.ofSeq
 
 
@@ -35,7 +36,8 @@ module CoachRepository =
                 SELECT 
                     Coach.*
                 FROM Coach
-                WHERE Coach.id=@0""", id)
+                WHERE Coach.id=@0
+                """, id)
 
 
     let save (coach : Coach) =

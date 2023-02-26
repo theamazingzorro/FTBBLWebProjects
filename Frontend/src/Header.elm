@@ -10,7 +10,7 @@ import Model.Division exposing (Division, DivisionId, compareDivisions, division
 import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (Route(..), pushUrl)
-
+import Env exposing (leagueName)
 
 
 -- Types --
@@ -118,7 +118,7 @@ view model =
             [ Custom.Attributes.navBarBrand
             , onClick HomeClicked
             ]
-            [ text "FTBBL" ]
+            [ text leagueName ]
         , toggleBarButton
         , div [ Custom.Attributes.navBarCollapsable, id "navbarNav" ]
             [ ul [ Custom.Attributes.navBarLinkList ]

@@ -19,7 +19,8 @@ module TeamHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Teams"
                 
-                let result = TeamService.getAll()
+                let league = ctx.Request.Headers["league"].ToString() |> int
+                let result = TeamService.getAll(league)
 
                 return! json result next ctx
             }
@@ -31,7 +32,8 @@ module TeamHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Teams not in any Division"
                 
-                let result = TeamService.getFree()
+                let league = ctx.Request.Headers["league"].ToString() |> int
+                let result = TeamService.getFree(league)
 
                 return! json result next ctx
             }
@@ -67,7 +69,8 @@ module TeamHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Teams for all other divs: div id={divId}"
                 
-                let result = TeamService.getNotInDiv divId
+                let league = ctx.Request.Headers["league"].ToString() |> int
+                let result = TeamService.getNotInDiv league divId
 
                 return! json result next ctx
             }
@@ -94,7 +97,8 @@ module TeamHandler =
 
                 logger.LogInformation $"Saving Team: name={team.Name}"
                 
-                let result = TeamService.saveNew team
+                let league = ctx.Request.Headers["league"].ToString() |> int
+                let result = TeamService.saveNew team league
 
                 return! json result next ctx
             }
@@ -122,7 +126,8 @@ module TeamHandler =
                 let! team = ctx.BindJsonAsync<Team>()
                 logger.LogInformation $"Updating Team: id={id}"
 
-                let result = TeamService.saveOverId id team
+                let league = ctx.Request.Headers["league"].ToString() |> int
+                let result = TeamService.saveOverId id team league
 
                 return! json result next ctx
             }

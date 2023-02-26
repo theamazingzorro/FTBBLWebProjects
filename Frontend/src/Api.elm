@@ -129,7 +129,9 @@ urlOf endpoint =
 
 getHeaders : Maybe String -> List Header
 getHeaders token =
-    [ Http.header "Authorization" <| "Bearer " ++ Maybe.withDefault "" token ]
+    [ Http.header "Authorization" <| "Bearer " ++ Maybe.withDefault "" token
+    , Http.header "league" <| Env.leagueId
+    ]
 
 
 getRequest : Maybe String -> Endpoint -> Expect msg -> Cmd msg
