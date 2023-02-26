@@ -27,7 +27,7 @@ module CoachService =
         if (oldCoach.Elo <> coach.Elo) 
         then CoachEloHistoryRepository.save({Id = 0; CoachId=oldCoach.Id; Elo = oldCoach.Elo; Date = DateTime.Now})
 
-        CoachRepository.save(coach)
+        CoachRepository.save({coach with LeagueId = oldCoach.LeagueId})
 
         coach
 
