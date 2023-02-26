@@ -26,17 +26,17 @@ INSERT INTO League(name)
 -- Table Updates --
 
 ALTER TABLE Coach
-	ADD COLUMN league_id INT NOT NULL DEFAULT(1),
+	ADD COLUMN league_id INT NOT NULL DEFAULT 1,
     ADD FOREIGN KEY ( league_id ) REFERENCES League(id)
     ;
     
 ALTER TABLE Division
-	ADD COLUMN league_id INT NOT NULL DEFAULT(1),
+	ADD COLUMN league_id INT NOT NULL DEFAULT 1,
     ADD FOREIGN KEY ( league_id ) REFERENCES League(id)
     ;
     
 ALTER TABLE Team
-	ADD COLUMN league_id INT NOT NULL DEFAULT(1),
+	ADD COLUMN league_id INT NOT NULL DEFAULT 1,
     ADD FOREIGN KEY ( league_id ) REFERENCES League(id)
     ;
 
