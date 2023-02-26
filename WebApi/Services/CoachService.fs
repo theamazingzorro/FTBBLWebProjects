@@ -9,10 +9,10 @@ module CoachService =
     let private populateCoachAccollades (accolades : Accolade list) (coach : Coach) : Coach =
         { coach with Accolades = List.filter (fun acc -> acc.CoachId = coach.Id) accolades }
 
-    let getAll() =
+    let getAll(leagueId) =
         let accolades = AccoladeService.getAll()
 
-        CoachRepository.getAll()
+        CoachRepository.getAll(leagueId)
         |> List.map (populateCoachAccollades accolades)
 
     let getById id =
@@ -34,11 +34,11 @@ module CoachService =
     let deleteById id =
         CoachRepository.deleteById(id)
 
-    let saveOverId id coach =
-        saveChanges { coach with Id = id }
+    let saveOverId id coach league =
+        saveChanges { coach with Id = id; LeagueId = league }
 
-    let saveNew coach =
-        let newCoach:Coach = { coach with Elo = 1000 }
+    let saveNew coach league=
+        let newCoach:Coach = { coach with Elo = 1000; LeagueId = league }
 
         CoachRepository.save newCoach
 

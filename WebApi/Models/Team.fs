@@ -19,6 +19,9 @@ type Team =
         [<ComplexMapping>]
         Division : Division
 
+        [<Column(Name = "league_id")>]
+        LeagueId : int
+
         [<Ignore>]
         Accolades : Accolade list
     }

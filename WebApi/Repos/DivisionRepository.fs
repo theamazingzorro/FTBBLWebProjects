@@ -11,13 +11,13 @@ module DivisionRepository =
     let connStr = WebApplication.CreateBuilder().Configuration["ConnString"]
 
 
-    let getAll() =  
+    let getAll(leagueId : int) =  
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
         use db = new Database(connection)
 
-        db.Fetch<Division>("SELECT * FROM Division")
+        db.Fetch<Division>("SELECT * FROM Division WHERE Division.league_id=@0", leagueId)
             |> List.ofSeq
 
 

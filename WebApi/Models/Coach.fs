@@ -9,6 +9,9 @@ type Coach =
         Name : string
         Elo : int
 
+        [<Column(Name = "league_id")>]
+        LeagueId : int
+
         [<Ignore>]
         Accolades : Accolade list
     }

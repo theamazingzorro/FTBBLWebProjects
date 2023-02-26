@@ -18,7 +18,8 @@ module DivisionHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Divisions"
                 
-                let result = DivisionService.getAll()
+                let league = ctx.Request.Headers["league"].ToString() |> int
+                let result = DivisionService.getAll(league)
 
                 return! json result next ctx
             }
@@ -45,7 +46,8 @@ module DivisionHandler =
 
                 logger.LogInformation $"Saving Division: name={division.Name}"
                 
-                let result = DivisionService.saveChanges division
+                let league = ctx.Request.Headers["league"].ToString() |> int
+                let result = DivisionService.saveChanges division league
 
                 return! json result next ctx
             }
@@ -73,7 +75,8 @@ module DivisionHandler =
                 let! division = ctx.BindJsonAsync<Division>()
                 logger.LogInformation $"Updating Division: id={id}"
 
-                let result = DivisionService.saveOverId id division
+                let league = ctx.Request.Headers["league"].ToString() |> int
+                let result = DivisionService.saveOverId id division league
 
                 return! json result next ctx
             }

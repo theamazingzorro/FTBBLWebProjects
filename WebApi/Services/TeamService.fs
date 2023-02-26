@@ -15,16 +15,16 @@ module TeamService =
                 Coach = { team.Coach with Accolades = List.filter (fun acc -> acc.CoachId = team.Coach.Id) accolades }
         }
 
-    let getAll() =
+    let getAll(leagueId) =
         let accolades = AccoladeService.getAll()
 
-        TeamRepository.getAll()
+        TeamRepository.getAll(leagueId)
         |> List.map (populateAccolades accolades)
 
-    let getFree() = 
+    let getFree(leagueId) = 
         let accolades = AccoladeService.getAll()
 
-        TeamRepository.getFree()
+        TeamRepository.getFree(leagueId)
         |> List.map (populateAccolades accolades)
 
     let getByCoach coachId = 
@@ -39,10 +39,10 @@ module TeamService =
         TeamRepository.getByDiv divId
         |> List.map (populateAccolades accolades)
 
-    let getNotInDiv divId = 
+    let getNotInDiv leagueId divId = 
         let accolades = AccoladeService.getAll()
 
-        TeamRepository.getNotInDiv divId
+        TeamRepository.getNotInDiv(leagueId, divId)
         |> List.map (populateAccolades accolades)
 
     let getById id =
@@ -64,11 +64,11 @@ module TeamService =
     let deleteById id =
         TeamRepository.deleteById(id)
 
-    let saveOverId id team =
-        saveChanges { team with Id = id }
+    let saveOverId id team league=
+        saveChanges { team with Id = id; LeagueId = league }
 
-    let saveNew team =
-        let newTeam:Team = { team with Elo = 1000 }
+    let saveNew team league =
+        let newTeam:Team = { team with Elo = 1000; LeagueId = league }
 
         TeamRepository.save newTeam
 

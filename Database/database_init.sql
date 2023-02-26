@@ -1,6 +1,13 @@
 CREATE DATABASE IF NOT EXISTS ftbbl;
 USE ftbbl;
 
+-- League --
+
+CREATE TABLE IF NOT EXISTS League(
+	id INT NOT NULL AUTO_INCREMENT,
+	name VARCHAR(40) NOT NULL UNIQUE,
+	PRIMARY KEY ( id )
+);
 
 -- Race --
 
@@ -47,6 +54,8 @@ CREATE TABLE IF NOT EXISTS Coach(
 	id INT NOT NULL AUTO_INCREMENT,
 	name VARCHAR(40) NOT NULL UNIQUE,
 	elo INT NOT NULL,
+    league_id INT NOT NULL,
+    FOREIGN KEY ( league_id ) REFERENCES League(id),
 	PRIMARY KEY ( id )
 );
 

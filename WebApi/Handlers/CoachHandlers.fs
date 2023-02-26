@@ -19,7 +19,8 @@ module CoachHandler =
                 let logger = getLogger ctx
                 logger.LogInformation $"Getting Coaches"
                 
-                let result = CoachService.getAll()
+                let league = ctx.Request.Headers["league"].ToString() |> int
+                let result = CoachService.getAll(league)
 
                 return! json result next ctx
             }
@@ -46,7 +47,8 @@ module CoachHandler =
 
                 logger.LogInformation $"Saving Coach: name={coach.Name}"
                 
-                let result = CoachService.saveNew coach
+                let league = ctx.Request.Headers["league"].ToString() |> int
+                let result = CoachService.saveNew coach league
 
                 return! json result next ctx
             }
@@ -73,7 +75,8 @@ module CoachHandler =
                 let! coach = ctx.BindJsonAsync<Coach>()
                 logger.LogInformation $"Updating Coach: id={id}"
 
-                let result = CoachService.saveOverId id coach
+                let league = ctx.Request.Headers["league"].ToString() |> int
+                let result = CoachService.saveOverId id coach league
 
                 return! json result next ctx
             }
