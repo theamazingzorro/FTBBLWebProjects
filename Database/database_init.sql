@@ -68,6 +68,8 @@ CREATE TABLE IF NOT EXISTS Team(
 	race_id INT NOT NULL,
 	coach_id INT NOT NULL,
 	elo INT NOT NULL,
+    league_id INT NOT NULL,
+    FOREIGN KEY ( league_id ) REFERENCES League(id),
 	FOREIGN KEY ( race_id ) REFERENCES Race(id),
 	FOREIGN KEY ( coach_id ) REFERENCES Coach(id),
 	PRIMARY KEY ( id )
@@ -98,6 +100,8 @@ CREATE TABLE IF NOT EXISTS Division(
 	name VARCHAR(40) NOT NULL,
 	season INT NOT NULL,
     closed BOOL NOT NULL,
+    league_id INT NOT NULL,
+    FOREIGN KEY ( league_id ) REFERENCES League(id),
 	UNIQUE ( name, season),
 	PRIMARY KEY ( id )
 );
