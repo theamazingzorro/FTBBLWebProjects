@@ -10,7 +10,7 @@ import Page
 import Page.Signin as SigninPage
 import Route exposing (Route(..))
 import Url exposing (Url)
-
+import Env exposing (leagueName)
 
 
 -- Types --
@@ -172,7 +172,7 @@ processPageOutMsg model outMsg =
 
 view : Model -> Document Msg
 view model =
-    { title = "FTBBL"
+    { title = leagueName
     , body =
         [ div [ Custom.Attributes.mainContainer ]
             [ navView model
