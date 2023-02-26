@@ -157,7 +157,8 @@ let configureDevCors (builder : CorsPolicyBuilder) =
 let configureProdCors (builder : CorsPolicyBuilder) =
     builder
        .WithOrigins(
-            "https://ftbbl-elo.github.io"
+            "https://ftbbl-elo.github.io",
+            "https://top-scumlord.github.io"
        )
        .AllowAnyMethod()
        .AllowAnyHeader()
