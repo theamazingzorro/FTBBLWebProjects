@@ -47,7 +47,16 @@ INSERT INTO Race(name)
 		 ) t
 	WHERE NOT EXISTS (SELECT 1 FROM Race);
 
-
+INSERT INTO Race(name)
+	SELECT t.name
+    FROM (
+		SELECT "Black Orcs" AS name UNION ALL
+		SELECT "Imperial Nobility" AS name UNION ALL
+		SELECT "Old World Alliance" AS name UNION ALL
+        SELECT "Chaos Renegades" AS name 
+		 ) t
+	WHERE NOT EXISTS (SELECT 1 FROM Race WHERE name="Black Orcs");
+    
 -- Coach --
 
 CREATE TABLE IF NOT EXISTS Coach(
