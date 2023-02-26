@@ -57,7 +57,7 @@ module TeamService =
         if (oldTeam.Elo <> team.Elo) 
         then TeamEloHistoryRepository.save({Id = 0; TeamId=oldTeam.Id; Elo = oldTeam.Elo; Date = DateTime.Now})
 
-        TeamRepository.save(team)
+        TeamRepository.save({team with LeagueId = oldTeam.LeagueId})
 
         team
 
