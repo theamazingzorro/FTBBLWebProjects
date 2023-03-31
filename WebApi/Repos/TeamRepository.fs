@@ -21,13 +21,15 @@ module TeamRepository =
         JOIN Coach ON Team.coach_id=Coach.id
         LEFT JOIN (
 	        SELECT a.* FROM TeamDivision a
-		        LEFT JOIN TeamDivision b
-			        ON a.team_id=b.team_id 
-			        AND (a.start_date < b.start_date 
-				        OR (a.start_date = b.start_date AND a.end_date > b.end_date)
-				        OR (a.start_date = b.start_date AND a.end_date IS NULL AND b.end_date IS NOT NULL)
-			        )
-		        WHERE b.start_date IS NULL
+	            LEFT JOIN TeamDivision b
+		            ON a.team_id=b.team_id 
+		            AND (a.start_date < b.start_date 
+			            OR (a.start_date <> b.start_date AND b.end_date IS NULL)
+                        OR (a.start_date = b.start_date AND a.end_date IS NOT NULL AND b.end_date IS NULL)
+			            OR (a.start_date = b.start_date AND a.end_date < b.end_date)
+                        OR (a.start_date = b.start_date AND a.end_date = b.end_date AND a.div_id > b.div_id)
+		            )
+	            WHERE b.start_date IS NULL
 	        ) TD ON Team.id=TD.team_id
         LEFT JOIN Division ON TD.div_id=Division.id
         {whereClause}
