@@ -5,3 +5,10 @@ Developed fully in the Functional Programming paradigm, using F# and giraffe for
 
 
 [Check it out here!](https://ftbbl-elo.github.io/)
+
+
+## Build Instructions
+```
+docker build -t web-api .
+docker run -p 80:80 web-api
+```
