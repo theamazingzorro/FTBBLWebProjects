@@ -10,7 +10,7 @@ import LineChart
 import Model.Accolade exposing (Accolade, viewAccolade)
 import Model.Coach exposing (Coach, coachDecoder)
 import Model.Division exposing (Division, DivisionId)
-import Model.EloHistory exposing (EloHistory, historyListDecoder)
+import Model.EloHistory exposing (EloHistory, historyListDecoder, maxElo)
 import Model.Session exposing (Session)
 import Model.SharedIds exposing (CoachId)
 import Model.Team exposing (Team, TeamId, teamsDecoder)
@@ -140,7 +140,7 @@ viewCoach : Model -> Coach -> Html Msg
 viewCoach model coach =
     div []
         [ br [] []
-        , viewCoachDetails coach
+        , viewCoachDetails model coach
         , viewTeams model
         , viewCoachEloHistory model
         ]
@@ -178,13 +178,14 @@ viewCoachEloHistory model =
             viewLoadError <| Error.buildErrorMessage httpError
 
 
-viewCoachDetails : Coach -> Html Msg
-viewCoachDetails coach =
+viewCoachDetails : Model -> Coach -> Html Msg
+viewCoachDetails model coach =
     div [ class "row" ]
         [ div [ class " col" ]
             [ h3 [] [ text coach.name ]
             , br [] []
             , p [] [ text <| "Current Elo: " ++ String.fromInt coach.elo ]
+            , p [] [ text <| "Max Elo: " ++ viewMaxElo model.coachHistory ]
             ]
         , div [ class "col" ]
             [ if coach.accolades /= [] then
@@ -194,6 +195,22 @@ viewCoachDetails coach =
                 text ""
             ]
         ]
+
+
+viewMaxElo : WebData (List EloHistory) -> String
+viewMaxElo historyData =
+    case historyData of
+        RemoteData.Success history ->
+            String.fromInt <| maxElo history
+
+        RemoteData.NotAsked ->
+            ""
+
+        RemoteData.Loading ->
+            "Loading Elo History..."
+
+        RemoteData.Failure httpError ->
+            Error.buildErrorMessage httpError
 
 
 viewAccolades : Coach -> Html Msg
