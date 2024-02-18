@@ -13,7 +13,7 @@ module CoachRepository =
 
     let getCoachSQL (whereClause : string) :string = $"""
         SELECT 
-	        Coach.*, 
+            Coach.*, 
             max(season) as recent_season 
         FROM Coach
         LEFT JOIN Team on Team.coach_id=Coach.id
