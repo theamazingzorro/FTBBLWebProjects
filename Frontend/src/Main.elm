@@ -3,6 +3,7 @@ module Main exposing (Msg, main)
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav
 import Custom.Attributes
+import Env exposing (leagueName)
 import Header
 import Html exposing (..)
 import Model.Session exposing (..)
@@ -10,7 +11,7 @@ import Page
 import Page.Signin as SigninPage
 import Route exposing (Route(..))
 import Url exposing (Url)
-import Env exposing (leagueName)
+
 
 
 -- Types --
