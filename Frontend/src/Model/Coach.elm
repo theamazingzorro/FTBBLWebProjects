@@ -27,6 +27,7 @@ type alias Coach =
     , name : String
     , elo : Int
     , accolades : List Accolade
+    , recentSeason : Maybe Int
     }
 
 
@@ -53,6 +54,7 @@ defaultCoach =
     , name = ""
     , elo = 1000
     , accolades = []
+    , recentSeason = Nothing
     }
 
 
@@ -72,6 +74,7 @@ coachDecoder =
         |> required "name" string
         |> required "elo" int
         |> optional "accolades" accoladesDecoder []
+        |> optional "recentSeason" (Decode.map Just int) Nothing
 
 
 coachIdDecoder : Decoder CoachId

@@ -41,6 +41,7 @@ type Msg
     | CoachDeleted (Result Http.Error DeleteResponse)
     | NameSortClick
     | EloSortClick
+    | SeasonSortClick
     | FirstPageClick
     | PrevPageClick
     | NextPageClick
@@ -53,6 +54,8 @@ type SortingMethod
     | NameDesc
     | Elo
     | EloDesc
+    | Season
+    | SeasonDesc
 
 
 
@@ -107,6 +110,9 @@ update msg model =
 
         EloSortClick ->
             ( { model | sortingMethod = newSort EloDesc Elo model.sortingMethod }, Cmd.none )
+            
+        SeasonSortClick ->
+            ( { model | sortingMethod = newSort SeasonDesc Season model.sortingMethod }, Cmd.none )
 
         FirstPageClick ->
             ( { model | page = 0 }, Cmd.none )
@@ -165,6 +171,24 @@ sortedCoaches sortingMethod coaches =
         compareStrIgnoreCase a b =
             compare (toLower a) (toLower b)
 
+        compareSeason a b =
+            case a.recentSeason of
+                Just aSeason ->
+                    case b.recentSeason of
+                        Just bSeason ->
+                            compare aSeason bSeason
+
+                        Nothing ->
+                            GT
+
+                Nothing ->
+                    case b.recentSeason of
+                        Just _ ->
+                            LT
+
+                        Nothing ->
+                            EQ
+
         secondarySortElo primarySort a b =
             case primarySort a b of
                 EQ ->
@@ -190,6 +214,12 @@ sortedCoaches sortingMethod coaches =
 
             EloDesc ->
                 List.sortWith (\a b -> compare b.elo a.elo) coaches
+
+            Season ->
+                List.sortWith (secondarySortElo compareSeason) coaches
+
+            SeasonDesc ->
+                List.sortWith (secondarySortElo <| reverse compareSeason) coaches
 
 
 
@@ -328,6 +358,17 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Name"
                 ]
+            , th [ scope "col", onClick SeasonSortClick, textCentered ]
+                [ case sortMethod of
+                    Season ->
+                        text "Last Played ▲"
+
+                    SeasonDesc ->
+                        text "Last Played ▼"
+
+                    _ ->
+                        text "Last Played"
+                ]
             , th [ scope "col", onClick EloSortClick, textCentered ]
                 [ case sortMethod of
                     Elo ->
@@ -355,11 +396,22 @@ viewCoach session coach =
             , viewAccolades coach
             ]
         , td [ textCentered ]
+            [ text <| viewRecentSeason coach ]
+        , td [ textCentered ]
             [ text <| String.fromInt coach.elo ]
         , requiresAuth session <|
             td (Custom.Attributes.tableButtonColumn 2)
                 [ viewEditButton coach, viewDeleteButton coach ]
         ]
+
+viewRecentSeason : Coach -> String
+viewRecentSeason coach = 
+    case coach.recentSeason of
+        Nothing ->
+            ""
+        
+        Just season ->
+            "Season " ++ String.fromInt season
 
 
 viewAccolades : Coach -> Html Msg
