@@ -16,7 +16,6 @@ import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
-import TypedSvg.Attributes exposing (x, y)
 
 
 
