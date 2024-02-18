@@ -110,7 +110,7 @@ update msg model =
 
         EloSortClick ->
             ( { model | sortingMethod = newSort EloDesc Elo model.sortingMethod }, Cmd.none )
-            
+
         SeasonSortClick ->
             ( { model | sortingMethod = newSort SeasonDesc Season model.sortingMethod }, Cmd.none )
 
@@ -197,31 +197,30 @@ sortedCoaches sortingMethod coaches =
                 other ->
                     other
 
-        reverse func a b = func b a
+        reverse func a b =
+            func b a
     in
-        case sortingMethod of
-            Default ->
-                List.sortWith (\a b -> compare b.elo a.elo) coaches
+    case sortingMethod of
+        Default ->
+            List.sortWith (\a b -> compare b.elo a.elo) coaches
 
-            Name ->
-                List.sortWith (\a b -> compareStrIgnoreCase a.name b.name) coaches
+        Name ->
+            List.sortWith (\a b -> compareStrIgnoreCase a.name b.name) coaches
 
-            NameDesc ->
-                List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) coaches
+        NameDesc ->
+            List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) coaches
 
-            Elo ->
-                List.sortWith (\a b -> compare a.elo b.elo) coaches
+        Elo ->
+            List.sortWith (\a b -> compare a.elo b.elo) coaches
 
-            EloDesc ->
-                List.sortWith (\a b -> compare b.elo a.elo) coaches
+        EloDesc ->
+            List.sortWith (\a b -> compare b.elo a.elo) coaches
 
-            Season ->
-                List.sortWith (secondarySortElo compareSeason) coaches
+        Season ->
+            List.sortWith (secondarySortElo compareSeason) coaches
 
-            SeasonDesc ->
-                List.sortWith (secondarySortElo <| reverse compareSeason) coaches
-
-
+        SeasonDesc ->
+            List.sortWith (secondarySortElo <| reverse compareSeason) coaches
 
 
 pageSize : Int
@@ -404,12 +403,13 @@ viewCoach session coach =
                 [ viewEditButton coach, viewDeleteButton coach ]
         ]
 
+
 viewRecentSeason : Coach -> String
-viewRecentSeason coach = 
+viewRecentSeason coach =
     case coach.recentSeason of
         Nothing ->
             ""
-        
+
         Just season ->
             "Season " ++ String.fromInt season
 

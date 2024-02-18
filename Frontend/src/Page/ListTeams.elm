@@ -208,7 +208,8 @@ sortedTeams sortingMethod teams =
                 other ->
                     other
 
-        reverse func a b = func b a
+        reverse func a b =
+            func b a
 
         compareMaybeDiv comparison a b =
             case a.division of
@@ -239,16 +240,16 @@ sortedTeams sortingMethod teams =
             List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) teams
 
         Coach ->
-            List.sortWith (\a b -> secondarySortElo sortCoachName a b) teams
+            List.sortWith (secondarySortElo sortCoachName) teams
 
         CoachDesc ->
-            List.sortWith (\a b -> secondarySortElo (reverse sortCoachName) a b) teams
+            List.sortWith (secondarySortElo <| reverse sortCoachName) teams
 
         Race ->
-            List.sortWith (\a b -> secondarySortElo sortRace a b) teams
+            List.sortWith (secondarySortElo sortRace) teams
 
         RaceDesc ->
-            List.sortWith (\a b -> secondarySortElo (reverse sortRace) a b) teams
+            List.sortWith (secondarySortElo <| reverse sortRace) teams
 
         Elo ->
             List.sortWith (\a b -> compare a.elo b.elo) teams
@@ -260,7 +261,7 @@ sortedTeams sortingMethod teams =
             List.sortWith (secondarySortElo <| compareMaybeDiv compareDivisions) teams
 
         DivisionDesc ->
-            List.sortWith (\a b -> secondarySortElo ( reverse <| compareMaybeDiv compareDivisions) a b) teams
+            List.sortWith (secondarySortElo <| reverse <| compareMaybeDiv compareDivisions) teams
 
 
 pageSize : Int
