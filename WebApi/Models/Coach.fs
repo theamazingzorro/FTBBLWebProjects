@@ -1,6 +1,7 @@
 ﻿namespace ftbbl.WebApi.Models
 
 open NPoco
+open System
 
 [<CLIMutable>]
 type Coach =
@@ -14,6 +15,9 @@ type Coach =
 
         [<Ignore>]
         Accolades : Accolade list
+
+        [<ResultColumn(Name = "recent_season")>]
+        RecentSeason : Nullable<int>
     }
 
 

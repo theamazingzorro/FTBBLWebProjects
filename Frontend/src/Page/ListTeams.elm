@@ -135,7 +135,7 @@ update msg model =
             ( { model | sortingMethod = newSort EloDesc Elo model.sortingMethod }, Cmd.none )
 
         DivisionSortClick ->
-            ( { model | sortingMethod = newSort Division DivisionDesc model.sortingMethod }, Cmd.none )
+            ( { model | sortingMethod = newSort DivisionDesc Division model.sortingMethod }, Cmd.none )
 
         FirstPageClick ->
             ( { model | page = 0 }, Cmd.none )
@@ -190,6 +190,45 @@ deleteTeamRequest token id =
 
 sortedTeams : SortingMethod -> List Team -> List Team
 sortedTeams sortingMethod teams =
+    let
+        compareStrIgnoreCase a b =
+            compare (toLower a) (toLower b)
+
+        sortCoachName a b =
+            compareStrIgnoreCase a.coach.name b.coach.name
+
+        sortRace a b =
+            compareStrIgnoreCase a.race.name b.race.name
+
+        secondarySortElo primarySort a b =
+            case primarySort a b of
+                EQ ->
+                    compare b.elo a.elo
+
+                other ->
+                    other
+
+        reverse func a b =
+            func b a
+
+        compareMaybeDiv comparison a b =
+            case a.division of
+                Just aDiv ->
+                    case b.division of
+                        Just bDiv ->
+                            comparison aDiv bDiv
+
+                        Nothing ->
+                            GT
+
+                Nothing ->
+                    case b.division of
+                        Just _ ->
+                            LT
+
+                        Nothing ->
+                            EQ
+    in
     case sortingMethod of
         Default ->
             List.sortWith (\a b -> compare b.elo a.elo) teams
@@ -201,16 +240,16 @@ sortedTeams sortingMethod teams =
             List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) teams
 
         Coach ->
-            List.sortWith (\a b -> compareStrIgnoreCase a.coach.name b.coach.name) teams
+            List.sortWith (secondarySortElo sortCoachName) teams
 
         CoachDesc ->
-            List.sortWith (\a b -> compareStrIgnoreCase b.coach.name a.coach.name) teams
+            List.sortWith (secondarySortElo <| reverse sortCoachName) teams
 
         Race ->
-            List.sortWith (\a b -> compareStrIgnoreCase a.race.name b.race.name) teams
+            List.sortWith (secondarySortElo sortRace) teams
 
         RaceDesc ->
-            List.sortWith (\a b -> compareStrIgnoreCase b.race.name a.race.name) teams
+            List.sortWith (secondarySortElo <| reverse sortRace) teams
 
         Elo ->
             List.sortWith (\a b -> compare a.elo b.elo) teams
@@ -219,10 +258,10 @@ sortedTeams sortingMethod teams =
             List.sortWith (\a b -> compare b.elo a.elo) teams
 
         Division ->
-            List.sortWith (compareMaybeDiv compareDivisions) teams
+            List.sortWith (secondarySortElo <| compareMaybeDiv compareDivisions) teams
 
         DivisionDesc ->
-            List.sortWith (compareMaybeDiv (\x y -> compareDivisions y x)) teams
+            List.sortWith (secondarySortElo <| reverse <| compareMaybeDiv compareDivisions) teams
 
 
 pageSize : Int
@@ -245,31 +284,6 @@ lastPage list =
 
         _ ->
             0
-
-
-compareStrIgnoreCase : String -> String -> Order
-compareStrIgnoreCase a b =
-    compare (toLower a) (toLower b)
-
-
-compareMaybeDiv : (Division -> Division -> Order) -> Team -> Team -> Order
-compareMaybeDiv comparison a b =
-    case a.division of
-        Just aDiv ->
-            case b.division of
-                Just bDiv ->
-                    comparison aDiv bDiv
-
-                Nothing ->
-                    LT
-
-        Nothing ->
-            case b.division of
-                Just _ ->
-                    GT
-
-                Nothing ->
-                    EQ
 
 
 

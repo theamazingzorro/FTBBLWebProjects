@@ -11,18 +11,25 @@ module CoachRepository =
 
     let connStr = WebApplication.CreateBuilder().Configuration["ConnString"]
 
+    let getCoachSQL (whereClause : string) :string = $"""
+        SELECT 
+            Coach.*, 
+            max(season) as recent_season 
+        FROM Coach
+        LEFT JOIN Team on Team.coach_id=Coach.id
+        LEFT JOIN TeamDivision on Team.id=TeamDivision.team_id
+        LEFT JOIN Division on TeamDivision.div_id=Division.id
+        {whereClause}
+        GROUP BY Coach.id;
+    """
+
     let getAll(leagueId : int) =  
         use connection = new MySqlConnection(connStr)
         connection.Open()
 
         use db = new Database(connection)
 
-        db.Fetch<Coach>("""
-                SELECT 
-                    Coach.*
-                FROM Coach
-                WHERE Coach.league_id=@0
-                """, leagueId)
+        db.Fetch<Coach>(getCoachSQL "WHERE Coach.league_id=@0", leagueId)
             |> List.ofSeq
 
 
@@ -32,12 +39,7 @@ module CoachRepository =
 
         use db = new Database(connection)
 
-        db.SingleOrDefault<Coach>("""
-                SELECT 
-                    Coach.*
-                FROM Coach
-                WHERE Coach.id=@0
-                """, id)
+        db.SingleOrDefault<Coach>(getCoachSQL "WHERE Coach.id=@0", id)
 
 
     let save (coach : Coach) =
