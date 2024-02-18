@@ -468,3 +468,4 @@ bundle.js
 
 initial_user.sql
 WebApi/appsettings.json
+Frontend/package-lock.json

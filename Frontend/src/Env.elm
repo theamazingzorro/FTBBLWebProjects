@@ -22,5 +22,5 @@ baseApiUrl =
 {-
    baseApiUrl : String
    baseApiUrl =
-       "https://ftbbleloapi.azurewebsites.net/api/"
+       "http://35.226.175.78/api/"
 -}

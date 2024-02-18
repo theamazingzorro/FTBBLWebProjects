@@ -9,6 +9,6 @@ Developed fully in the Functional Programming paradigm, using F# and giraffe for
 
 ## Build Instructions
 ```
-docker build -t web-api .
-docker run -p 80:80 web-api
+docker build -t ftbbl-api .
+docker run -p 80:80 ftbbl-api
 ```
