@@ -11,11 +11,12 @@ import Model.Accolade exposing (Accolade, viewAccolade)
 import Model.Coach exposing (CoachId)
 import Model.DivStanding exposing (DivStanding, divStandingsDecoder, getTDD)
 import Model.Division exposing (Division, DivisionId)
-import Model.EloHistory exposing (EloHistory, historyListDecoder)
+import Model.EloHistory exposing (EloHistory, historyListDecoder, maxElo)
 import Model.Session exposing (Session)
 import Model.Team exposing (Team, TeamId, teamDecoder)
 import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
+import TypedSvg.Attributes exposing (x, y)
 
 
 
@@ -140,7 +141,7 @@ viewTeam : Model -> Team -> Html Msg
 viewTeam model team =
     div []
         [ br [] []
-        , viewTeamDetails team
+        , viewTeamDetails model team
         , viewResultsHistory model
         , viewTeamEloHistory model
         ]
@@ -178,8 +179,8 @@ viewTeamEloHistory model =
             viewLoadError <| Error.buildErrorMessage httpError
 
 
-viewTeamDetails : Team -> Html Msg
-viewTeamDetails team =
+viewTeamDetails : Model -> Team -> Html Msg
+viewTeamDetails model team =
     div [ class "row" ]
         [ div [ class " col" ]
             [ h3 [] [ text team.name ]
@@ -192,6 +193,7 @@ viewTeamDetails team =
                 ]
             , p [] [ text <| "Race: " ++ team.race.name ]
             , p [] [ text <| "Current Elo: " ++ String.fromInt team.elo ]
+            , p [] [ text <| "Max Elo: " ++ viewMaxElo model.teamHistory ]
             , p [] [ text "Most Recent Division: ", Maybe.map viewDivision team.division |> Maybe.withDefault (text "N/A") ]
             ]
         , div [ class "col" ]
@@ -202,6 +204,22 @@ viewTeamDetails team =
                 text ""
             ]
         ]
+
+
+viewMaxElo : WebData (List EloHistory) -> String
+viewMaxElo historyData =
+    case historyData of
+        RemoteData.Success history ->
+            String.fromInt <| maxElo history
+
+        RemoteData.NotAsked ->
+            ""
+
+        RemoteData.Loading ->
+            "Loading Elo History..."
+
+        RemoteData.Failure httpError ->
+            Error.buildErrorMessage httpError
 
 
 viewAccolades : Team -> Html Msg
