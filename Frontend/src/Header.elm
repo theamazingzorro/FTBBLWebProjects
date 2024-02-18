@@ -2,6 +2,7 @@ module Header exposing (Model, Msg, OutMsg(..), init, update, view)
 
 import Api
 import Custom.Attributes
+import Env exposing (leagueName)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -10,7 +11,7 @@ import Model.Division exposing (Division, DivisionId, compareDivisions, division
 import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (Route(..), pushUrl)
-import Env exposing (leagueName)
+
 
 
 -- Types --

@@ -13,4 +13,4 @@ leagueName =
 
 baseApiUrl : String
 baseApiUrl =
-    "https://localhost:17317/api/"
+    "https://ftbblelo.win/api/"

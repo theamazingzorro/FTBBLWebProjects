@@ -1,11 +1,7 @@
 to run:
 
-`npm install -g elm`
-
-then run 
+`npm install`
 `elm install`
-
-finally
 `npm start`
 
 spa problem --
