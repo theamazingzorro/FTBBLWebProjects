@@ -161,26 +161,37 @@ deleteCoachRequest token id =
 
 sortedCoaches : SortingMethod -> List Coach -> List Coach
 sortedCoaches sortingMethod coaches =
-    case sortingMethod of
-        Default ->
-            List.sortWith (\a b -> compare b.elo a.elo) coaches
+    let
+        compareStrIgnoreCase a b =
+            compare (toLower a) (toLower b)
 
-        Name ->
-            List.sortWith (\a b -> compareStrIgnoreCase a.name b.name) coaches
+        secondarySortElo primarySort a b =
+            case primarySort a b of
+                EQ ->
+                    compare b.elo a.elo
 
-        NameDesc ->
-            List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) coaches
+                other ->
+                    other
 
-        Elo ->
-            List.sortWith (\a b -> compare a.elo b.elo) coaches
+        reverse func a b = func b a
+    in
+        case sortingMethod of
+            Default ->
+                List.sortWith (\a b -> compare b.elo a.elo) coaches
 
-        EloDesc ->
-            List.sortWith (\a b -> compare b.elo a.elo) coaches
+            Name ->
+                List.sortWith (\a b -> compareStrIgnoreCase a.name b.name) coaches
+
+            NameDesc ->
+                List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) coaches
+
+            Elo ->
+                List.sortWith (\a b -> compare a.elo b.elo) coaches
+
+            EloDesc ->
+                List.sortWith (\a b -> compare b.elo a.elo) coaches
 
 
-compareStrIgnoreCase : String -> String -> Order
-compareStrIgnoreCase a b =
-    compare (toLower a) (toLower b)
 
 
 pageSize : Int

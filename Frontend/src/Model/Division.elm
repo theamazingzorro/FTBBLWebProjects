@@ -15,7 +15,6 @@ module Model.Division exposing
 import Json.Decode as Decode exposing (Decoder, bool, int, list, string)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
-import String exposing (toLower)
 import Url.Parser exposing (Parser, custom)
 
 
@@ -63,12 +62,7 @@ defaultDivision =
 
 compareDivisions : Division -> Division -> Order
 compareDivisions a b =
-    case compare b.season a.season of
-        EQ ->
-            compare (toLower a.name) (toLower b.name)
-
-        other ->
-            other
+    compare a.season b.season
 
 
 
