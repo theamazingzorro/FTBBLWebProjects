@@ -14,3 +14,5 @@ BEGIN
 
 END//
 DELIMITER ;
+
+GRANT EXECUTE ON PROCEDURE ftbbl.sp_UpdateTeamDivision TO 'ftbbl-api'@'%';

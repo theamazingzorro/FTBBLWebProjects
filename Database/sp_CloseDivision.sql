@@ -15,3 +15,5 @@ BEGIN
 
 END//
 DELIMITER ;
+
+GRANT EXECUTE ON PROCEDURE ftbbl.sp_CloseDivision TO 'ftbbl-api'@'%';
