@@ -81,6 +81,7 @@ update msg model =
         ViewCoachClick id ->
             ( model, pushUrl model.session.navkey <| Route.ViewCoach id )
 
+
 sortStandingsChron : WebData (List DivStanding) -> WebData (List DivStanding)
 sortStandingsChron data =
     case data of
@@ -89,6 +90,8 @@ sortStandingsChron data =
 
         other ->
             other
+
+
 
 -- API Requests --
 
