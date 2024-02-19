@@ -73,7 +73,7 @@ update msg model =
             ( { model | teamHistory = response }, Cmd.none )
 
         StandingsReceived response ->
-            ( { model | standingsHistory = response }, Cmd.none )
+            ( { model | standingsHistory = sortStandingsChron response }, Cmd.none )
 
         ViewDivisionButtonClick divId ->
             ( model, pushUrl model.session.navkey <| Route.ViewDivision divId )
@@ -81,7 +81,14 @@ update msg model =
         ViewCoachClick id ->
             ( model, pushUrl model.session.navkey <| Route.ViewCoach id )
 
+sortStandingsChron : WebData (List DivStanding) -> WebData (List DivStanding)
+sortStandingsChron data =
+    case data of
+        RemoteData.Success standings ->
+            RemoteData.Success <| List.reverse <| List.sortBy (.div >> .season) standings
 
+        other ->
+            other
 
 -- API Requests --
 
