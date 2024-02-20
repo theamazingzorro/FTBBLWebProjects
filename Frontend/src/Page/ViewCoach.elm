@@ -118,7 +118,7 @@ buildDeleteError res =
         Nothing
 
     else
-        Just "Delete Failed. Team not found."
+        Just "Delete Failed. Coach not found."
 
 
 sortTeamsChron : WebData (List Team) -> WebData (List Team)
