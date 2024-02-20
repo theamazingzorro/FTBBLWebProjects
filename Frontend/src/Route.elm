@@ -33,6 +33,7 @@ type Route
     | AddGameWeek DivisionId Int
     | Accolades
     | AddAccolade
+    | AddAccoladeWithDefaults (Maybe TeamId) CoachId
 
 
 parseUrl : Url -> Route
@@ -123,6 +124,11 @@ matchRoute =
             oneOf
                 [ s "Accolade" </> s "Add"
                 , s "accolade" </> s "add"
+                ]
+        , map AddAccoladeWithDefaults <|
+            oneOf
+                [ s "Accolade" </> s "Add" </> Team.maybeIdParser </> Coach.idParser
+                , s "accolade" </> s "add" </> Team.maybeIdParser </> Coach.idParser
                 ]
 
         {- More Complex Views -}
@@ -228,3 +234,16 @@ routeToString route =
 
         AddAccolade ->
             "/Accolade/Add"
+
+        AddAccoladeWithDefaults teamId coachId ->
+            "/Accolade/Add/" ++ maybeIdToString Team.idToString teamId ++ "/" ++ Coach.idToString coachId
+
+
+maybeIdToString : (a -> String) -> Maybe a -> String
+maybeIdToString idToString maybeId =
+    case maybeId of
+        Just id ->
+            idToString id
+
+        Nothing ->
+            "nil"

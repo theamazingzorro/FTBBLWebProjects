@@ -8,6 +8,7 @@ module Model.SharedIds exposing
     , defaultTeamId
     , encodeCoachId
     , encodeTeamId
+    , maybeTeamIdParser
     , teamIdDecoder
     , teamIdParser
     , teamIdToString
@@ -86,3 +87,15 @@ teamIdParser =
     custom "TEAMID" <|
         \id ->
             Maybe.map TeamId (String.toInt id)
+
+
+maybeTeamIdParser : Parser (Maybe TeamId -> a) a
+maybeTeamIdParser =
+    custom "TEAMID" <|
+        \id ->
+            case id of
+                "nil" ->
+                    Just Nothing
+
+                _ ->
+                    Just <| Maybe.map TeamId (String.toInt id)
