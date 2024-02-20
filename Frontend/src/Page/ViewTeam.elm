@@ -1,14 +1,17 @@
 module Page.ViewTeam exposing (Model, Msg, init, update, view)
 
 import Api exposing (Endpoint(..))
+import Auth exposing (requiresAuth)
 import Custom.Attributes
-import Error
+import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Http
 import LineChart
 import Model.Accolade exposing (Accolade, viewAccolade)
 import Model.Coach exposing (CoachId)
+import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.DivStanding exposing (DivStanding, divStandingsDecoder, getTDD)
 import Model.Division exposing (Division, DivisionId)
 import Model.EloHistory exposing (EloHistory, historyListDecoder, maxElo)
@@ -28,6 +31,7 @@ type alias Model =
     , team : WebData Team
     , standingsHistory : WebData (List DivStanding)
     , teamHistory : WebData (List EloHistory)
+    , deleteError : Maybe String
     }
 
 
@@ -37,6 +41,10 @@ type Msg
     | StandingsReceived (WebData (List DivStanding))
     | ViewDivisionButtonClick DivisionId
     | ViewCoachClick CoachId
+    | DeleteTeamButtonClick
+    | EditTeamButtonClick
+    | AddAccoladeButtonClick TeamId CoachId
+    | TeamDeleted (Result Http.Error DeleteResponse)
 
 
 
@@ -50,6 +58,7 @@ init session id =
       , team = RemoteData.Loading
       , standingsHistory = RemoteData.Loading
       , teamHistory = RemoteData.Loading
+      , deleteError = Nothing
       }
     , Cmd.batch
         [ getTeamRequest session.token id
@@ -81,6 +90,27 @@ update msg model =
         ViewCoachClick id ->
             ( model, pushUrl model.session.navkey <| Route.ViewCoach id )
 
+        AddAccoladeButtonClick teamId coachId ->
+            ( model, pushUrl model.session.navkey <| Route.AddAccoladeWithDefaults (Just teamId) coachId )
+
+        EditTeamButtonClick ->
+            ( model, pushUrl model.session.navkey <| Route.EditTeam model.id )
+
+        DeleteTeamButtonClick ->
+            ( model, deleteTeamRequest model.session.token model.id )
+
+        TeamDeleted (Ok res) ->
+            ( { model | deleteError = buildDeleteError res }
+            , if res.deleted then
+                pushUrl model.session.navkey Route.Teams
+
+              else
+                Cmd.none
+            )
+
+        TeamDeleted (Err err) ->
+            ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
+
 
 sortStandingsChron : WebData (List DivStanding) -> WebData (List DivStanding)
 sortStandingsChron data =
@@ -90,6 +120,15 @@ sortStandingsChron data =
 
         other ->
             other
+
+
+buildDeleteError : DeleteResponse -> Maybe String
+buildDeleteError res =
+    if res.deleted then
+        Nothing
+
+    else
+        Just "Delete Failed. Team not found."
 
 
 
@@ -114,6 +153,12 @@ getStandingsHistoryRequest token id =
         Http.expectJson (RemoteData.fromResult >> StandingsReceived) divStandingsDecoder
 
 
+deleteTeamRequest : Maybe String -> TeamId -> Cmd Msg
+deleteTeamRequest token id =
+    Api.deleteRequest token (Api.Team id) <|
+        Http.expectJson TeamDeleted deleteResponseDecoder
+
+
 
 -- View --
 
@@ -128,7 +173,11 @@ view model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success team ->
-            viewTeam model team
+            div []
+                [ requiresAuth model.session <| viewToolBar team
+                , viewErrorMessage model.deleteError
+                , viewTeam model team
+                ]
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -143,6 +192,34 @@ viewLoadError errorMessage =
     div [ Custom.Attributes.errorMessage ]
         [ h3 [] [ text errorHeading ]
         , text <| "Error: " ++ errorMessage
+        ]
+
+
+viewErrorMessage : Maybe String -> Html Msg
+viewErrorMessage message =
+    case message of
+        Just m ->
+            div [ Custom.Attributes.errorMessage ]
+                [ text <| "Error: " ++ m ]
+
+        Nothing ->
+            text ""
+
+
+viewToolBar : Team -> Html Msg
+viewToolBar team =
+    div [ Custom.Attributes.rightSideButtons ]
+        [ button
+            [ Custom.Attributes.addButton
+            , onClick <| AddAccoladeButtonClick team.id team.coach.id
+            ]
+            [ text "Add Accolade" ]
+        , button
+            (onClick EditTeamButtonClick :: Custom.Attributes.editButton)
+            [ text "Edit" ]
+        , button
+            (onClick DeleteTeamButtonClick :: Custom.Attributes.deleteButton)
+            [ text "Delete" ]
         ]
 
 

@@ -1,14 +1,17 @@
 module Page.ViewCoach exposing (Model, Msg, init, update, view)
 
 import Api exposing (Endpoint(..))
+import Auth exposing (requiresAuth)
 import Custom.Attributes
-import Error
+import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Http
 import LineChart
 import Model.Accolade exposing (Accolade, viewAccolade)
 import Model.Coach exposing (Coach, coachDecoder)
+import Model.DeleteResponse exposing (DeleteResponse, deleteResponseDecoder)
 import Model.Division exposing (Division, DivisionId, compareDivisions)
 import Model.EloHistory exposing (EloHistory, historyListDecoder, maxElo)
 import Model.Session exposing (Session)
@@ -28,6 +31,7 @@ type alias Model =
     , coach : WebData Coach
     , teams : WebData (List Team)
     , coachHistory : WebData (List EloHistory)
+    , deleteError : Maybe String
     }
 
 
@@ -37,6 +41,10 @@ type Msg
     | TeamsReceived (WebData (List Team))
     | ViewTeamClick TeamId
     | ViewDivisionClick DivisionId
+    | DeleteCoachButtonClick
+    | EditCoachButtonClick
+    | AddAccoladeButtonClick
+    | CoachDeleted (Result Http.Error DeleteResponse)
 
 
 
@@ -50,6 +58,7 @@ init session id =
       , coach = RemoteData.Loading
       , teams = RemoteData.Loading
       , coachHistory = RemoteData.Loading
+      , deleteError = Nothing
       }
     , Cmd.batch
         [ getTeamsRequest session.token id
@@ -80,6 +89,36 @@ update msg model =
 
         ViewDivisionClick divId ->
             ( model, pushUrl model.session.navkey <| Route.ViewDivision divId )
+
+        AddAccoladeButtonClick ->
+            ( model, pushUrl model.session.navkey <| Route.AddAccoladeWithDefaults Nothing model.id )
+
+        EditCoachButtonClick ->
+            ( model, pushUrl model.session.navkey <| Route.EditCoach model.id )
+
+        DeleteCoachButtonClick ->
+            ( model, deleteCoachRequest model.session.token model.id )
+
+        CoachDeleted (Ok res) ->
+            ( { model | deleteError = buildDeleteError res }
+            , if res.deleted then
+                pushUrl model.session.navkey Route.Coaches
+
+              else
+                Cmd.none
+            )
+
+        CoachDeleted (Err err) ->
+            ( { model | deleteError = Just (buildErrorMessage err) }, Cmd.none )
+
+
+buildDeleteError : DeleteResponse -> Maybe String
+buildDeleteError res =
+    if res.deleted then
+        Nothing
+
+    else
+        Just "Delete Failed. Coach not found."
 
 
 sortTeamsChron : WebData (List Team) -> WebData (List Team)
@@ -133,6 +172,12 @@ getCoachRequest token id =
         Http.expectJson (RemoteData.fromResult >> CoachReceived) coachDecoder
 
 
+deleteCoachRequest : Maybe String -> CoachId -> Cmd Msg
+deleteCoachRequest token id =
+    Api.deleteRequest token (Api.Coach id) <|
+        Http.expectJson CoachDeleted deleteResponseDecoder
+
+
 
 -- View --
 
@@ -147,7 +192,11 @@ view model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success coach ->
-            viewCoach model coach
+            div []
+                [ requiresAuth model.session viewToolBar
+                , viewErrorMessage model.deleteError
+                , viewCoach model coach
+                ]
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -162,6 +211,34 @@ viewLoadError errorMessage =
     div [ Custom.Attributes.errorMessage ]
         [ h3 [] [ text errorHeading ]
         , text <| "Error: " ++ errorMessage
+        ]
+
+
+viewErrorMessage : Maybe String -> Html Msg
+viewErrorMessage message =
+    case message of
+        Just m ->
+            div [ Custom.Attributes.errorMessage ]
+                [ text <| "Error: " ++ m ]
+
+        Nothing ->
+            text ""
+
+
+viewToolBar : Html Msg
+viewToolBar =
+    div [ Custom.Attributes.rightSideButtons ]
+        [ button
+            [ Custom.Attributes.addButton
+            , onClick AddAccoladeButtonClick
+            ]
+            [ text "Add Accolade" ]
+        , button
+            (onClick EditCoachButtonClick :: Custom.Attributes.editButton)
+            [ text "Edit" ]
+        , button
+            (onClick DeleteCoachButtonClick :: Custom.Attributes.deleteButton)
+            [ text "Delete" ]
         ]
 
 

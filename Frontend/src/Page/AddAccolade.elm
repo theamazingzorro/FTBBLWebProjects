@@ -8,10 +8,10 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Accolade exposing (Accolade, accoladeDecoder, defaultAccolade, newAccoladeEncoder)
-import Model.Coach as Coach exposing (Coach, coachsDecoder, defaultCoach)
+import Model.Coach as Coach exposing (Coach, CoachId, coachsDecoder, defaultCoach)
 import Model.Session exposing (Session)
 import Model.SharedIds exposing (defaultTeamId)
-import Model.Team as Team exposing (Team, teamsDecoder)
+import Model.Team as Team exposing (Team, TeamId, teamsDecoder)
 import RemoteData exposing (RemoteData(..), WebData)
 
 
@@ -46,10 +46,10 @@ type Msg
 -- Init --
 
 
-init : Session -> ( Model, Cmd Msg )
-init session =
+init : Session -> Maybe TeamId -> Maybe CoachId -> ( Model, Cmd Msg )
+init session initialTeamId initialCoachId =
     ( { session = session
-      , accolade = defaultAccolade
+      , accolade = { defaultAccolade | teamId = initialTeamId, coachId = Maybe.withDefault defaultAccolade.coachId initialCoachId }
       , teams = Loading
       , coaches = Loading
       , saveError = Nothing
@@ -140,15 +140,7 @@ update msg model =
         RunnerupBoxChecked ->
             let
                 reRunner accolade =
-                    { accolade
-                        | isRunnerUp = not accolade.isRunnerUp
-                        , name =
-                            if accolade.isRunnerUp then
-                                accolade.name
-
-                            else
-                                "Taurus Runner-Up"
-                    }
+                    { accolade | isRunnerUp = not accolade.isRunnerUp }
             in
             ( { model | accolade = reRunner model.accolade }, Cmd.none )
 

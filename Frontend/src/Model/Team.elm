@@ -4,6 +4,7 @@ module Model.Team exposing
     , defaultTeam
     , idParser
     , idToString
+    , maybeIdParser
     , newTeamEncoder
     , teamDecoder
     , teamEncoder
@@ -129,3 +130,8 @@ encodeId =
 idParser : Parser (TeamId -> a) a
 idParser =
     SharedIds.teamIdParser
+
+
+maybeIdParser : Parser (Maybe TeamId -> a) a
+maybeIdParser =
+    SharedIds.maybeTeamIdParser

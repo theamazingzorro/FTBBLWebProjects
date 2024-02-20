@@ -186,7 +186,12 @@ init session route =
                 |> requiresAuth session
 
         Route.AddAccolade ->
-            AddAccolade.init session
+            AddAccolade.init session Nothing Nothing
+                |> wrapInitWith AddAccoladePage AddAccoladePageMsg
+                |> requiresAuth session
+
+        Route.AddAccoladeWithDefaults teamId coachId ->
+            AddAccolade.init session teamId (Just coachId)
                 |> wrapInitWith AddAccoladePage AddAccoladePageMsg
                 |> requiresAuth session
 
