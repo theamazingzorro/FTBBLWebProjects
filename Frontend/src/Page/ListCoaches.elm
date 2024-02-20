@@ -197,24 +197,30 @@ sortedCoaches sortingMethod coaches =
                 other ->
                     other
 
+        compareElo a b =
+            compare a.elo b.elo
+
+        compareName a b =
+            compareStrIgnoreCase a.name b.name
+
         reverse func a b =
             func b a
     in
     case sortingMethod of
         Default ->
-            List.sortWith (\a b -> compare b.elo a.elo) coaches
+            List.sortWith (reverse compareElo) coaches
 
         Name ->
-            List.sortWith (\a b -> compareStrIgnoreCase a.name b.name) coaches
+            List.sortWith compareName coaches
 
         NameDesc ->
-            List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) coaches
+            List.sortWith (reverse compareName) coaches
 
         Elo ->
-            List.sortWith (\a b -> compare a.elo b.elo) coaches
+            List.sortWith compareElo coaches
 
         EloDesc ->
-            List.sortWith (\a b -> compare b.elo a.elo) coaches
+            List.sortWith (reverse compareName) coaches
 
         Season ->
             List.sortWith (secondarySortElo compareSeason) coaches

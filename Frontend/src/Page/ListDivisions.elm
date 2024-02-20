@@ -177,26 +177,34 @@ closeDivRequest token divId =
 
 sortedDivs : SortingMethod -> List Division -> List Division
 sortedDivs sortingMethod divs =
+    let
+        compareName a b =
+            compareStrIgnoreCase a.name b.name
+
+        compareSeason a b =
+            compare a.season b.season
+
+        compareStrIgnoreCase a b =
+            compare (toLower a) (toLower b)
+
+        reverse func a b =
+            func b a
+    in
     case sortingMethod of
         Default ->
-            List.sortWith compareDivisions divs
+            List.sortWith (reverse compareDivisions) divs
 
         Name ->
-            List.sortWith (\a b -> compareStrIgnoreCase a.name b.name) divs
+            List.sortWith compareName divs
 
         NameDesc ->
-            List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) divs
+            List.sortWith (reverse compareName) divs
 
         Season ->
-            List.sortWith (\a b -> compare a.season b.season) divs
+            List.sortWith compareSeason divs
 
         SeasonDesc ->
-            List.sortWith (\a b -> compare b.season a.season) divs
-
-
-compareStrIgnoreCase : String -> String -> Order
-compareStrIgnoreCase a b =
-    compare (toLower a) (toLower b)
+            List.sortWith (reverse compareSeason) divs
 
 
 pageSize : Int
