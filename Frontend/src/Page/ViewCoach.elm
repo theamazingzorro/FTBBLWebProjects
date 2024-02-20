@@ -9,7 +9,7 @@ import Http
 import LineChart
 import Model.Accolade exposing (Accolade, viewAccolade)
 import Model.Coach exposing (Coach, coachDecoder)
-import Model.Division exposing (Division, DivisionId)
+import Model.Division exposing (Division, DivisionId, compareDivisions)
 import Model.EloHistory exposing (EloHistory, historyListDecoder, maxElo)
 import Model.Session exposing (Session)
 import Model.SharedIds exposing (CoachId)
@@ -67,7 +67,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         TeamsReceived response ->
-            ( { model | teams = response }, Cmd.none )
+            ( { model | teams = sortTeamsChron response }, Cmd.none )
 
         HistoryReceived response ->
             ( { model | coachHistory = response }, Cmd.none )
@@ -80,6 +80,35 @@ update msg model =
 
         ViewDivisionClick divId ->
             ( model, pushUrl model.session.navkey <| Route.ViewDivision divId )
+
+
+sortTeamsChron : WebData (List Team) -> WebData (List Team)
+sortTeamsChron data =
+    let
+        compareMaybeDiv a b =
+            case a.division of
+                Just aDiv ->
+                    case b.division of
+                        Just bDiv ->
+                            compareDivisions aDiv bDiv
+
+                        Nothing ->
+                            GT
+
+                Nothing ->
+                    case b.division of
+                        Just _ ->
+                            LT
+
+                        Nothing ->
+                            EQ
+    in
+    case data of
+        RemoteData.Success teams ->
+            RemoteData.Success <| List.reverse <| List.sortWith compareMaybeDiv teams
+
+        other ->
+            other
 
 
 
