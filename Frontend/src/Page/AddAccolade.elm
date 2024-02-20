@@ -47,9 +47,9 @@ type Msg
 
 
 init : Session -> Maybe TeamId -> Maybe CoachId -> ( Model, Cmd Msg )
-init session defaultTeam defaultCoach =
+init session initialTeamId initialCoachId =
     ( { session = session
-      , accolade = { defaultAccolade | teamId = defaultTeam, coachId = Maybe.withDefault defaultAccolade.coachId defaultCoach }
+      , accolade = { defaultAccolade | teamId = initialTeamId, coachId = Maybe.withDefault defaultAccolade.coachId initialCoachId }
       , teams = Loading
       , coaches = Loading
       , saveError = Nothing
