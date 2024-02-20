@@ -194,10 +194,10 @@ sortedTeams sortingMethod teams =
         compareStrIgnoreCase a b =
             compare (toLower a) (toLower b)
 
-        sortCoachName a b =
+        compareCoachName a b =
             compareStrIgnoreCase a.coach.name b.coach.name
 
-        sortRace a b =
+        compareRace a b =
             compareStrIgnoreCase a.race.name b.race.name
 
         secondarySortElo primarySort a b =
@@ -207,6 +207,12 @@ sortedTeams sortingMethod teams =
 
                 other ->
                     other
+
+        compareElo a b =
+            compare a.elo b.elo
+
+        compareName a b =
+            compareStrIgnoreCase a.name b.name
 
         reverse func a b =
             func b a
@@ -231,31 +237,31 @@ sortedTeams sortingMethod teams =
     in
     case sortingMethod of
         Default ->
-            List.sortWith (\a b -> compare b.elo a.elo) teams
+            List.sortWith (reverse compareElo) teams
 
         Name ->
-            List.sortWith (\a b -> compareStrIgnoreCase a.name b.name) teams
+            List.sortWith compareName teams
 
         NameDesc ->
-            List.sortWith (\a b -> compareStrIgnoreCase b.name a.name) teams
+            List.sortWith (reverse compareName) teams
 
         Coach ->
-            List.sortWith (secondarySortElo sortCoachName) teams
+            List.sortWith (secondarySortElo compareCoachName) teams
 
         CoachDesc ->
-            List.sortWith (secondarySortElo <| reverse sortCoachName) teams
+            List.sortWith (secondarySortElo <| reverse compareCoachName) teams
 
         Race ->
-            List.sortWith (secondarySortElo sortRace) teams
+            List.sortWith (secondarySortElo compareRace) teams
 
         RaceDesc ->
-            List.sortWith (secondarySortElo <| reverse sortRace) teams
+            List.sortWith (secondarySortElo <| reverse compareRace) teams
 
         Elo ->
-            List.sortWith (\a b -> compare a.elo b.elo) teams
+            List.sortWith compareElo teams
 
         EloDesc ->
-            List.sortWith (\a b -> compare b.elo a.elo) teams
+            List.sortWith (reverse compareElo) teams
 
         Division ->
             List.sortWith (secondarySortElo <| compareMaybeDiv compareDivisions) teams
