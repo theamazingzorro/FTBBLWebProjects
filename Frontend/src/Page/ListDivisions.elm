@@ -180,14 +180,15 @@ sortedDivs sortingMethod divs =
     let
         compareName a b =
             compareStrIgnoreCase a.name b.name
-        
-        compareSeason a b = 
+
+        compareSeason a b =
             compare a.season b.season
+
         compareStrIgnoreCase a b =
             compare (toLower a) (toLower b)
 
         reverse func a b =
-            func b a 
+            func b a
     in
     case sortingMethod of
         Default ->
@@ -204,6 +205,7 @@ sortedDivs sortingMethod divs =
 
         SeasonDesc ->
             List.sortWith (reverse compareSeason) divs
+
 
 pageSize : Int
 pageSize =
