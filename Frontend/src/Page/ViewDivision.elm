@@ -444,15 +444,15 @@ viewAddTeamButton =
 viewStandings : Model -> Bool -> List Standing -> Html Msg
 viewStandings model divClosed standings =
     table [ Custom.Attributes.table ]
-        [ viewTableHeader divClosed model.sortingMethod
+        [ viewTableHeader divClosed model.session model.sortingMethod
         , tbody [] <|
-            List.map (viewStandingTableRow model.session divClosed) <|
+            List.map (viewStandingTableRow model.session divClosed model.games) <|
                 sortedStandings model.sortingMethod standings
         ]
 
 
-viewTableHeader : Bool -> TeamSortingMethod -> Html Msg
-viewTableHeader divClosed sortMethod =
+viewTableHeader : Bool -> Session -> TeamSortingMethod -> Html Msg
+viewTableHeader divClosed session sortMethod =
     thead []
         [ tr []
             [ th [ scope "col", onClick TeamNameSortClick ]
@@ -503,6 +503,9 @@ viewTableHeader divClosed sortMethod =
                 [ text "Points" ]
             , th [ scope "col", onClick DefaultSortClick, textCentered ]
                 [ text "Games" ]
+            , requiresAuth session <|
+                th [ scope "col", onClick DefaultSortClick, textCentered ]
+                    [ text "Total" ]
             , th [ scope "col", onClick DefaultSortClick, textCentered ]
                 [ text "W-D-L" ]
             , th [ scope "col", onClick DefaultSortClick ]
@@ -513,14 +516,15 @@ viewTableHeader divClosed sortMethod =
               else
                 th [ scope "col", textCentered ]
                     [ text "Strength of Schedule" ]
-            , th [ scope "col", onClick DefaultSortClick ]
-                [ text "" ]
+            , requiresAuth session <|
+                th [ scope "col", onClick DefaultSortClick ]
+                    [ text "" ]
             ]
         ]
 
 
-viewStandingTableRow : Session -> Bool -> Standing -> Html Msg
-viewStandingTableRow session divClosed standing =
+viewStandingTableRow : Session -> Bool -> WebData (List Game) -> Standing -> Html Msg
+viewStandingTableRow session divClosed games standing =
     tr []
         [ td []
             [ span
@@ -542,6 +546,9 @@ viewStandingTableRow session divClosed standing =
             [ text <| String.fromInt <| getPoints standing ]
         , td [ textCentered ]
             [ text <| String.fromInt <| getGamesPlayed standing ]
+        , requiresAuth session <|
+            td [ textCentered ]
+                [ text <| String.fromInt <| getTotalGames games standing.team ]
         , td [ textCentered ]
             [ text <| String.fromInt standing.wins ++ " - " ++ String.fromInt standing.draws ++ " - " ++ String.fromInt standing.losses ]
         , td [ textCentered ]
@@ -556,6 +563,17 @@ viewStandingTableRow session divClosed standing =
             td (Custom.Attributes.tableButtonColumn 2)
                 [ viewTeamEditButton standing.team, viewTeamDeleteButton standing.team ]
         ]
+
+
+getTotalGames : WebData (List Game) -> Team -> Int
+getTotalGames gamesData team =
+    case gamesData of
+        RemoteData.Success games ->
+            List.filter (\g -> (g.homeTeam.id == team.id) || (g.awayTeam.id == team.id)) games
+                |> List.length
+
+        _ ->
+            0
 
 
 viewAccolades : List Accolade -> Html Msg
