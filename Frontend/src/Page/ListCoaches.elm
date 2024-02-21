@@ -319,7 +319,7 @@ viewCoaches session sortMethod page coaches =
     div []
         [ viewHeader session
         , table [ Custom.Attributes.table ]
-            [ viewTableHeader sortMethod
+            [ viewTableHeader session sortMethod
             , sortedCoaches sortMethod coaches
                 |> pageOfList page
                 |> List.map (viewCoach session)
@@ -348,8 +348,8 @@ viewToolBar =
         ]
 
 
-viewTableHeader : SortingMethod -> Html Msg
-viewTableHeader sortMethod =
+viewTableHeader : Session -> SortingMethod -> Html Msg
+viewTableHeader session sortMethod =
     thead []
         [ tr []
             [ th [ scope "col", onClick NameSortClick ]
@@ -385,8 +385,9 @@ viewTableHeader sortMethod =
                     _ ->
                         text "Elo"
                 ]
-            , th [ scope "col" ]
-                [ text "" ]
+            , requiresAuth session <|
+                th [ scope "col" ]
+                    [ text "" ]
             ]
         ]
 

@@ -297,7 +297,7 @@ viewDivisions session sortMethod page divisions =
     div []
         [ viewHeader session
         , table [ Custom.Attributes.table ]
-            [ viewTableHeader sortMethod
+            [ viewTableHeader session sortMethod
             , sortedDivs sortMethod divisions
                 |> pageOfList page
                 |> List.map (viewDivision session)
@@ -326,8 +326,8 @@ viewToolBar =
         ]
 
 
-viewTableHeader : SortingMethod -> Html Msg
-viewTableHeader sortMethod =
+viewTableHeader : Session -> SortingMethod -> Html Msg
+viewTableHeader session sortMethod =
     thead []
         [ tr []
             [ th [ scope "col", onClick NameSortClick ]
@@ -353,9 +353,10 @@ viewTableHeader sortMethod =
                         text "Season"
                 ]
             , th [ scope "col" ]
-                [ text "" ]
-            , th [ scope "col" ]
-                [ text "" ]
+                [ text "Open?" ]
+            , requiresAuth session <|
+                th [ scope "col" ]
+                    [ text "" ]
             ]
         ]
 
