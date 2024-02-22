@@ -29,6 +29,14 @@ module GameService =
         GameRepository.getByDiv divId
             |> List.map getOdds
 
+    let getByTeams team1Id team2Id =
+        GameRepository.getByTeams team1Id team2Id
+            |> List.map getOdds
+
+    let getByCoaches coach1Id coach2Id =
+        GameRepository.getByCoaches coach1Id coach2Id
+            |> List.map getOdds
+
     let updateElos (game:Game) =
         let homeTeam = game.HomeTeam
         let awayTeam = game.AwayTeam
@@ -39,6 +47,8 @@ module GameService =
         let (htElo, atElo) = Elo.newRatings homeTeam.Elo awayTeam.Elo matchResult
         let (hcElo, acElo) = Elo.newRatings homeCoach.Elo awayCoach.Elo matchResult
 
+        // side effects in my functional code base?
+        // its more likely than you may think
         ignore <| TeamService.saveChanges { homeTeam with Elo=htElo }
         ignore <| TeamService.saveChanges { awayTeam with Elo=atElo }
 
