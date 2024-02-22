@@ -1,14 +1,14 @@
 module Page.ViewHeadToHead exposing (Model, Msg, init, update, view)
 
+import Api
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Model.Coach exposing (CoachId)
+import Http
+import Model.Coach as Coach exposing (Coach, CoachId, coachsDecoder)
+import Model.Game exposing (Game, gamesDecoder)
 import Model.Session exposing (Session)
-import Model.Team exposing (TeamId)
+import Model.Team as Team exposing (Team, TeamId, defaultTeam, teamsDecoder)
 import RemoteData exposing (WebData)
-import Model.Game exposing (Game)
-import Model.Team exposing (Team)
-import Model.Coach exposing (Coach)
 
 
 
@@ -22,15 +22,19 @@ type alias Model =
     , coach1Id : Maybe CoachId
     , coach2Id : Maybe CoachId
     , games : WebData (List Game)
-    , team1 : WebData Team
-    , team2 : WebData Team
-    , coach1 : WebData Coach
-    , coach2 : WebData Coach
+    , teams : WebData (List Team)
+    , coaches : WebData (List Coach)
     }
 
 
 type Msg
-    = None
+    = GamesReceived (WebData (List Game))
+    | TeamListReceived (WebData (List Team))
+    | CoachListReceived (WebData (List Coach))
+    | Team1Selected String
+    | Team2Selected String
+    | Coach1Selected String
+    | Coach2Selected String
 
 
 
@@ -38,54 +42,58 @@ type Msg
 
 
 init : Session -> Maybe ( TeamId, TeamId ) -> Maybe ( CoachId, CoachId ) -> ( Model, Cmd Msg )
-init session tData coaches =
-    case tData of
-        Just (team1, team2) ->
+init session teams coaches =
+    case ( teams, coaches ) of
+        ( Just ( team1, team2 ), _ ) ->
             ( { session = session
-                , team1Id = Just team1
-                , team2Id = Just team2
-                , coach1Id = Nothing
-                , coach2Id = Nothing
-                , games = RemoteData.Loading
-                , team1 = RemoteData.Loading
-                , team2 = RemoteData.Loading
-                , coach1 = RemoteData.NotAsked
-                , coach2 = RemoteData.NotAsked
-                }
-                , Cmd.none
+              , team1Id = Just team1
+              , team2Id = Just team2
+              , coach1Id = Nothing
+              , coach2Id = Nothing
+              , games = RemoteData.Loading
+              , teams = RemoteData.Loading
+              , coaches = RemoteData.Loading
+              }
+            , Cmd.batch
+                [ getGamesForTeamsRequest session.token team1 team2
+                , getTeamListRequest session.token
+                , getCoachListRequest session.token
+                ]
             )
 
-        Nothing ->
-            case coaches of
-                Just (coach1, coach2) ->
-                    ( { session = session
-                        , team1Id = Nothing
-                        , team2Id = Nothing
-                        , coach1Id = Just coach1
-                        , coach2Id = Just coach2
-                        , games = RemoteData.Loading
-                        , team1 = RemoteData.NotAsked
-                        , team2 = RemoteData.NotAsked
-                        , coach1 = RemoteData.Loading
-                        , coach2 = RemoteData.Loading
-                        }
-                        , Cmd.none
-                    )
+        ( _, Just ( coach1, coach2 ) ) ->
+            ( { session = session
+              , team1Id = Nothing
+              , team2Id = Nothing
+              , coach1Id = Just coach1
+              , coach2Id = Just coach2
+              , games = RemoteData.Loading
+              , teams = RemoteData.Loading
+              , coaches = RemoteData.Loading
+              }
+            , Cmd.batch
+                [ getGamesForCoachesRequest session.token coach1 coach2
+                , getTeamListRequest session.token
+                , getCoachListRequest session.token
+                ]
+            )
 
-                Nothing ->
-                    ( { session = session
-                        , team1Id = Nothing
-                        , team2Id = Nothing
-                        , coach1Id = Nothing
-                        , coach2Id = Nothing
-                        , games = RemoteData.NotAsked
-                        , team1 = RemoteData.NotAsked
-                        , team2 = RemoteData.NotAsked
-                        , coach1 = RemoteData.NotAsked
-                        , coach2 = RemoteData.NotAsked
-                        }
-                        , Cmd.none
-                    )
+        _ ->
+            ( { session = session
+              , team1Id = Nothing
+              , team2Id = Nothing
+              , coach1Id = Nothing
+              , coach2Id = Nothing
+              , games = RemoteData.NotAsked
+              , teams = RemoteData.Loading
+              , coaches = RemoteData.Loading
+              }
+            , Cmd.batch
+                [ getTeamListRequest session.token
+                , getCoachListRequest session.token
+                ]
+            )
+
 
 
 -- Update --
@@ -94,12 +102,95 @@ init session tData coaches =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        None ->
-            ( model, Cmd.none )
+        GamesReceived response ->
+            ( { model | games = response }, Cmd.none )
+
+        TeamListReceived response ->
+            ( { model | teams = response }, Cmd.none )
+
+        CoachListReceived response ->
+            ( { model | coaches = response }, Cmd.none )
+
+        Team1Selected teamId ->
+            ( { model | team1Id = searchForIdString teamId Team.idToString model.teams }, Cmd.none )
+
+        Team2Selected teamId ->
+            ( { model | team2Id = searchForIdString teamId Team.idToString model.teams }, Cmd.none )
+
+        Coach1Selected coachId ->
+            ( { model | coach1Id = searchForIdString coachId Coach.idToString model.coaches }, Cmd.none )
+
+        Coach2Selected coachId ->
+            ( { model | coach2Id = searchForIdString coachId Coach.idToString model.coaches }, Cmd.none )
 
 
 
 -- API Requests --
+
+
+getGamesForTeamsRequest : Maybe String -> TeamId -> TeamId -> Cmd Msg
+getGamesForTeamsRequest token team1 team2 =
+    Api.getRequest token (Api.GamesBetweenTeams team1 team2) <|
+        Http.expectJson (RemoteData.fromResult >> GamesReceived) gamesDecoder
+
+
+getGamesForCoachesRequest : Maybe String -> CoachId -> CoachId -> Cmd Msg
+getGamesForCoachesRequest token coach1 coach2 =
+    Api.getRequest token (Api.GamesBetweenCoaches coach1 coach2) <|
+        Http.expectJson (RemoteData.fromResult >> GamesReceived) gamesDecoder
+
+
+getTeamListRequest : Maybe String -> Cmd Msg
+getTeamListRequest token =
+    Api.getRequest token Api.Teams <|
+        Http.expectJson (RemoteData.fromResult >> TeamListReceived) teamsDecoder
+
+
+getCoachListRequest : Maybe String -> Cmd Msg
+getCoachListRequest token =
+    Api.getRequest token Api.Coaches <|
+        Http.expectJson (RemoteData.fromResult >> CoachListReceived) coachsDecoder
+
+
+searchForIdString : String -> (id -> String) -> RemoteData.RemoteData e (List { d | id : id }) -> Maybe id
+searchForIdString idString idToString listData =
+    case listData of
+        RemoteData.Success list ->
+            List.filter (\x -> idToString x.id == idString) list
+                |> List.head
+                |> Maybe.map .id
+
+        _ ->
+            Nothing
+
+
+
+-- Helper Functions --
+
+
+getTeam : WebData (List Team) -> Maybe TeamId -> Maybe Team
+getTeam teamData teamId =
+    case ( teamData, teamId ) of
+        ( RemoteData.Success teams, Just id ) ->
+            List.filter (\team -> team.id == id) teams
+                |> List.head
+
+        _ ->
+            Nothing
+
+
+getCoach : WebData (List Coach) -> Maybe CoachId -> Maybe Coach
+getCoach coachData coachId =
+    case ( coachData, coachId ) of
+        ( RemoteData.Success coaches, Just id ) ->
+            List.filter (\coach -> coach.id == id) coaches
+                |> List.head
+
+        _ ->
+            Nothing
+
+
+
 -- View --
 
 

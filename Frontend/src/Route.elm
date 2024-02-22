@@ -264,6 +264,7 @@ routeToString route =
         ViewHeadToHeadCoaches coach1Id coach2Id ->
             "/HeadToHead/Coaches/" ++ Coach.idToString coach1Id ++ "/" ++ Coach.idToString coach2Id
 
+
 maybeIdToString : (a -> String) -> Maybe a -> String
 maybeIdToString idToString maybeId =
     case maybeId of

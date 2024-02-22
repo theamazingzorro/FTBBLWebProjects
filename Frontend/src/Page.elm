@@ -21,8 +21,8 @@ import Page.ListTeams as ListTeams
 import Page.Signin as Signin
 import Page.ViewCoach as ViewCoach
 import Page.ViewDivision as ViewDivision
-import Page.ViewTeam as ViewTeam
 import Page.ViewHeadToHead as ViewHeadToHead
+import Page.ViewTeam as ViewTeam
 import Route exposing (Route(..))
 
 
@@ -203,12 +203,13 @@ init session route =
                 |> wrapInitWith ViewHeadToHeadPage ViewHeadToHeadPageMsg
 
         Route.ViewHeadToHeadTeams team1Id team2Id ->
-            ViewHeadToHead.init session (Just (team1Id, team2Id)) Nothing
+            ViewHeadToHead.init session (Just ( team1Id, team2Id )) Nothing
                 |> wrapInitWith ViewHeadToHeadPage ViewHeadToHeadPageMsg
 
         Route.ViewHeadToHeadCoaches coach1Id coach2Id ->
-            ViewHeadToHead.init session Nothing (Just (coach1Id, coach2Id))
+            ViewHeadToHead.init session Nothing (Just ( coach1Id, coach2Id ))
                 |> wrapInitWith ViewHeadToHeadPage ViewHeadToHeadPageMsg
+
 
 
 -- Update --
@@ -359,7 +360,7 @@ update msg model =
         ( ViewHeadToHeadPageMsg subMsg, ViewHeadToHeadPage pageModel ) ->
             ViewHeadToHead.update subMsg pageModel
                 |> wrapUpdateWith ViewHeadToHeadPage ViewHeadToHeadPageMsg
-        
+
         ( ViewHeadToHeadPageMsg _, _ ) ->
             ( model, Cmd.none, Nothing )
 
