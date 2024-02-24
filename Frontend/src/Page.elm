@@ -21,6 +21,7 @@ import Page.ListTeams as ListTeams
 import Page.Signin as Signin
 import Page.ViewCoach as ViewCoach
 import Page.ViewDivision as ViewDivision
+import Page.ViewHeadToHead as ViewHeadToHead
 import Page.ViewTeam as ViewTeam
 import Route exposing (Route(..))
 
@@ -50,6 +51,7 @@ type Model
     | AddGameWeekPage AddGameWeek.Model
     | AccoladesPage ListAccolades.Model
     | AddAccoladePage AddAccolade.Model
+    | ViewHeadToHeadPage ViewHeadToHead.Model
 
 
 type Msg
@@ -72,6 +74,7 @@ type Msg
     | AddGameWeekMsg AddGameWeek.Msg
     | AccoladesPageMsg ListAccolades.Msg
     | AddAccoladePageMsg AddAccolade.Msg
+    | ViewHeadToHeadPageMsg ViewHeadToHead.Msg
 
 
 type OutMsg
@@ -194,6 +197,18 @@ init session route =
             AddAccolade.init session teamId (Just coachId)
                 |> wrapInitWith AddAccoladePage AddAccoladePageMsg
                 |> requiresAuth session
+
+        Route.ViewHeadToHeadDefault ->
+            ViewHeadToHead.init session Nothing Nothing
+                |> wrapInitWith ViewHeadToHeadPage ViewHeadToHeadPageMsg
+
+        Route.ViewHeadToHeadTeams team1Id team2Id ->
+            ViewHeadToHead.init session (Just ( team1Id, team2Id )) Nothing
+                |> wrapInitWith ViewHeadToHeadPage ViewHeadToHeadPageMsg
+
+        Route.ViewHeadToHeadCoaches coach1Id coach2Id ->
+            ViewHeadToHead.init session Nothing (Just ( coach1Id, coach2Id ))
+                |> wrapInitWith ViewHeadToHeadPage ViewHeadToHeadPageMsg
 
 
 
@@ -342,6 +357,13 @@ update msg model =
         ( ViewDivisionPageMsg _, _ ) ->
             ( model, Cmd.none, Nothing )
 
+        ( ViewHeadToHeadPageMsg subMsg, ViewHeadToHeadPage pageModel ) ->
+            ViewHeadToHead.update subMsg pageModel
+                |> wrapUpdateWith ViewHeadToHeadPage ViewHeadToHeadPageMsg
+
+        ( ViewHeadToHeadPageMsg _, _ ) ->
+            ( model, Cmd.none, Nothing )
+
 
 
 -- Common helpers --
@@ -473,6 +495,10 @@ view model =
         AddAccoladePage pageModel ->
             AddAccolade.view pageModel
                 |> Html.map AddAccoladePageMsg
+
+        ViewHeadToHeadPage pageModel ->
+            ViewHeadToHead.view pageModel
+                |> Html.map ViewHeadToHeadPageMsg
 
 
 notFoundView : Html msg

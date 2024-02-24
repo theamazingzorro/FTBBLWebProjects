@@ -31,6 +31,7 @@ type Msg
     | CoachIndexClicked
     | DivisionIndexClicked
     | AccoladeIndexClicked
+    | HeadToHeadClicked
     | SpecificDivisionClicked DivisionId
     | DivisionsRecieved (WebData (List Division))
 
@@ -72,6 +73,9 @@ update msg model =
 
         HomeClicked ->
             ( model, pushUrl model.session.navkey Route.Home, Nothing )
+
+        HeadToHeadClicked ->
+            ( model, pushUrl model.session.navkey Route.ViewHeadToHeadDefault, Nothing )
 
         SigninClicked ->
             ( model, pushUrl model.session.navkey Route.Signin, Nothing )
@@ -126,6 +130,7 @@ view model =
                 [ linkElement "Teams" TeamIndexClicked
                 , linkElement "Coaches" CoachIndexClicked
                 , viewDivisionsLink model.divisions
+                , linkElement "Matchups" HeadToHeadClicked
                 , viewAccoladesLink model.session.token
                 , viewSignInOutLink model.session.token
                 ]

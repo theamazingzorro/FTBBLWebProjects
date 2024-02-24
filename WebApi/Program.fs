@@ -53,6 +53,10 @@ let webApp =
                     routef "/game/%i/" GameHandler.getGame
                     routef "/game/bydiv/%i" GameHandler.getGamesByDiv
                     routef "/game/bydiv/%i/" GameHandler.getGamesByDiv
+                    routef "/game/teams/%i/%i" GameHandler.getGamesByTeams
+                    routef "/game/teams/%i/%i/" GameHandler.getGamesByTeams
+                    routef "/game/coaches/%i/%i" GameHandler.getGamesByCoaches
+                    routef "/game/coaches/%i/%i/" GameHandler.getGamesByCoaches
 
                     routef "/standings/%i" StandingHandler.getDivStandings
                     routef "/standings/%i/" StandingHandler.getDivStandings

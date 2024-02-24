@@ -27,6 +27,8 @@ type Endpoint
     | CloseDivision DivisionId
     | Games
     | GamesInDiv DivisionId
+    | GamesBetweenTeams TeamId TeamId
+    | GamesBetweenCoaches CoachId CoachId
     | Game GameId
     | Accolades
     | Accolade AccoladeId
@@ -90,6 +92,12 @@ stringOf endpoint =
 
         GamesInDiv index ->
             "game/bydiv/" ++ Div.idToString index
+
+        GamesBetweenTeams team1 team2 ->
+            "game/teams/" ++ Team.idToString team1 ++ "/" ++ Team.idToString team2
+
+        GamesBetweenCoaches coach1 coach2 ->
+            "game/coaches/" ++ Coach.idToString coach1 ++ "/" ++ Coach.idToString coach2
 
         TeamsWithCoach coachId ->
             "team/bycoach/" ++ Coach.idToString coachId

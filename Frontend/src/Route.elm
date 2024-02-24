@@ -34,6 +34,9 @@ type Route
     | Accolades
     | AddAccolade
     | AddAccoladeWithDefaults (Maybe TeamId) CoachId
+    | ViewHeadToHeadDefault
+    | ViewHeadToHeadTeams TeamId TeamId
+    | ViewHeadToHeadCoaches CoachId CoachId
 
 
 parseUrl : Url -> Route
@@ -154,6 +157,20 @@ matchRoute =
                 [ s "Game" </> s "AddWeek" </> Div.idParser </> int
                 , s "game" </> s "addweek" </> Div.idParser </> int
                 ]
+
+        {- HeadToHead Page -}
+        , map ViewHeadToHeadDefault <|
+            oneOf [ s "HeadToHead", s "headtohead" ]
+        , map ViewHeadToHeadTeams <|
+            oneOf
+                [ s "HeadToHead" </> s "Teams" </> Team.idParser </> Team.idParser
+                , s "headtohead" </> s "teams" </> Team.idParser </> Team.idParser
+                ]
+        , map ViewHeadToHeadCoaches <|
+            oneOf
+                [ s "HeadToHead" </> s "Coaches" </> Coach.idParser </> Coach.idParser
+                , s "headtohead" </> s "coaches" </> Coach.idParser </> Coach.idParser
+                ]
         ]
 
 
@@ -237,6 +254,15 @@ routeToString route =
 
         AddAccoladeWithDefaults teamId coachId ->
             "/Accolade/Add/" ++ maybeIdToString Team.idToString teamId ++ "/" ++ Coach.idToString coachId
+
+        ViewHeadToHeadDefault ->
+            "/HeadToHead"
+
+        ViewHeadToHeadTeams team1Id team2Id ->
+            "/HeadToHead/Teams/" ++ Team.idToString team1Id ++ "/" ++ Team.idToString team2Id
+
+        ViewHeadToHeadCoaches coach1Id coach2Id ->
+            "/HeadToHead/Coaches/" ++ Coach.idToString coach1Id ++ "/" ++ Coach.idToString coach2Id
 
 
 maybeIdToString : (a -> String) -> Maybe a -> String
