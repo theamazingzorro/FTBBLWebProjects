@@ -126,11 +126,11 @@ update msg model =
 
         Team1Selected teamId ->
             let
-                team1Id =
+                newTeam =
                     searchForIdString teamId Team.idToString model.teams
 
                 ( loading, cmd ) =
-                    maybeGetGamesForTeams model.session.token team1Id model.team2Id
+                    maybeGetGamesForTeams model.session.token newTeam model.team2Id
 
                 newGames =
                     if loading then
@@ -139,15 +139,15 @@ update msg model =
                     else
                         model.games
             in
-            ( { model | team1Id = team1Id, games = newGames }, cmd )
+            ( { model | team1Id = newTeam, games = newGames }, cmd )
 
         Team2Selected teamId ->
             let
-                team2Id =
+                newTeam =
                     searchForIdString teamId Team.idToString model.teams
 
                 ( loading, cmd ) =
-                    maybeGetGamesForTeams model.session.token model.team1Id team2Id
+                    maybeGetGamesForTeams model.session.token model.team1Id newTeam
 
                 newGames =
                     if loading then
@@ -156,7 +156,7 @@ update msg model =
                     else
                         model.games
             in
-            ( { model | team2Id = team2Id, games = newGames }, cmd )
+            ( { model | team2Id = newTeam, games = newGames }, cmd )
 
         Coach1Selected coachId ->
             let
@@ -171,7 +171,7 @@ update msg model =
                         RemoteData.Loading
 
                     else
-                        model.games
+                        RemoteData.NotAsked
             in
             ( { model | coach1Id = newCoach, games = newGames }, cmd )
 
@@ -188,7 +188,7 @@ update msg model =
                         RemoteData.Loading
 
                     else
-                        model.games
+                        RemoteData.NotAsked
             in
             ( { model | coach2Id = newCoach, games = newGames }, cmd )
 
@@ -322,7 +322,6 @@ getCoach coaches coachId =
 getRecordForTeams : List Game -> TeamId -> TeamId -> ( Int, Int, Int )
 getRecordForTeams games team1Id team2Id =
     let
-        isWin : TeamId -> Game -> Bool
         isWin teamId game =
             (game.homeTeam.id == teamId && Maybe.withDefault 0 game.homeScore > Maybe.withDefault 0 game.awayScore)
                 || (game.awayTeam.id == teamId && Maybe.withDefault 0 game.awayScore > Maybe.withDefault 0 game.homeScore)
@@ -345,7 +344,6 @@ getRecordForTeams games team1Id team2Id =
 getRecordForCoaches : List Game -> CoachId -> CoachId -> ( Int, Int, Int )
 getRecordForCoaches games coach1Id coach2Id =
     let
-        isWin : CoachId -> Game -> Bool
         isWin coachId game =
             (game.homeTeam.coach.id == coachId && Maybe.withDefault 0 game.homeScore > Maybe.withDefault 0 game.awayScore)
                 || (game.awayTeam.coach.id == coachId && Maybe.withDefault 0 game.awayScore > Maybe.withDefault 0 game.homeScore)
@@ -354,15 +352,15 @@ getRecordForCoaches games coach1Id coach2Id =
             List.filter (\g -> g.awayScore == g.homeScore) games
                 |> List.length
 
-        t1Wins =
+        c1Wins =
             List.filter (isWin coach1Id) games
                 |> List.length
 
-        t2Wins =
+        c2Wins =
             List.filter (isWin coach2Id) games
                 |> List.length
     in
-    ( t1Wins, draws, t2Wins )
+    ( c1Wins, draws, c2Wins )
 
 
 
@@ -426,7 +424,6 @@ viewErrorMessage message =
 
 
 -- Matchup Record --
---TODO: ADD Team/Coach Name displays & giv this its own header
 
 
 viewTeamHeadToHead : WebData (List Team) -> WebData (List Game) -> Maybe TeamId -> Maybe TeamId -> Html Msg
@@ -435,13 +432,13 @@ viewTeamHeadToHead teamData gameData team1 team2 =
         ( RemoteData.Success games, RemoteData.Success teams ) ->
             viewTeamMatchupRecord teams games team1 team2
 
-        ( RemoteData.Success _, RemoteData.Loading ) ->
+        ( _, RemoteData.Loading ) ->
             h3 [] [ text "Loading Teams..." ]
 
         ( RemoteData.Loading, _ ) ->
             h3 [] [ text "Loading Games..." ]
 
-        ( RemoteData.Success _, RemoteData.Failure httpError ) ->
+        ( _, RemoteData.Failure httpError ) ->
             viewLoadError <| Error.buildErrorMessage httpError
 
         ( RemoteData.Failure httpError, _ ) ->
@@ -606,17 +603,12 @@ viewTeamButton team =
 
 viewScore : Game -> Html Msg
 viewScore game =
-    case game.homeScore of
-        Just homeScore ->
-            case game.awayScore of
-                Just awayScore ->
-                    text <| String.fromInt homeScore ++ " - " ++ String.fromInt awayScore
+    case ( game.homeScore, game.awayScore ) of
+        ( Just homeScore, Just awayScore ) ->
+            text <| String.fromInt homeScore ++ " - " ++ String.fromInt awayScore
 
-                Nothing ->
-                    text "vs"
-
-        Nothing ->
-            text "vs"
+        _ ->
+            text "vs."
 
 
 
@@ -640,7 +632,7 @@ viewTeam teamData =
 
         Nothing ->
             div [ Custom.Attributes.col ]
-                [ text "-" ]
+                [ text "" ]
 
 
 viewCoach : Maybe Coach -> Html Msg
@@ -654,7 +646,7 @@ viewCoach coachData =
 
         Nothing ->
             div [ Custom.Attributes.col ]
-                [ text "-" ]
+                [ text "" ]
 
 
 
@@ -664,18 +656,18 @@ viewCoach coachData =
 viewTeamSelector : WebData (List Team) -> Maybe TeamId -> Maybe TeamId -> Html Msg
 viewTeamSelector teamData team1Id team2Id =
     div Custom.Attributes.row
-        [ viewDropdown team1Id teamData team1Dropdown
+        [ viewDropdown team1Id teamData <| teamDropdown "team1Dropdown" Team1Selected
         , text "vs."
-        , viewDropdown team2Id teamData team2Dropdown
+        , viewDropdown team2Id teamData <| teamDropdown "team2Dropdown" Team2Selected
         ]
 
 
 viewCoachSelector : WebData (List Coach) -> Maybe CoachId -> Maybe CoachId -> Html Msg
 viewCoachSelector coachData coach1 coach2 =
     div Custom.Attributes.row
-        [ viewDropdown coach1 coachData coach1Dropdown
+        [ viewDropdown coach1 coachData <| coachDropdown "coach1Dropdown" Coach1Selected
         , text "vs."
-        , viewDropdown coach2 coachData coach2Dropdown
+        , viewDropdown coach2 coachData <| coachDropdown "coach2Dropdown" Coach2Selected
         ]
 
 
@@ -696,48 +688,24 @@ viewDropdown idData data dropDownFunction =
             dropDownFunction idData <| List.sortBy .name d
 
 
-team1Dropdown : Maybe TeamId -> List Team -> Html Msg
-team1Dropdown selectedTeam teams =
+teamDropdown : String -> (String -> Msg) -> Maybe TeamId -> List Team -> Html Msg
+teamDropdown selectorId selectionEvent selectedTeam teams =
     div [ Custom.Attributes.col ]
         [ select
-            (Custom.Attributes.formDropdown "team1Dropdown"
-                [ onInput Team1Selected ]
+            (Custom.Attributes.formDropdown selectorId
+                [ onInput selectionEvent ]
             )
             (defaultOption :: List.map (teamOption selectedTeam) teams)
         , viewTeam <| getTeam teams selectedTeam
         ]
 
 
-team2Dropdown : Maybe TeamId -> List Team -> Html Msg
-team2Dropdown selectedTeam teams =
+coachDropdown : String -> (String -> Msg) -> Maybe CoachId -> List Coach -> Html Msg
+coachDropdown selectorId selectionEvent selectedCoach coaches =
     div [ Custom.Attributes.col ]
         [ select
-            (Custom.Attributes.formDropdown "team2Dropdown"
-                [ onInput Team2Selected ]
-            )
-            (defaultOption :: List.map (teamOption selectedTeam) teams)
-        , viewTeam <| getTeam teams selectedTeam
-        ]
-
-
-coach1Dropdown : Maybe CoachId -> List Coach -> Html Msg
-coach1Dropdown selectedCoach coaches =
-    div [ Custom.Attributes.col ]
-        [ select
-            (Custom.Attributes.formDropdown "coach1Dropdown"
-                [ onInput Coach1Selected ]
-            )
-            (defaultOption :: List.map (coachOption selectedCoach) coaches)
-        , viewCoach <| getCoach coaches selectedCoach
-        ]
-
-
-coach2Dropdown : Maybe CoachId -> List Coach -> Html Msg
-coach2Dropdown selectedCoach coaches =
-    div [ Custom.Attributes.col ]
-        [ select
-            (Custom.Attributes.formDropdown "coach2Dropdown"
-                [ onInput Coach2Selected ]
+            (Custom.Attributes.formDropdown selectorId
+                [ onInput selectionEvent ]
             )
             (defaultOption :: List.map (coachOption selectedCoach) coaches)
         , viewCoach <| getCoach coaches selectedCoach
