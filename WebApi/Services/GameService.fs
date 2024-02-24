@@ -31,11 +31,9 @@ module GameService =
 
     let getByTeams team1Id team2Id =
         GameRepository.getByTeams team1Id team2Id
-            |> List.map getOdds
 
     let getByCoaches coach1Id coach2Id =
         GameRepository.getByCoaches coach1Id coach2Id
-            |> List.map getOdds
 
     let updateElos (game:Game) =
         let homeTeam = game.HomeTeam
