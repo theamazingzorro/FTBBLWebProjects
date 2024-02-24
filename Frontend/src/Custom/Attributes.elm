@@ -14,6 +14,16 @@ textCentered =
     style "text-align" "center"
 
 
+textRight : Attribute msg
+textRight =
+    style "text-align" "right"
+
+
+textLeft : Attribute msg
+textLeft =
+    style "text-align" "left"
+
+
 centered : Attribute msg
 centered =
     style "margin" "1em auto"

@@ -193,7 +193,25 @@ update msg model =
             ( { model | coach2Id = newCoach, games = newGames }, cmd )
 
         TeamsCoachSwitch ->
-            ( { model | useTeams = not model.useTeams }, Cmd.none )
+            let
+                newUseTeams =
+                    not model.useTeams
+
+                ( loading, newGamesCmd ) =
+                    if newUseTeams then
+                        maybeGetGamesForTeams model.session.token model.team1Id model.team2Id
+
+                    else
+                        maybeGetGamesForCoaches model.session.token model.coach1Id model.coach2Id
+
+                newGames =
+                    if loading then
+                        RemoteData.Loading
+
+                    else
+                        RemoteData.NotAsked
+            in
+            ( { model | useTeams = newUseTeams, games = newGames }, newGamesCmd )
 
         ViewDivisionClick divId ->
             ( model, pushUrl model.session.navkey <| Route.ViewDivision divId )
@@ -301,7 +319,7 @@ getCoach coaches coachId =
             Nothing
 
 
-getRecordForTeams : List Game -> TeamId -> TeamId -> (Int, Int, Int)
+getRecordForTeams : List Game -> TeamId -> TeamId -> ( Int, Int, Int )
 getRecordForTeams games team1Id team2Id =
     let
         isWin : TeamId -> Game -> Bool
@@ -321,10 +339,10 @@ getRecordForTeams games team1Id team2Id =
             List.filter (isWin team2Id) games
                 |> List.length
     in
-    (t1Wins, draws, t2Wins)
+    ( t1Wins, draws, t2Wins )
 
 
-getRecordForCoaches : List Game -> CoachId -> CoachId -> (Int, Int, Int)
+getRecordForCoaches : List Game -> CoachId -> CoachId -> ( Int, Int, Int )
 getRecordForCoaches games coach1Id coach2Id =
     let
         isWin : CoachId -> Game -> Bool
@@ -344,7 +362,7 @@ getRecordForCoaches games coach1Id coach2Id =
             List.filter (isWin coach2Id) games
                 |> List.length
     in
-    (t1Wins, draws, t2Wins)
+    ( t1Wins, draws, t2Wins )
 
 
 
@@ -355,19 +373,32 @@ view : Model -> Html Msg
 view model =
     if model.useTeams then
         div []
-            [ br [] []
+            [ div [] [ viewSwitchTeamCoachButton "View Coaches" ]
+            , br [] []
             , viewTeamSelector model.teams model.team1Id model.team2Id
             , br [] []
-            , viewGames model model.games
+            , viewTeamHeadToHead model.teams model.games model.team1Id model.team2Id
+            , br [] []
+            , viewGames model.games
             ]
 
     else
         div []
-            [ br [] []
+            [ div [] [ viewSwitchTeamCoachButton "View Teams" ]
+            , br [] []
             , viewCoachSelector model.coaches model.coach1Id model.coach2Id
             , br [] []
-            , viewGames model model.games
+            , viewCoachHeadToHead model.coaches model.games model.coach1Id model.coach2Id
+            , br [] []
+            , viewGames model.games
             ]
+
+
+viewSwitchTeamCoachButton : String -> Html Msg
+viewSwitchTeamCoachButton buttonText =
+    span
+        (Custom.Attributes.textButton TeamsCoachSwitch)
+        [ text buttonText ]
 
 
 viewLoadError : String -> Html Msg
@@ -382,18 +413,142 @@ viewLoadError errorMessage =
         ]
 
 
+viewErrorMessage : Maybe String -> Html Msg
+viewErrorMessage message =
+    case message of
+        Just m ->
+            div [ Custom.Attributes.errorMessage ]
+                [ text <| "Error: " ++ m ]
+
+        Nothing ->
+            text ""
+
+
+
+-- Matchup Record --
+--TODO: ADD Team/Coach Name displays & giv this its own header
+
+
+viewTeamHeadToHead : WebData (List Team) -> WebData (List Game) -> Maybe TeamId -> Maybe TeamId -> Html Msg
+viewTeamHeadToHead teamData gameData team1 team2 =
+    case ( gameData, teamData ) of
+        ( RemoteData.Success games, RemoteData.Success teams ) ->
+            viewTeamMatchupRecord teams games team1 team2
+
+        ( RemoteData.Success _, RemoteData.Loading ) ->
+            h3 [] [ text "Loading Teams..." ]
+
+        ( RemoteData.Loading, _ ) ->
+            h3 [] [ text "Loading Games..." ]
+
+        ( RemoteData.Success _, RemoteData.Failure httpError ) ->
+            viewLoadError <| Error.buildErrorMessage httpError
+
+        ( RemoteData.Failure httpError, _ ) ->
+            viewLoadError <| Error.buildErrorMessage httpError
+
+        ( RemoteData.Success _, RemoteData.NotAsked ) ->
+            viewErrorMessage <| Just "Error: Team Data Not Requested"
+
+        ( RemoteData.NotAsked, _ ) ->
+            text ""
+
+
+viewCoachHeadToHead : WebData (List Coach) -> WebData (List Game) -> Maybe CoachId -> Maybe CoachId -> Html Msg
+viewCoachHeadToHead coachData gameData coach1 coach2 =
+    case ( gameData, coachData ) of
+        ( RemoteData.Success games, RemoteData.Success coaches ) ->
+            viewCoachMatchupRecord coaches games coach1 coach2
+
+        ( _, RemoteData.Loading ) ->
+            h3 [] [ text "Loading Coaches..." ]
+
+        ( RemoteData.Loading, _ ) ->
+            h3 [] [ text "Loading Games..." ]
+
+        ( _, RemoteData.Failure httpError ) ->
+            viewLoadError <| Error.buildErrorMessage httpError
+
+        ( RemoteData.Failure httpError, _ ) ->
+            viewLoadError <| Error.buildErrorMessage httpError
+
+        ( RemoteData.Success _, RemoteData.NotAsked ) ->
+            viewErrorMessage <| Just "Error: Coach Data Not Requested"
+
+        ( RemoteData.NotAsked, _ ) ->
+            text ""
+
+
+viewTeamMatchupRecord : List Team -> List Game -> Maybe TeamId -> Maybe TeamId -> Html Msg
+viewTeamMatchupRecord teams games team1 team2 =
+    case ( team1, team2 ) of
+        ( Just team1Id, Just team2Id ) ->
+            div []
+                [ h3 [ Custom.Attributes.textCentered ] [ text "Record" ]
+                , br [] []
+                , div Custom.Attributes.row
+                    [ div [ Custom.Attributes.col ]
+                        [ h5 [ Custom.Attributes.textRight ]
+                            [ text <| (getTeam teams team1 |> Maybe.map .name |> Maybe.withDefault "") ]
+                        ]
+                    , div [ Custom.Attributes.col ]
+                        [ h5 [ Custom.Attributes.textCentered ]
+                            [ viewRecord <| getRecordForTeams games team1Id team2Id ]
+                        ]
+                    , div [ Custom.Attributes.col ]
+                        [ h5 [ Custom.Attributes.textLeft ]
+                            [ text <| (getTeam teams team2 |> Maybe.map .name |> Maybe.withDefault "") ]
+                        ]
+                    ]
+                ]
+
+        _ ->
+            text ""
+
+
+viewCoachMatchupRecord : List Coach -> List Game -> Maybe CoachId -> Maybe CoachId -> Html Msg
+viewCoachMatchupRecord coaches games coach1 coach2 =
+    case ( coach1, coach2 ) of
+        ( Just coach1Id, Just coach2Id ) ->
+            div []
+                [ h3 [ Custom.Attributes.textCentered ] [ text "Record" ]
+                , br [] []
+                , div Custom.Attributes.row
+                    [ div [ Custom.Attributes.col ]
+                        [ h5 [ Custom.Attributes.textRight ]
+                            [ text <| (getCoach coaches coach1 |> Maybe.map .name |> Maybe.withDefault "") ]
+                        ]
+                    , div [ Custom.Attributes.col ]
+                        [ h5 [ Custom.Attributes.textCentered ]
+                            [ viewRecord <| getRecordForCoaches games coach1Id coach2Id ]
+                        ]
+                    , div [ Custom.Attributes.col ]
+                        [ h5 [ Custom.Attributes.textLeft ]
+                            [ text <| (getCoach coaches coach2 |> Maybe.map .name |> Maybe.withDefault "") ]
+                        ]
+                    ]
+                ]
+
+        _ ->
+            text ""
+
+
+viewRecord : ( Int, Int, Int ) -> Html Msg
+viewRecord ( win, draw, loss ) =
+    text <| String.fromInt win ++ " - " ++ String.fromInt draw ++ " - " ++ String.fromInt loss
+
+
 
 -- View Games List --
 
 
-viewGames : Model -> WebData (List Game) -> Html Msg
-viewGames model gameData =
+viewGames : WebData (List Game) -> Html Msg
+viewGames gameData =
     case gameData of
         RemoteData.Success games ->
             div []
-                [ h4 [ Custom.Attributes.textCentered ]
+                [ h3 [ Custom.Attributes.textCentered ]
                     [ text "History" ]
-                , viewMatchupRecord model games
                 , div []
                     (List.map viewGameDetails games)
                 ]
@@ -407,30 +562,6 @@ viewGames model gameData =
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
 
-
-viewMatchupRecord : Model -> List Game -> Html Msg
-viewMatchupRecord model games =
-    case ( model.useTeams, model.team1Id, model.team2Id ) of
-        ( True, Just team1, Just team2 ) ->
-            h6 [ Custom.Attributes.textCentered ]
-                [ viewRecord <| getRecordForTeams games team1 team2]
-
-        ( False, _, _ ) ->
-            case ( model.coach1Id, model.coach2Id ) of
-                ( Just coach1, Just coach2 ) ->
-                    h6 [ Custom.Attributes.textCentered ]
-                        [ viewRecord <| getRecordForCoaches games coach1 coach2]
-
-                _ ->
-                    text ""
-
-        _ ->
-            text ""
-
-
-viewRecord : (Int, Int, Int) -> Html Msg
-viewRecord (win, draw, loss) =
-    text <| String.fromInt win ++ " - " ++ String.fromInt draw ++ " - " ++ String.fromInt loss
 
 viewGameDetails : Game -> Html Msg
 viewGameDetails game =
