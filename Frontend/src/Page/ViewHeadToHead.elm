@@ -42,8 +42,9 @@ type Msg
     | Coach1Selected String
     | Coach2Selected String
     | TeamsCoachSwitch
-    | ViewDivisionButtonClick DivisionId
+    | ViewDivisionClick DivisionId
     | ViewCoachClick CoachId
+    | ViewTeamClick TeamId
 
 
 
@@ -194,11 +195,14 @@ update msg model =
         TeamsCoachSwitch ->
             ( { model | useTeams = not model.useTeams }, Cmd.none )
 
-        ViewDivisionButtonClick divId ->
+        ViewDivisionClick divId ->
             ( model, pushUrl model.session.navkey <| Route.ViewDivision divId )
 
         ViewCoachClick coachId ->
             ( model, pushUrl model.session.navkey <| Route.ViewCoach coachId )
+
+        ViewTeamClick teamId ->
+            ( model, pushUrl model.session.navkey <| Route.ViewTeam teamId )
 
 
 sortGames : WebData (List Game) -> WebData (List Game)
@@ -297,6 +301,52 @@ getCoach coaches coachId =
             Nothing
 
 
+getRecordForTeams : List Game -> TeamId -> TeamId -> (Int, Int, Int)
+getRecordForTeams games team1Id team2Id =
+    let
+        isWin : TeamId -> Game -> Bool
+        isWin teamId game =
+            (game.homeTeam.id == teamId && Maybe.withDefault 0 game.homeScore > Maybe.withDefault 0 game.awayScore)
+                || (game.awayTeam.id == teamId && Maybe.withDefault 0 game.awayScore > Maybe.withDefault 0 game.homeScore)
+
+        draws =
+            List.filter (\g -> g.awayScore == g.homeScore) games
+                |> List.length
+
+        t1Wins =
+            List.filter (isWin team1Id) games
+                |> List.length
+
+        t2Wins =
+            List.filter (isWin team2Id) games
+                |> List.length
+    in
+    (t1Wins, draws, t2Wins)
+
+
+getRecordForCoaches : List Game -> CoachId -> CoachId -> (Int, Int, Int)
+getRecordForCoaches games coach1Id coach2Id =
+    let
+        isWin : CoachId -> Game -> Bool
+        isWin coachId game =
+            (game.homeTeam.coach.id == coachId && Maybe.withDefault 0 game.homeScore > Maybe.withDefault 0 game.awayScore)
+                || (game.awayTeam.coach.id == coachId && Maybe.withDefault 0 game.awayScore > Maybe.withDefault 0 game.homeScore)
+
+        draws =
+            List.filter (\g -> g.awayScore == g.homeScore) games
+                |> List.length
+
+        t1Wins =
+            List.filter (isWin coach1Id) games
+                |> List.length
+
+        t2Wins =
+            List.filter (isWin coach2Id) games
+                |> List.length
+    in
+    (t1Wins, draws, t2Wins)
+
+
 
 -- View --
 
@@ -308,7 +358,7 @@ view model =
             [ br [] []
             , viewTeamSelector model.teams model.team1Id model.team2Id
             , br [] []
-            , viewGames model.games
+            , viewGames model model.games
             ]
 
     else
@@ -316,7 +366,7 @@ view model =
             [ br [] []
             , viewCoachSelector model.coaches model.coach1Id model.coach2Id
             , br [] []
-            , viewGames model.games
+            , viewGames model model.games
             ]
 
 
@@ -336,13 +386,14 @@ viewLoadError errorMessage =
 -- View Games List --
 
 
-viewGames : WebData (List Game) -> Html Msg
-viewGames gameData =
+viewGames : Model -> WebData (List Game) -> Html Msg
+viewGames model gameData =
     case gameData of
         RemoteData.Success games ->
             div []
                 [ h4 [ Custom.Attributes.textCentered ]
                     [ text "History" ]
+                , viewMatchupRecord model games
                 , div []
                     (List.map viewGameDetails games)
                 ]
@@ -357,32 +408,69 @@ viewGames gameData =
             viewLoadError <| Error.buildErrorMessage httpError
 
 
+viewMatchupRecord : Model -> List Game -> Html Msg
+viewMatchupRecord model games =
+    case ( model.useTeams, model.team1Id, model.team2Id ) of
+        ( True, Just team1, Just team2 ) ->
+            h6 [ Custom.Attributes.textCentered ]
+                [ viewRecord <| getRecordForTeams games team1 team2]
+
+        ( False, _, _ ) ->
+            case ( model.coach1Id, model.coach2Id ) of
+                ( Just coach1, Just coach2 ) ->
+                    h6 [ Custom.Attributes.textCentered ]
+                        [ viewRecord <| getRecordForCoaches games coach1 coach2]
+
+                _ ->
+                    text ""
+
+        _ ->
+            text ""
+
+
+viewRecord : (Int, Int, Int) -> Html Msg
+viewRecord (win, draw, loss) =
+    text <| String.fromInt win ++ " - " ++ String.fromInt draw ++ " - " ++ String.fromInt loss
+
 viewGameDetails : Game -> Html Msg
 viewGameDetails game =
     div Custom.Attributes.carouselItemEntry
         [ div [ class "row" ]
-            [ h6 [] [ viewDivision game.division ] ]
+            [ h6 [] [ viewDivisionButton game.division ] ]
         , div [ class "row" ]
             [ div [ class "col" ]
-                [ h6 [] [ text game.homeTeam.name ]
-                , p [] [ text game.homeTeam.coach.name ]
+                [ h6 [] [ viewTeamButton game.homeTeam ]
+                , p [] [ viewCoachButton game.homeTeam.coach ]
                 ]
             , div [ class "col col-auto", Custom.Attributes.centered ]
-                [ viewScore game
-                ]
+                [ viewScore game ]
             , div [ class "col" ]
-                [ h6 [] [ text game.awayTeam.name ]
-                , p [] [ text game.awayTeam.coach.name ]
+                [ h6 [] [ viewTeamButton game.awayTeam ]
+                , p [] [ viewCoachButton game.awayTeam.coach ]
                 ]
             ]
         ]
 
 
-viewDivision : Division -> Html Msg
-viewDivision division =
+viewDivisionButton : Division -> Html Msg
+viewDivisionButton division =
     span
-        (Custom.Attributes.textButton <| ViewDivisionButtonClick division.id)
+        (Custom.Attributes.textButton <| ViewDivisionClick division.id)
         [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
+
+
+viewCoachButton : Coach -> Html Msg
+viewCoachButton coach =
+    span
+        (Custom.Attributes.textButton <| ViewCoachClick coach.id)
+        [ text coach.name ]
+
+
+viewTeamButton : Team -> Html Msg
+viewTeamButton team =
+    span
+        (Custom.Attributes.textButton <| ViewTeamClick team.id)
+        [ text team.name ]
 
 
 viewScore : Game -> Html Msg
@@ -412,13 +500,11 @@ viewTeam teamData =
                 [ br [] []
                 , p []
                     [ text "Coach: "
-                    , span
-                        (Custom.Attributes.textButton <| ViewCoachClick team.coach.id)
-                        [ text team.coach.name ]
+                    , viewCoachButton team.coach
                     ]
                 , p [] [ text <| "Race: " ++ team.race.name ]
                 , p [] [ text <| "Current Elo: " ++ String.fromInt team.elo ]
-                , p [] [ text "Most Recent Division: ", Maybe.map viewDivision team.division |> Maybe.withDefault (text "N/A") ]
+                , p [] [ text "Most Recent Division: ", Maybe.map viewDivisionButton team.division |> Maybe.withDefault (text "N/A") ]
                 ]
 
         Nothing ->
