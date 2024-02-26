@@ -4,7 +4,7 @@
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
-const mainAssets = function () {(function($) {
+(function($) {
 
 	console.log("Main loaded")
 
@@ -264,6 +264,4 @@ const mainAssets = function () {(function($) {
 
 			});
 
-})(jQuery);}
-
-mainAssets();
+})(jQuery);

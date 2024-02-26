@@ -35,27 +35,20 @@
   <body class="is-preload">
     <div id="elm-bed"></div>
     
-    <!-- Scripts -->
-      <script src="assets/js/jquery.min.js"></script>
-      <script src="assets/js/browser.min.js"></script>
-      <script src="assets/js/breakpoints.min.js"></script>
-      <script src="assets/js/util.js"></script>
-      <script src="assets/js/main.js"></script>
-      <script src="elm.min.js"></script>
+    <script src="elm.min.js"></script>
 
     <script>
       var app = Elm.Main.init({
         node: document.getElementById("elm-bed")
       });     
-      
-      app.ports.refreshImports.subscribe(function(msg) {
-        console.log("refresh imports")
-        mainAssets();
-      });
-
-      
+       
     </script>
 
-    
+    <!-- Scripts -->
+      <script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
   </body>
 </html>
