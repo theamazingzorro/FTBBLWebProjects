@@ -2,7 +2,7 @@ module Main exposing (Msg, main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav
-import Custom.Attributes
+import Custom.Html
 import Env exposing (leagueName)
 import Header
 import Html exposing (..)
@@ -175,18 +175,14 @@ view : Model -> Document Msg
 view model =
     { title = leagueName
     , body =
-        [ div [ Custom.Attributes.mainContainer ]
-            [ navView model
-            , currentPageView model
-            ]
-        ]
+        navView model ++ [ Custom.Html.mainContainer [] [ currentPageView model ] ]
     }
 
 
-navView : Model -> Html Msg
+navView : Model -> List (Html Msg)
 navView model =
     Header.view model.headerModel
-        |> Html.map HeaderMsg
+        |> List.map (Html.map HeaderMsg)
 
 
 currentPageView : Model -> Html Msg
