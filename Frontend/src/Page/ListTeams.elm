@@ -306,8 +306,7 @@ view model =
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    div [ rightAlign ]
-        [ optionButton [ onClick FetchTeams ] [ text "Refresh Teams" ] ]
+    optionButton [ onClick FetchTeams, rightAlign ] [ text "Refresh Teams" ]
 
 
 viewTeamsOrError : Model -> Html Msg
@@ -369,17 +368,15 @@ viewHeader : Session -> Html Msg
 viewHeader session =
     row []
         [ mainHeader [] [ text "Teams" ]
-        , requiresAuth session viewToolBar
+        , requiresAuth session viewAddButton
         ]
 
 
-viewToolBar : Html Msg
-viewToolBar =
-    div [ rightAlign ]
-        [ addButton
-            [ onClick AddTeamButtonClick ]
-            [ text "Add Team" ]
-        ]
+viewAddButton : Html Msg
+viewAddButton =
+    addButton
+        [ onClick AddTeamButtonClick, rightAlign ]
+        [ text "Add Team" ]
 
 
 viewTableHeader : Session -> SortingMethod -> Html Msg
@@ -447,7 +444,7 @@ viewTableHeader session sortMethod =
           )
         , ( [], [ requiresAuth session <| text " " ] )
 
-        {- likely will show something either way NEED FIX -}
+        {- TODO: likely will show something either way NEED FIX -}
         ]
 
 

@@ -2,10 +2,9 @@ module Page.ListDivisions exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes exposing (textCentered)
+import Custom.Html exposing (..)
 import Error
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, div, text)
 import Html.Events exposing (onClick)
 import Http
 import List exposing (drop, length, take)
@@ -235,8 +234,8 @@ lastPage list =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ div Custom.Attributes.row [ viewRefreshButton ]
+    row []
+        [ viewRefreshButton
         , viewErrorMessage model.deleteError
         , viewDivisionsOrError model
         ]
@@ -244,13 +243,7 @@ view model =
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    div [ Custom.Attributes.col ]
-        [ button
-            [ onClick FetchDivisions
-            , Custom.Attributes.refreshButton
-            ]
-            [ text "Refresh Divisions" ]
-        ]
+    optionButton [ onClick FetchDivisions, rightAlign ] [ text "Refresh Divisions" ]
 
 
 viewDivisionsOrError : Model -> Html Msg
@@ -260,7 +253,7 @@ viewDivisionsOrError model =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
+            emphasisText [] [ text "Loading..." ]
 
         RemoteData.Success divisions ->
             viewDivisions model.session model.sortingMethod model.page divisions
@@ -275,8 +268,8 @@ viewLoadError errorMessage =
         errorHeading =
             "Couldn't fetch data at this time."
     in
-    div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text errorHeading ]
+    errorText []
+        [ emphasisText [] [ text errorHeading ]
         , text <| "Error: " ++ errorMessage
         ]
 
@@ -285,8 +278,7 @@ viewErrorMessage : Maybe String -> Html Msg
 viewErrorMessage message =
     case message of
         Just m ->
-            div [ Custom.Attributes.errorMessage ]
-                [ text <| "Error: " ++ m ]
+            errorText [] [ text <| "Error: " ++ m ]
 
         Nothing ->
             text ""
@@ -296,12 +288,13 @@ viewDivisions : Session -> SortingMethod -> Int -> List Division -> Html Msg
 viewDivisions session sortMethod page divisions =
     div []
         [ viewHeader session
-        , table [ Custom.Attributes.table ]
+        , table []
             [ viewTableHeader session sortMethod
-            , sortedDivs sortMethod divisions
-                |> pageOfList page
-                |> List.map (viewDivision session)
-                |> tbody []
+            , tableBody []
+                (sortedDivs sortMethod divisions
+                    |> pageOfList page
+                    |> List.map (viewDivision session)
+                )
             ]
         , viewPageSelect page (length divisions)
         ]
@@ -309,92 +302,89 @@ viewDivisions session sortMethod page divisions =
 
 viewHeader : Session -> Html Msg
 viewHeader session =
-    div Custom.Attributes.row
-        [ div [ Custom.Attributes.col ] [ h3 [] [ text "Divisions" ] ]
-        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
+    row []
+        [ mainHeader [] [ text "Divisions" ]
+        , requiresAuth session viewAddButton
         ]
 
 
-viewToolBar : Html Msg
-viewToolBar =
-    div [ Custom.Attributes.rightSideButtons ]
-        [ button
-            [ Custom.Attributes.addButton
-            , onClick AddDivisionButtonClick
-            ]
-            [ text "Add Division" ]
-        ]
+viewAddButton : Html Msg
+viewAddButton =
+    addButton
+        [ onClick AddDivisionButtonClick, rightAlign ]
+        [ text "Add Division" ]
 
 
 viewTableHeader : Session -> SortingMethod -> Html Msg
 viewTableHeader session sortMethod =
-    thead []
-        [ tr []
-            [ th [ scope "col", onClick NameSortClick ]
-                [ case sortMethod of
-                    Name ->
-                        text "Name ▲"
+    tableHead []
+        [ ( [ onClick NameSortClick ]
+          , [ case sortMethod of
+                Name ->
+                    text "Name ▲"
 
-                    NameDesc ->
-                        text "Name ▼"
+                NameDesc ->
+                    text "Name ▼"
 
-                    _ ->
-                        text "Name"
-                ]
-            , th [ scope "col", onClick SeasonSortClick, textCentered ]
-                [ case sortMethod of
-                    Season ->
-                        text "Season ▲"
-
-                    SeasonDesc ->
-                        text "Season ▼"
-
-                    _ ->
-                        text "Season"
-                ]
-            , th [ scope "col" ]
-                [ text "Open?" ]
-            , requiresAuth session <|
-                th [ scope "col" ]
-                    [ text "" ]
+                _ ->
+                    text "Name"
             ]
+          )
+        , ( [ onClick SeasonSortClick ]
+          , [ case sortMethod of
+                Season ->
+                    text "Season ▲"
+
+                SeasonDesc ->
+                    text "Season ▼"
+
+                _ ->
+                    text "Season"
+            ]
+          )
+        , ( [], [ text "Open?" ] )
+        , ( [], [ requiresAuth session <| text " " ] )
         ]
 
 
 viewDivision : Session -> Division -> Html Msg
 viewDivision session division =
-    tr []
-        [ td [ class "btn-link", onClick <| ViewDivisionButtonClick division.id ]
-            [ text division.name ]
-        , td [ textCentered ]
-            [ text <| String.fromInt division.season ]
-        , td []
-            [ if division.closed then
+    tableRow []
+        [ ( []
+          , [ pageLink
+                [ onClick <| ViewDivisionButtonClick division.id ]
+                [ text division.name ]
+            ]
+          )
+        , ( [], [ text <| String.fromInt division.season ] )
+        , ( []
+          , [ if division.closed then
                 text "Closed"
 
               else
                 text "Ongoing"
             ]
-        , requiresAuth session <|
-            td (Custom.Attributes.tableButtonColumn 3)
-                [ viewCloseButton division
-                , viewEditButton division
-                , viewDeleteButton division
-                ]
+          )
+        , ( []
+          , [ requiresAuth session <| viewCloseButton division
+            , requiresAuth session <| viewEditButton division
+            , requiresAuth session <| viewDeleteButton division
+            ]
+          )
         ]
 
 
 viewDeleteButton : Division -> Html Msg
 viewDeleteButton division =
-    button
-        (onClick (DeleteDivisionButtonClick division.id) :: Custom.Attributes.deleteButton)
+    warnButton
+        [ onClick (DeleteDivisionButtonClick division.id) ]
         [ text "Delete" ]
 
 
 viewEditButton : Division -> Html Msg
 viewEditButton division =
-    button
-        (onClick (EditDivisionButtonClick division.id) :: Custom.Attributes.editButton)
+    optionButton
+        [ onClick (EditDivisionButtonClick division.id) ]
         [ text "Edit" ]
 
 
@@ -404,21 +394,21 @@ viewCloseButton division =
         text ""
 
     else
-        button
-            (onClick (CloseDivisionButtonClick division.id) :: Custom.Attributes.editButton)
+        optionButton
+            [ onClick (CloseDivisionButtonClick division.id) ]
             [ text "Close" ]
 
 
 viewPageSelect : Int -> Int -> Html Msg
-viewPageSelect page divsCount =
-    if divsCount <= pageSize then
+viewPageSelect page count =
+    if count <= pageSize then
         text ""
 
     else
-        div [ textCentered ]
-            [ button [ class "btn", onClick FirstPageClick ] [ text "<<" ]
-            , button [ class "btn", onClick PrevPageClick ] [ text "<" ]
-            , text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (divsCount // pageSize + 1)
-            , button [ class "btn", onClick NextPageClick ] [ text ">" ]
-            , button [ class "btn", onClick LastPageClick ] [ text ">>" ]
+        pageBar []
+            [ pageBarButton [ onClick FirstPageClick ] [ text "<<" ]
+            , pageBarButton [ onClick PrevPageClick ] [ text "<" ]
+            , pageBarFiller [] [ text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (count // pageSize + 1) ]
+            , pageBarButton [ onClick NextPageClick ] [ text ">" ]
+            , pageBarButton [ onClick LastPageClick ] [ text ">>" ]
             ]
