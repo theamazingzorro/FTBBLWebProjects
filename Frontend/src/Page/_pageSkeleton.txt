@@ -1,7 +1,7 @@
 module PageSkeleton exposing (Model, Msg, init, update, view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html)
+import Html.Attributes
 import Model.Session exposing (Session)
 
 

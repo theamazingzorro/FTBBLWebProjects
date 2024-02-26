@@ -13,4 +13,9 @@ body {
     min-height: 100vh;
     flex-direction: column;
     justify-content: space-between;
-  }
+}
+.main-page-content {
+    padding: 2em;
+    max-width: 1200px;
+    margin: 0 auto;
+}

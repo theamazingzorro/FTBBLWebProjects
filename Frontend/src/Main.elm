@@ -5,7 +5,7 @@ import Browser.Navigation as Nav
 import Custom.Html
 import Env exposing (leagueName)
 import Header
-import Html exposing (..)
+import Html exposing (Html, a, h4, p, text)
 import Html.Attributes exposing (href, target)
 import Model.Session exposing (..)
 import Page
@@ -178,7 +178,7 @@ view model =
     , body =
         navView model
             ++ [ Custom.Html.mainContainer []
-                    [ currentPageView model
+                    [ Custom.Html.pageContent [] [ currentPageView model ]
                     , viewFooter
                     ]
                ]

@@ -4,8 +4,8 @@ import Api
 import Auth exposing (requiresAuth)
 import Custom.Html exposing (importantNavButton)
 import Env exposing (leagueName)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Attribute, Html, text)
+import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Http
 import Model.Division exposing (Division, DivisionId, compareDivisions, divisionsDecoder)
