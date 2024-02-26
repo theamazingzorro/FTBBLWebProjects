@@ -19,7 +19,7 @@ navBar attributes children =
 menuIcon : List (Attribute msg) -> Html msg
 menuIcon attributes =
     a
-        ([ class "w3-bar-item w3-button w3-padding-large w3-hide-medium w3-hide-large w3-right"
+        ([ class "w3-bar-item w3-button w3-padding-large w3-hide-large w3-right"
          , href "#"
          ]
             ++ attributes
@@ -160,7 +160,7 @@ list attributes children =
 mainContainer : List (Attribute msg) -> List (Html msg) -> Html msg
 mainContainer attributes children =
     div
-        ([ class "w3-main"
+        ([ class "w3-main flex-wrapper"
          , style "margin-left" "250px"
          ]
             ++ attributes
@@ -172,3 +172,13 @@ row : List (Attribute msg) -> List (Html msg) -> Html msg
 row attributes children =
     div (class "w3-row w3-padding-32" :: attributes)
         children
+
+
+footer : List (Attribute msg) -> List (Html msg) -> List (Html msg) -> Html msg
+footer attributes mainChildren subChildren =
+    Html.footer (id "footer" :: attributes)
+        [ div [ class "w3-container w3-theme-l2 w3-padding-32" ]
+            mainChildren
+        , div [ class "w3-container w3-theme-l1" ]
+            subChildren
+        ]

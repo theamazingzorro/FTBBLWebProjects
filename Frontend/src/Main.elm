@@ -6,6 +6,7 @@ import Custom.Html
 import Env exposing (leagueName)
 import Header
 import Html exposing (..)
+import Html.Attributes exposing (href, target)
 import Model.Session exposing (..)
 import Page
 import Page.Signin as SigninPage
@@ -175,8 +176,24 @@ view : Model -> Document Msg
 view model =
     { title = leagueName
     , body =
-        navView model ++ [ Custom.Html.mainContainer [] [ currentPageView model ] ]
+        navView model
+            ++ [ Custom.Html.mainContainer []
+                    [ currentPageView model
+                    , viewFooter
+                    ]
+               ]
     }
+
+
+viewFooter : Html msg
+viewFooter =
+    Custom.Html.footer []
+        [ h4 [] [ text "©2024 FTBBL" ] ]
+        [ p []
+            [ text "Powered by "
+            , a [ href "https://www.w3schools.com/w3css/default.asp", target "_blank" ] [ text "w3.css" ]
+            ]
+        ]
 
 
 navView : Model -> List (Html Msg)

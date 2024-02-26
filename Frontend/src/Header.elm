@@ -1,6 +1,7 @@
 module Header exposing (Model, Msg, OutMsg(..), init, update, view)
 
 import Api
+import Auth exposing (requiresAuth)
 import Custom.Html exposing (importantNavButton)
 import Env exposing (leagueName)
 import Html exposing (..)
@@ -11,7 +12,6 @@ import Model.Division exposing (Division, DivisionId, compareDivisions, division
 import Model.Session exposing (Session)
 import RemoteData exposing (WebData)
 import Route exposing (Route(..), pushUrl)
-import Auth exposing (requiresAuth)
 
 
 
@@ -219,4 +219,3 @@ sidebarLink title msg =
 smallSidebarLink : String -> Msg -> Html Msg
 smallSidebarLink title msg =
     Custom.Html.smallSideBarLink [ onClick msg ] [ text title ]
-
