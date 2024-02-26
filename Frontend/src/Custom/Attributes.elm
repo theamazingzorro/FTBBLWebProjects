@@ -151,7 +151,7 @@ button =
 
 rightSideButtons : Attribute msg
 rightSideButtons =
-    class "btn-group float-end"
+    class "col-4"
 
 
 refreshButton : Attribute msg

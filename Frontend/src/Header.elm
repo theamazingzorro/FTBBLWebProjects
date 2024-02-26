@@ -1,7 +1,6 @@
-module Header exposing (Model, Msg, OutMsg(..), init, update, view)
+port module Header exposing (Model, Msg, OutMsg(..), init, update, view)
 
 import Api
-import Custom.Attributes
 import Env exposing (leagueName)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -39,14 +38,14 @@ type Msg
 type OutMsg
     = Signout
 
-
+port resizeSidebar : () -> Cmd msg
 
 -- Init --
 
 
 init : Session -> ( Model, Cmd Msg )
 init session =
-    ( { session = session, divisions = RemoteData.Loading }, getDivisionsRequest session.token )
+    ( { session = session, divisions = RemoteData.Loading }, Cmd.batch [getDivisionsRequest session.token, resizeSidebar() ] )
 
 
 
@@ -117,22 +116,19 @@ getDivisionsRequest token =
 
 view : Model -> Html Msg
 view model =
-    nav [ Custom.Attributes.mainNavBar ]
-        [ styleTag
-        , a
-            [ Custom.Attributes.navBarBrand
-            , onClick HomeClicked
-            ]
-            [ text leagueName ]
-        , toggleBarButton
-        , div [ Custom.Attributes.navBarCollapsable, id "navbarNav" ]
-            [ ul [ Custom.Attributes.navBarLinkList ]
-                [ linkElement "Teams" TeamIndexClicked
-                , linkElement "Coaches" CoachIndexClicked
-                , viewDivisionsLink model.divisions
-                , linkElement "Matchups" HeadToHeadClicked
-                , viewAccoladesLink model.session.token
-                , viewSignInOutLink model.session.token
+    div [ id "sidebar" ]
+        [ div [ class "inner" ]
+            [ nav [ id "menu" ]
+                [ header [ class "major" ]
+                    [ h2 [] [ text "Menu" ] ]
+                , ul []
+                    [ linkElement "Teams" TeamIndexClicked
+                    , linkElement "Coaches" CoachIndexClicked
+                    , viewDivisionsLink model.divisions
+                    , linkElement "Matchups" HeadToHeadClicked
+                    , viewAccoladesLink model.session.token
+                    , viewSignInOutLink model.session.token
+                    ]
                 ]
             ]
         ]
@@ -164,7 +160,7 @@ viewDivisionsLink divisions =
         RemoteData.Success divs ->
             dropdownLink "Divisions" DivisionIndexClicked <|
                 List.map
-                    (\div -> dropdownEntry (div.name ++ " Season " ++ String.fromInt div.season) <| SpecificDivisionClicked div.id)
+                    (\div -> linkElement (div.name ++ " Season " ++ String.fromInt div.season) <| SpecificDivisionClicked div.id)
                     (List.sortWith compareDivisions divs
                         |> List.filter (\div -> not div.closed)
                     )
@@ -173,66 +169,20 @@ viewDivisionsLink divisions =
             linkElement "Divisions" DivisionIndexClicked
 
 
-toggleBarButton : Html Msg
-toggleBarButton =
-    button
-        [ class "navbar-toggler"
-        , type_ "button"
-        , attribute "data-toggle" "collapse"
-        , attribute "data-target" "#navbarNav"
-        ]
-        [ span [ class "navbar-toggler-icon" ] [] ]
-
-
 linkElement : String -> Msg -> Html Msg
 linkElement title msg =
-    li [ Custom.Attributes.navItem ]
-        [ a
-            [ Custom.Attributes.navLink
-            , onClick msg
-            , href "#"
-            ]
+    li []
+        [ a [ onClick msg, href "#" ]
             [ text title ]
         ]
 
 
 dropdownLink : String -> Msg -> List (Html Msg) -> Html Msg
 dropdownLink title clickEvent submenu =
-    li [ Custom.Attributes.navDropDownContainer ]
-        [ a
-            (onClick clickEvent
-                :: Custom.Attributes.navDropDownTitleLink
-            )
+    li []
+        [ span [ class "opener" ]
             [ text title ]
-        , ul [ Custom.Attributes.navDropDownMenu ]
+        , ul []
             submenu
         ]
-
-
-dropdownEntry : String -> Msg -> Html Msg
-dropdownEntry label clickEvent =
-    li
-        [ Custom.Attributes.navDropDownItem
-        , onClick clickEvent
-        ]
-        [ text label ]
-
-
-
-{- Direct css to make the hover function in both dev and live. -}
-
-
-styleTag : Html Msg
-styleTag =
-    let
-        styles =
-            """
-        @media all and (min-width: 992px) {
-            .navbar .nav-item .dropdown-menu{ display: none; }
-            .navbar .nav-item:hover .nav-link{   }
-            .navbar .nav-item:hover .dropdown-menu{ display: block; }
-            .navbar .nav-item .dropdown-menu{ margin-top:0; }
-        }
-      """
-    in
-    node "style" [] [ text styles ]
+ 

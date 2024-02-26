@@ -42,6 +42,12 @@
         node: document.getElementById("elm-bed")
       });     
        
+
+      app.ports.resizeSidebar.subscribe(function () {
+        window.setTimeout(function() {
+          $window.trigger('scroll.sidebar-lock');
+        }, 100);
+      })
     </script>
 
     <!-- Scripts -->

@@ -1,11 +1,11 @@
-module Main exposing (Msg, main)
+port module Main exposing (Msg, main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav
-import Custom.Attributes
 import Env exposing (leagueName)
 import Header
 import Html exposing (..)
+import Html.Attributes exposing (..)
 import Model.Session exposing (..)
 import Page
 import Page.Signin as SigninPage
@@ -31,7 +31,7 @@ type Msg
     | HeaderMsg Header.Msg
     | PageMsg Page.Msg
 
-
+port refreshImports : () -> Cmd msg
 
 -- Init --
 
@@ -59,6 +59,7 @@ init _ url navkey =
             Cmd.batch
                 [ Cmd.map HeaderMsg navCommand
                 , Cmd.map PageMsg pageCommand
+                , refreshImports()
                 ]
     in
     ( model, cmds )
@@ -175,9 +176,9 @@ view : Model -> Document Msg
 view model =
     { title = leagueName
     , body =
-        [ div [ Custom.Attributes.mainContainer ]
-            [ navView model
-            , currentPageView model
+        [ div [ class "wrapper" ]
+            [ currentPageView model
+            , navView model
             ]
         ]
     }
@@ -191,8 +192,21 @@ navView model =
 
 currentPageView : Model -> Html Msg
 currentPageView model =
-    Page.view model.page
-        |> Html.map PageMsg
+    div [ id "main" ]
+        [ div [ class "inner" ]
+            [ pageHeader
+            , Page.view model.page
+                |> Html.map PageMsg
+            ]
+        ]
+
+
+pageHeader : Html Msg
+pageHeader =
+    header [ id "header" ]
+        [ p [ href "#", class "logo" ]
+            [ strong [] [ text "FTBBL" ] ]
+        ]
 
 
 

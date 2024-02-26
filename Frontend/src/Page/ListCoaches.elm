@@ -257,21 +257,49 @@ lastPage list =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ div Custom.Attributes.row [ viewRefreshButton ]
+    section []
+        [ viewHeader model.session
+        , viewRefreshButton
+        , hr [ class "major" ] []
         , viewErrorMessage model.deleteError
         , viewCoachesOrError model
         ]
 
 
+viewHeader : Session -> Html Msg
+viewHeader session =
+    header [ class "main" ]
+        [ div [ class "row" ]
+            [ div [ class "col-10" ]
+                [ h1 [] [ text "Coaches" ] ]
+            , div [ class "col-2" ]
+                [ requiresAuth session viewAddButton ]
+            ]
+        ]
+
+
+viewAddButton : Html Msg
+viewAddButton =
+    a
+        [ href "#"
+        , class "button primary"
+        , onClick AddCoachButtonClick
+        ]
+        [ text "Add Coach" ]
+
+
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    div [ Custom.Attributes.col ]
-        [ button
-            [ onClick FetchCoaches
-            , Custom.Attributes.refreshButton
+    div [ class "row" ]
+        [ div [ class "col-10" ] []
+        , div [ class "col-2" ]
+            [ a
+                [ onClick FetchCoaches
+                , href "#"
+                , class "button small"
+                ]
+                [ text "Refresh Coaches" ]
             ]
-            [ text "Refresh Coaches" ]
         ]
 
 
@@ -316,9 +344,8 @@ viewErrorMessage message =
 
 viewCoaches : Session -> SortingMethod -> Int -> List Coach -> Html Msg
 viewCoaches session sortMethod page coaches =
-    div []
-        [ viewHeader session
-        , table [ Custom.Attributes.table ]
+    div [ class "table-wrapper" ]
+        [ table [ Custom.Attributes.table ]
             [ viewTableHeader session sortMethod
             , sortedCoaches sortMethod coaches
                 |> pageOfList page
@@ -326,25 +353,6 @@ viewCoaches session sortMethod page coaches =
                 |> tbody []
             ]
         , viewPageSelect page (length coaches)
-        ]
-
-
-viewHeader : Session -> Html Msg
-viewHeader session =
-    div Custom.Attributes.row
-        [ div [ Custom.Attributes.col ] [ h3 [] [ text "Coaches" ] ]
-        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
-        ]
-
-
-viewToolBar : Html Msg
-viewToolBar =
-    div [ Custom.Attributes.rightSideButtons ]
-        [ button
-            [ Custom.Attributes.addButton
-            , onClick AddCoachButtonClick
-            ]
-            [ text "Add Coach" ]
         ]
 
 
@@ -396,8 +404,7 @@ viewCoach : Session -> Coach -> Html Msg
 viewCoach session coach =
     tr []
         [ td []
-            [ span
-                (Custom.Attributes.textButton <| ViewCoachClick coach.id)
+            [ a [ href "#", onClick <| ViewCoachClick coach.id ]
                 [ text coach.name ]
             , viewAccolades coach
             ]
@@ -406,8 +413,8 @@ viewCoach session coach =
         , td [ textCentered ]
             [ text <| String.fromInt coach.elo ]
         , requiresAuth session <|
-            td (Custom.Attributes.tableButtonColumn 2)
-                [ viewEditButton coach, viewDeleteButton coach ]
+            td []
+                [ viewAdminButtons coach ]
         ]
 
 
@@ -430,30 +437,49 @@ viewAccolades coach =
         )
 
 
+viewAdminButtons : Coach -> Html Msg
+viewAdminButtons coach =
+    ul [ class "actions small stacked" ]
+        [ li [] [ viewEditButton coach ]
+        , li [] [ viewDeleteButton coach ]
+        ]
+
+
 viewDeleteButton : Coach -> Html Msg
 viewDeleteButton coach =
-    button
-        (onClick (DeleteCoachButtonClick coach.id) :: Custom.Attributes.deleteButton)
+    a
+        [ onClick <| DeleteCoachButtonClick coach.id
+        , href "#"
+        , class "button small"
+        ]
         [ text "Delete" ]
 
 
 viewEditButton : Coach -> Html Msg
 viewEditButton coach =
-    button
-        (onClick (EditCoachButtonClick coach.id) :: Custom.Attributes.editButton)
+    a
+        [ onClick <| EditCoachButtonClick coach.id
+        , href "#"
+        , class "button primary small"
+        ]
         [ text "Edit" ]
 
 
 viewPageSelect : Int -> Int -> Html Msg
-viewPageSelect page coachesCount =
-    if coachesCount <= pageSize then
+viewPageSelect page teamsCount =
+    if teamsCount <= pageSize then
         text ""
 
     else
-        div [ textCentered ]
-            [ button [ class "btn", onClick FirstPageClick ] [ text "<<" ]
-            , button [ class "btn", onClick PrevPageClick ] [ text "<" ]
-            , text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (coachesCount // pageSize + 1)
-            , button [ class "btn", onClick NextPageClick ] [ text ">" ]
-            , button [ class "btn", onClick LastPageClick ] [ text ">>" ]
+        div [ class "row" ]
+            [ div [ class "col-4" ] []
+            , div [ class "col-4" ]
+                [ ul [ class "actions" ]
+                    [ li [] [ a [ href "#", class "button", onClick FirstPageClick ] [ text "<<" ] ]
+                    , li [] [ a [ href "#", class "button", onClick PrevPageClick ] [ text "<" ] ]
+                    , li [] [ text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (teamsCount // pageSize + 1) ]
+                    , li [] [ a [ href "#", class "button", onClick NextPageClick ] [ text ">" ] ]
+                    , li [] [ a [ href "#", class "button", onClick LastPageClick ] [ text ">>" ] ]
+                    ]
+                ]
             ]

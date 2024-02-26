@@ -2,7 +2,7 @@ module Page.ListTeams exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes exposing (textButton, textCentered)
+import Custom.Attributes exposing (textCentered)
 import Error exposing (buildErrorMessage)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -298,21 +298,49 @@ lastPage list =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ div Custom.Attributes.row [ viewRefreshButton ]
+    section []
+        [ viewHeader model.session
+        , viewRefreshButton
+        , hr [ class "major" ] []
         , viewErrorMessage model.deleteError
         , viewTeamsOrError model
         ]
 
 
+viewHeader : Session -> Html Msg
+viewHeader session =
+    header [ class "main" ]
+        [ div [ class "row" ]
+            [ div [ class "col-10" ]
+                [ h1 [] [ text "Teams" ] ]
+            , div [ class "col-2" ]
+                [ requiresAuth session viewAddButton ]
+            ]
+        ]
+
+
+viewAddButton : Html Msg
+viewAddButton =
+    a
+        [ href "#"
+        , class "button primary"
+        , onClick AddTeamButtonClick
+        ]
+        [ text "Add Team" ]
+
+
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    div [ Custom.Attributes.col ]
-        [ button
-            [ onClick FetchTeams
-            , Custom.Attributes.refreshButton
+    div [ class "row" ]
+        [ div [ class "col-10" ] []
+        , div [ class "col-2" ]
+            [ a
+                [ onClick FetchTeams
+                , href "#"
+                , class "button small"
+                ]
+                [ text "Refresh Teams" ]
             ]
-            [ text "Refresh Teams" ]
         ]
 
 
@@ -357,9 +385,8 @@ viewErrorMessage message =
 
 viewTeams : Session -> SortingMethod -> Int -> List Team -> Html Msg
 viewTeams session sortMethod page teams =
-    div []
-        [ viewHeader session
-        , table [ Custom.Attributes.table ]
+    div [ class "table-wrapper" ]
+        [ table []
             [ viewTableHeader session sortMethod
             , sortedTeams sortMethod teams
                 |> pageOfList page
@@ -367,25 +394,6 @@ viewTeams session sortMethod page teams =
                 |> tbody []
             ]
         , viewPageSelect page (length teams)
-        ]
-
-
-viewHeader : Session -> Html Msg
-viewHeader session =
-    div Custom.Attributes.row
-        [ div [ Custom.Attributes.col ] [ h3 [] [ text "Teams" ] ]
-        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
-        ]
-
-
-viewToolBar : Html Msg
-viewToolBar =
-    div [ Custom.Attributes.rightSideButtons ]
-        [ button
-            [ Custom.Attributes.addButton
-            , onClick AddTeamButtonClick
-            ]
-            [ text "Add Team" ]
         ]
 
 
@@ -459,16 +467,14 @@ viewTeam : Session -> Team -> Html Msg
 viewTeam session team =
     tr []
         [ td []
-            [ span
-                (textButton <| ViewTeamClick team.id)
+            [ a [ href "#", onClick <| ViewTeamClick team.id ]
                 [ text team.name ]
             , viewAccolades team.accolades
             ]
         , td []
             [ text team.race.name ]
         , td []
-            [ span
-                (textButton <| ViewCoachClick team.coach.id)
+            [ a [ href "#", onClick <| ViewCoachClick team.coach.id ]
                 [ text team.coach.name ]
             , viewAccolades team.coach.accolades
             ]
@@ -477,8 +483,7 @@ viewTeam session team =
         , td [ textCentered ]
             [ text <| String.fromInt team.elo ]
         , requiresAuth session <|
-            td (Custom.Attributes.tableButtonColumn 2)
-                [ viewEditButton team, viewDeleteButton team ]
+            td [] [ viewAdminButtons team ]
         ]
 
 
@@ -495,25 +500,41 @@ viewDivision : Team -> Html Msg
 viewDivision team =
     case team.division of
         Just division ->
-            span
-                (Custom.Attributes.textButton <| ViewDivisionButtonClick division.id)
+            a
+                [ onClick <| ViewDivisionButtonClick division.id
+                , href "#"
+                ]
                 [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
 
         Nothing ->
             text ""
 
 
+viewAdminButtons : Team -> Html Msg
+viewAdminButtons team =
+    ul [ class "actions small stacked" ]
+        [ li [] [ viewEditButton team ]
+        , li [] [ viewDeleteButton team ]
+        ]
+
+
 viewDeleteButton : Team -> Html Msg
 viewDeleteButton team =
-    button
-        (onClick (DeleteTeamButtonClick team.id) :: Custom.Attributes.deleteButton)
+    a
+        [ onClick <| DeleteTeamButtonClick team.id
+        , href "#"
+        , class "button small"
+        ]
         [ text "Delete" ]
 
 
 viewEditButton : Team -> Html Msg
 viewEditButton team =
-    button
-        (onClick (EditTeamButtonClick team.id) :: Custom.Attributes.editButton)
+    a
+        [ onClick <| EditTeamButtonClick team.id
+        , href "#"
+        , class "button primary small"
+        ]
         [ text "Edit" ]
 
 
@@ -523,10 +544,15 @@ viewPageSelect page teamsCount =
         text ""
 
     else
-        div [ textCentered ]
-            [ button [ class "btn", onClick FirstPageClick ] [ text "<<" ]
-            , button [ class "btn", onClick PrevPageClick ] [ text "<" ]
-            , text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (teamsCount // pageSize + 1)
-            , button [ class "btn", onClick NextPageClick ] [ text ">" ]
-            , button [ class "btn", onClick LastPageClick ] [ text ">>" ]
+        div [ class "row" ]
+            [ div [ class "col-4" ] []
+            , div [ class "col-4" ]
+                [ ul [ class "actions" ]
+                    [ li [] [ a [ href "#", class "button", onClick FirstPageClick ] [ text "<<" ] ]
+                    , li [] [ a [ href "#", class "button", onClick PrevPageClick ] [ text "<" ] ]
+                    , li [] [ text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (teamsCount // pageSize + 1) ]
+                    , li [onClick NextPageClick] [ a [ href "#", class "button" ] [ text ">" ] ]
+                    , li [] [ a [ href "#", class "button", onClick LastPageClick ] [ text ">>" ] ]
+                    ]
+                ]
             ]

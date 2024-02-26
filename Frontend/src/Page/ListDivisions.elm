@@ -235,21 +235,49 @@ lastPage list =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ div Custom.Attributes.row [ viewRefreshButton ]
+    section []
+        [ viewHeader model.session
+        , viewRefreshButton
+        , hr [ class "major" ] []
         , viewErrorMessage model.deleteError
         , viewDivisionsOrError model
         ]
 
 
+viewHeader : Session -> Html Msg
+viewHeader session =
+    header [ class "main" ]
+        [ div [ class "row" ]
+            [ div [ class "col-10" ]
+                [ h1 [] [ text "Divisions" ] ]
+            , div [ class "col-2" ]
+                [ requiresAuth session viewAddButton ]
+            ]
+        ]
+
+
+viewAddButton : Html Msg
+viewAddButton =
+    a
+        [ href "#"
+        , class "button primary"
+        , onClick AddDivisionButtonClick
+        ]
+        [ text "Add Division" ]
+
+
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    div [ Custom.Attributes.col ]
-        [ button
-            [ onClick FetchDivisions
-            , Custom.Attributes.refreshButton
+    div [ class "row" ]
+        [ div [ class "col-10" ] []
+        , div [ class "col-2" ]
+            [ a
+                [ onClick FetchDivisions
+                , href "#"
+                , class "button small"
+                ]
+                [ text "Refresh Divs" ]
             ]
-            [ text "Refresh Divisions" ]
         ]
 
 
@@ -294,9 +322,8 @@ viewErrorMessage message =
 
 viewDivisions : Session -> SortingMethod -> Int -> List Division -> Html Msg
 viewDivisions session sortMethod page divisions =
-    div []
-        [ viewHeader session
-        , table [ Custom.Attributes.table ]
+    div [ class "table-wrapper" ]
+        [ table [ Custom.Attributes.table ]
             [ viewTableHeader session sortMethod
             , sortedDivs sortMethod divisions
                 |> pageOfList page
@@ -304,25 +331,6 @@ viewDivisions session sortMethod page divisions =
                 |> tbody []
             ]
         , viewPageSelect page (length divisions)
-        ]
-
-
-viewHeader : Session -> Html Msg
-viewHeader session =
-    div Custom.Attributes.row
-        [ div [ Custom.Attributes.col ] [ h3 [] [ text "Divisions" ] ]
-        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
-        ]
-
-
-viewToolBar : Html Msg
-viewToolBar =
-    div [ Custom.Attributes.rightSideButtons ]
-        [ button
-            [ Custom.Attributes.addButton
-            , onClick AddDivisionButtonClick
-            ]
-            [ text "Add Division" ]
         ]
 
 
@@ -364,8 +372,10 @@ viewTableHeader session sortMethod =
 viewDivision : Session -> Division -> Html Msg
 viewDivision session division =
     tr []
-        [ td [ class "btn-link", onClick <| ViewDivisionButtonClick division.id ]
-            [ text division.name ]
+        [ td []
+            [ a [ href "#", onClick <| ViewDivisionButtonClick division.id ]
+                [ text division.name ]
+            ]
         , td [ textCentered ]
             [ text <| String.fromInt division.season ]
         , td []
@@ -376,25 +386,38 @@ viewDivision session division =
                 text "Ongoing"
             ]
         , requiresAuth session <|
-            td (Custom.Attributes.tableButtonColumn 3)
-                [ viewCloseButton division
-                , viewEditButton division
-                , viewDeleteButton division
+            td []
+                [ viewAdminButtons division
                 ]
+        ]
+
+
+viewAdminButtons : Division -> Html Msg
+viewAdminButtons division =
+    ul [ class "actions small stacked" ]
+        [ li [] [ viewCloseButton division ]
+        , li [] [ viewEditButton division ]
+        , li [] [ viewDeleteButton division ]
         ]
 
 
 viewDeleteButton : Division -> Html Msg
 viewDeleteButton division =
-    button
-        (onClick (DeleteDivisionButtonClick division.id) :: Custom.Attributes.deleteButton)
+    a
+        [ onClick <| DeleteDivisionButtonClick division.id
+        , href "#"
+        , class "button small"
+        ]
         [ text "Delete" ]
 
 
 viewEditButton : Division -> Html Msg
 viewEditButton division =
-    button
-        (onClick (EditDivisionButtonClick division.id) :: Custom.Attributes.editButton)
+    a
+        [ onClick <| EditDivisionButtonClick division.id
+        , href "#"
+        , class "button primary small"
+        ]
         [ text "Edit" ]
 
 
@@ -404,21 +427,29 @@ viewCloseButton division =
         text ""
 
     else
-        button
-            (onClick (CloseDivisionButtonClick division.id) :: Custom.Attributes.editButton)
-            [ text "Close" ]
+        a
+        [ onClick <| CloseDivisionButtonClick division.id
+        , href "#"
+        , class "button primary small"
+        ]
+        [ text "Close" ]
 
 
 viewPageSelect : Int -> Int -> Html Msg
-viewPageSelect page divsCount =
-    if divsCount <= pageSize then
+viewPageSelect page teamsCount =
+    if teamsCount <= pageSize then
         text ""
 
     else
-        div [ textCentered ]
-            [ button [ class "btn", onClick FirstPageClick ] [ text "<<" ]
-            , button [ class "btn", onClick PrevPageClick ] [ text "<" ]
-            , text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (divsCount // pageSize + 1)
-            , button [ class "btn", onClick NextPageClick ] [ text ">" ]
-            , button [ class "btn", onClick LastPageClick ] [ text ">>" ]
+        div [ class "row" ]
+            [ div [ class "col-4" ] []
+            , div [ class "col-4" ]
+                [ ul [ class "actions" ]
+                    [ li [] [ a [ href "#", class "button", onClick FirstPageClick ] [ text "<<" ] ]
+                    , li [] [ a [ href "#", class "button", onClick PrevPageClick ] [ text "<" ] ]
+                    , li [] [ text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (teamsCount // pageSize + 1) ]
+                    , li [] [ a [ href "#", class "button", onClick NextPageClick ] [ text ">" ] ]
+                    , li [] [ a [ href "#", class "button", onClick LastPageClick ] [ text ">>" ] ]
+                    ]
+                ]
             ]
