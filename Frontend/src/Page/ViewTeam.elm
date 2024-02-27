@@ -173,8 +173,7 @@ view model =
 
         RemoteData.Success team ->
             row []
-                [ requiresAuth model.session <| viewToolBar team
-                , viewErrorMessage model.deleteError
+                [ viewErrorMessage model.deleteError
                 , viewTeam model team
                 ]
 
@@ -277,12 +276,14 @@ viewTeamDetails model team =
             , bodyText [] [ text "Most Recent Division: ", Maybe.map viewDivision team.division |> Maybe.withDefault (text "N/A") ]
             ]
         , colThird []
-            [ if team.accolades /= [] then
-                viewAccolades team
+            (if team.accolades /= [] then
+                [ viewAccolades team
+                , requiresAuth model.session <| viewToolBar team
+                ]
 
-              else
-                text ""
-            ]
+             else
+                [ requiresAuth model.session <| viewToolBar team ]
+            )
         ]
 
 
@@ -363,7 +364,7 @@ viewDivision division =
 
 viewTeamEloGraph : List EloHistory -> Html Msg
 viewTeamEloGraph history =
-    div []
+    row []
         [ subHeader [] [ text "Elo History" ]
         , List.map (\h -> ( h.date, toFloat h.elo )) history
             |> LineChart.viewChart

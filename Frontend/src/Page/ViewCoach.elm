@@ -192,8 +192,7 @@ view model =
 
         RemoteData.Success coach ->
             row []
-                [ requiresAuth model.session viewToolBar
-                , viewErrorMessage model.deleteError
+                [ viewErrorMessage model.deleteError
                 , viewCoach model coach
                 ]
 
@@ -288,12 +287,13 @@ viewCoachDetails model coach =
             , bodyText [] [ text <| "Max Elo: " ++ viewMaxElo model.coachHistory ]
             ]
         , colThird []
-            [ if coach.accolades /= [] then
-                viewAccolades coach
+            ( if coach.accolades /= [] then
+                [viewAccolades coach
+                , requiresAuth model.session viewToolBar ]
 
               else
-                text ""
-            ]
+                [ requiresAuth model.session viewToolBar ]
+            )
         ]
 
 
@@ -335,7 +335,7 @@ viewAccoladeRow accolade =
 
 viewTeamsTable : List Team -> Html Msg
 viewTeamsTable teams =
-    row []
+    div []
         [ subHeader [] [ text "Teams" ]
         , table []
             [ viewTeamTableHeader
