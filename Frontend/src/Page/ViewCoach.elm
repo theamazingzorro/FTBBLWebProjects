@@ -287,11 +287,12 @@ viewCoachDetails model coach =
             , bodyText [] [ text <| "Max Elo: " ++ viewMaxElo model.coachHistory ]
             ]
         , colThird []
-            ( if coach.accolades /= [] then
-                [viewAccolades coach
-                , requiresAuth model.session viewToolBar ]
+            (if coach.accolades /= [] then
+                [ viewAccolades coach
+                , requiresAuth model.session viewToolBar
+                ]
 
-              else
+             else
                 [ requiresAuth model.session viewToolBar ]
             )
         ]

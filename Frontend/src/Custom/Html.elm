@@ -8,6 +8,16 @@ import Html.Attributes exposing (..)
 -- Attributes --
 
 
+visible : Attribute msg
+visible =
+    style "display" "block"
+
+
+hidden : Attribute msg
+hidden =
+    style "display" "none"
+
+
 floatRight : Attribute msg
 floatRight =
     class "w3-right"
