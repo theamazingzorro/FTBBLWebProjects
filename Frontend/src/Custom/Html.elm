@@ -184,7 +184,7 @@ sideBarShadow attributes =
 mainHeader : List (Attribute msg) -> List (Html msg) -> Html msg
 mainHeader attributes children =
     h1 (class "w3-text-teal" :: attributes)
-        [b [] children]
+        [ b [] children ]
 
 
 subHeader : List (Attribute msg) -> List (Html msg) -> Html msg
@@ -258,6 +258,7 @@ addButton : List (Attribute msg) -> List (Html msg) -> Html msg
 addButton attributes children =
     a
         ([ class "w3-button w3-green round-corners"
+         , style "margin" "2px"
          , href "#"
          ]
             ++ attributes
@@ -269,6 +270,7 @@ optionButton : List (Attribute msg) -> List (Html msg) -> Html msg
 optionButton attributes children =
     a
         ([ class "w3-button w3-theme round-corners"
+         , style "margin" "2px"
          , href "#"
          ]
             ++ attributes
@@ -280,6 +282,7 @@ warnButton : List (Attribute msg) -> List (Html msg) -> Html msg
 warnButton attributes children =
     a
         ([ class "w3-button w3-red round-corners"
+         , style "margin" "2px"
          , href "#"
          ]
             ++ attributes
@@ -291,6 +294,7 @@ circleButton : List (Attribute msg) -> List (Html msg) -> Html msg
 circleButton attributes children =
     a
         ([ class "w3-button w3-circle w3-large w3-card-4"
+         , style "margin" "2px"
          , href "#"
          ]
             ++ attributes
@@ -385,6 +389,7 @@ row : List (Attribute msg) -> List (Html msg) -> Html msg
 row attributes children =
     div (class "w3-row w3-padding-32" :: attributes)
         children
+
 
 narrowRow : List (Attribute msg) -> List (Html msg) -> Html msg
 narrowRow attributes children =
