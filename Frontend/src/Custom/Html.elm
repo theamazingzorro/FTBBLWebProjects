@@ -184,7 +184,7 @@ sideBarShadow attributes =
 mainHeader : List (Attribute msg) -> List (Html msg) -> Html msg
 mainHeader attributes children =
     h1 (class "w3-text-teal" :: attributes)
-        children
+        [b [] children]
 
 
 subHeader : List (Attribute msg) -> List (Html msg) -> Html msg
@@ -192,10 +192,11 @@ subHeader attributes children =
     h2 (class "w3-text-teal" :: attributes)
         children
 
+
 smallColorText : List (Attribute msg) -> List (Html msg) -> Html msg
 smallColorText attributes children =
     h4 (class "w3-text-teal" :: attributes)
-        [b [] children]
+        [ b [] children ]
 
 
 emphasisText : List (Attribute msg) -> List (Html msg) -> Html msg
@@ -256,7 +257,7 @@ tableRow attributes children =
 addButton : List (Attribute msg) -> List (Html msg) -> Html msg
 addButton attributes children =
     a
-        ([ class "w3-button w3-green"
+        ([ class "w3-button w3-green round-corners"
          , href "#"
          ]
             ++ attributes
@@ -267,7 +268,7 @@ addButton attributes children =
 optionButton : List (Attribute msg) -> List (Html msg) -> Html msg
 optionButton attributes children =
     a
-        ([ class "w3-button w3-theme"
+        ([ class "w3-button w3-theme round-corners"
          , href "#"
          ]
             ++ attributes
@@ -278,7 +279,7 @@ optionButton attributes children =
 warnButton : List (Attribute msg) -> List (Html msg) -> Html msg
 warnButton attributes children =
     a
-        ([ class "w3-button w3-red"
+        ([ class "w3-button w3-red round-corners"
          , href "#"
          ]
             ++ attributes
@@ -286,8 +287,8 @@ warnButton attributes children =
         children
 
 
-roundButton : List (Attribute msg) -> List (Html msg) -> Html msg
-roundButton attributes children =
+circleButton : List (Attribute msg) -> List (Html msg) -> Html msg
+circleButton attributes children =
     a
         ([ class "w3-button w3-circle w3-large w3-card-4"
          , href "#"
@@ -300,6 +301,63 @@ roundButton attributes children =
 pageLink : List (Attribute msg) -> List (Html msg) -> Html msg
 pageLink attributes children =
     a (href "#" :: attributes) children
+
+
+
+-- Forms --
+
+
+inputForm : List (Attribute msg) -> List (Html msg) -> Html msg
+inputForm attributes children =
+    Html.form (class "w3-container" :: attributes) children
+
+
+inputSection : List (Attribute msg) -> List (Html msg) -> Html msg
+inputSection attributes children =
+    div (class "w3-section" :: attributes) children
+
+
+inputLabel : List (Attribute msg) -> List (Html msg) -> Html msg
+inputLabel attributes children =
+    label attributes children
+
+
+textInput : List (Attribute msg) -> List (Html msg) -> Html msg
+textInput attributes children =
+    inputSection []
+        [ input
+            ([ class "w3-input"
+             , type_ "text"
+             ]
+                ++ attributes
+            )
+            []
+        , inputLabel [] children
+        ]
+
+
+disabledTextInput : List (Attribute msg) -> List (Html msg) -> Html msg
+disabledTextInput attributes children =
+    inputSection []
+        [ input
+            ([ class "w3-input"
+             , type_ "text"
+             , readonly True
+             , disabled True
+             ]
+                ++ attributes
+            )
+            []
+        , inputLabel [] children
+        ]
+
+
+dropdownInput : List (Attribute msg) -> List ( List (Attribute msg), List (Html msg) ) -> Html msg
+dropdownInput attributes children =
+    select (class "form-control form-select" :: attributes)
+        (option [ value "0" ] [ text "-" ]
+            :: List.map (\( a, h ) -> option a h) children
+        )
 
 
 
@@ -326,6 +384,11 @@ pageContent attributes children =
 row : List (Attribute msg) -> List (Html msg) -> Html msg
 row attributes children =
     div (class "w3-row w3-padding-32" :: attributes)
+        children
+
+narrowRow : List (Attribute msg) -> List (Html msg) -> Html msg
+narrowRow attributes children =
+    div (class "w3-row" :: attributes)
         children
 
 
@@ -361,22 +424,22 @@ colThreeQuarter attributes children =
 
 shadedContainer : List (Attribute msg) -> List (Html msg) -> Html msg
 shadedContainer attributes children =
-    div (class "w3-container w3-theme-l3" :: attributes)
+    div (class "w3-container w3-theme-l3 round-corners" :: attributes)
         children
 
 
 floatingCard : List (Attribute msg) -> List (Html msg) -> Html msg
 floatingCard attributes children =
-    div (class "w3-card-4 w3-container w3-white floating-card-container" :: attributes)
+    div (class "w3-card-4 w3-container w3-white floating-card-container round-corners" :: attributes)
         children
 
 
 footer : List (Attribute msg) -> List (Html msg) -> List (Html msg) -> Html msg
 footer attributes mainChildren subChildren =
     Html.footer (id "footer" :: attributes)
-        [ div [ class "w3-container w3-theme-l2 w3-padding-32" ]
+        [ div [ class "w3-container w3-theme-l2 w3-padding-32", textRight ]
             mainChildren
-        , div [ class "w3-container w3-theme-l1" ]
+        , div [ class "w3-container w3-theme-l1", textRight ]
             subChildren
         ]
 
@@ -396,8 +459,8 @@ pageBar attributes children =
 pageBarButton : List (Attribute msg) -> List (Html msg) -> Html msg
 pageBarButton attributes children =
     div
-        (class "w3-bar-item w3-button w3-hover-teal" :: attributes)
-        children
+        (class "w3-bar-item w3-button w3-hover-teal w3-text-teal" :: attributes)
+        [ b [] children ]
 
 
 pageBarFiller : List (Attribute msg) -> List (Html msg) -> Html msg

@@ -4,7 +4,7 @@ import Api
 import Auth exposing (requiresAuth)
 import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (Html, div, span, text)
+import Html exposing (Html, div, h2, span, text)
 import Html.Events exposing (onClick)
 import Http
 import Model.Accolade exposing (Accolade, viewAccolade)
@@ -19,7 +19,6 @@ import RemoteData exposing (WebData)
 import Route exposing (pushUrl)
 import String exposing (toLower)
 import Url exposing (Protocol(..))
-import Html exposing (h2)
 
 
 
@@ -192,17 +191,30 @@ update msg model =
         PrevPageClick ->
             let
                 newWeek =
-                    if model.displayedWeek <= 1 then 1 else model.displayedWeek - 1
+                    if model.displayedWeek <= 1 then
+                        1
+
+                    else
+                        model.displayedWeek - 1
             in
             ( { model | displayedWeek = newWeek }, Cmd.none )
 
         NextPageClick ->
             let
-                max = case model.games of
-                        RemoteData.Success games -> maxWeek games
-                        _ -> model.displayedWeek
+                max =
+                    case model.games of
+                        RemoteData.Success games ->
+                            maxWeek games
+
+                        _ ->
+                            model.displayedWeek
+
                 newWeek =
-                    if model.displayedWeek >=max then max else model.displayedWeek + 1
+                    if model.displayedWeek >= max then
+                        max
+
+                    else
+                        model.displayedWeek + 1
             in
             ( { model | displayedWeek = newWeek }, Cmd.none )
 
@@ -210,8 +222,11 @@ update msg model =
             let
                 newWeek =
                     case model.games of
-                        RemoteData.Success games -> maxWeek games
-                        _ -> model.displayedWeek
+                        RemoteData.Success games ->
+                            maxWeek games
+
+                        _ ->
+                            model.displayedWeek
             in
             ( { model | displayedWeek = newWeek }, Cmd.none )
 
@@ -353,7 +368,7 @@ view model =
 viewRefreshButton : Html Msg
 viewRefreshButton =
     optionButton
-        [ onClick RefreshButtonClick ]
+        [ onClick RefreshButtonClick, floatRight ]
         [ text "Refresh Page" ]
 
 
@@ -635,7 +650,7 @@ viewAddWeekButton nextWeek =
 viewWeekOfGames : Model -> List Game -> Html Msg
 viewWeekOfGames model games =
     shadedContainer []
-        ( viewWeekTitle model.displayedWeek
+        (viewWeekTitle model.displayedWeek
             :: (gamesInWeek model.displayedWeek games
                     |> List.map (viewGame model.session)
                )
@@ -654,19 +669,18 @@ viewGame : Session -> Game -> Html Msg
 viewGame session game =
     floatingCard []
         [ viewGameDetails game
-        , viewOdds game
         , requiresAuth session <| viewGameButtons game
         ]
 
 
 viewGameDetails : Game -> Html Msg
 viewGameDetails game =
-    row []
+    narrowRow []
         [ colThird [ textRight ]
             [ smallColorText [] [ text game.homeTeam.name ]
             , bodyText [] [ text game.homeTeam.coach.name ]
             ]
-        , colThird [ textCenter ] [ viewScore game ]
+        , colThird [ textCenter ] [ viewScore game, viewOdds game ]
         , colThird [ textLeft ]
             [ smallColorText [] [ text game.awayTeam.name ]
             , bodyText [] [ text game.awayTeam.coach.name ]

@@ -1,10 +1,10 @@
 module Page.AddTeamToDiv exposing (Model, Msg, init, update, view)
 
 import Api
-import Custom.Attributes
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Attribute, Html, div, text)
+import Html.Attributes exposing (selected, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Division exposing (Division, DivisionId, divisionDecoder)
@@ -161,12 +161,11 @@ view model =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
+            emphasisText [] [ text "Loading..." ]
 
         RemoteData.Success division ->
-            div []
-                [ h3 [] [ text <| "Add Team to " ++ division.name ]
-                , br [] []
+            row []
+                [ mainHeader [] [ text <| "Add Team to " ++ division.name ]
                 , viewSaveError model.saveError
                 , if division.closed then
                     closedDivError
@@ -181,10 +180,9 @@ view model =
 
 closedDivError : Html Msg
 closedDivError =
-    div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text "Invalid Division" ]
+    errorText []
+        [ emphasisText [] [ text "Invalid Division" ]
         , text "You cannot add a team to a division that has been closed."
-        , br [] []
         ]
 
 
@@ -195,7 +193,7 @@ viewFormOrError model =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
+            emphasisText [] [ text "Loading..." ]
 
         RemoteData.Success teams ->
             viewForm teams model
@@ -208,10 +206,9 @@ viewSaveError : Maybe String -> Html msg
 viewSaveError maybeError =
     case maybeError of
         Just error ->
-            div [ Custom.Attributes.errorMessage ]
-                [ h3 [] [ text "Couldn't add team to a new division at this time." ]
+            errorText []
+                [ emphasisText [] [ text "Couldn't add team to a new division at this time." ]
                 , text ("Error: " ++ error)
-                , br [] []
                 ]
 
         Nothing ->
@@ -224,15 +221,15 @@ viewLoadError errorMessage =
         errorHeading =
             "Couldn't fetch data at this time."
     in
-    div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text errorHeading ]
+    errorText []
+        [ emphasisText [] [ text errorHeading ]
         , text <| "Error: " ++ errorMessage
         ]
 
 
 viewForm : List Team -> Model -> Html Msg
 viewForm teams model =
-    div []
+    inputForm []
         [ teamDropdown model.selectedTeamId <| List.sortBy .name teams
         , viewSelectedTeam <| getSelectedTeam teams model.selectedTeamId
         ]
@@ -240,30 +237,20 @@ viewForm teams model =
 
 teamDropdown : Maybe TeamId -> List Team -> Html Msg
 teamDropdown selectedId teams =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "teamDropdown")
-            [ text "Team" ]
-        , select
-            (Custom.Attributes.formDropdown "teamDropdown"
-                [ onInput TeamSelected ]
-            )
-            (defaultOption :: List.map (teamOption selectedId) teams)
+    inputSection []
+        [ dropdownInput [ onInput TeamSelected ]
+            (List.map (teamOption selectedId) teams)
+        , inputLabel [] [ text "Team" ]
         ]
 
 
-defaultOption : Html Msg
-defaultOption =
-    option [ value "0" ] [ text "-" ]
-
-
-teamOption : Maybe TeamId -> Team -> Html msg
+teamOption : Maybe TeamId -> Team -> ( List (Attribute msg), List (Html msg) )
 teamOption selectedId team =
-    option
-        [ value <| Model.Team.idToString team.id
-        , selected (Just team.id == selectedId)
-        ]
-        [ text team.name ]
+    ( [ value <| Model.Team.idToString team.id
+      , selected <| Just team.id == selectedId
+      ]
+    , [ text team.name ]
+    )
 
 
 viewSelectedTeam : Maybe Team -> Html Msg
@@ -271,31 +258,18 @@ viewSelectedTeam maybeTeam =
     case maybeTeam of
         Just team ->
             div []
-                [ viewStaticField "raceField" "Race" team.race.name
-                , viewStaticField "coachField" "Coach" team.coach.name
-                , viewStaticField "eloField" "Elo" <| String.fromInt team.elo
-                , button
-                    [ Custom.Attributes.submitButton
-                    , onClick Submit
-                    ]
-                    [ text "Save" ]
+                [ viewStaticField "Race" team.race.name
+                , viewStaticField "Coach" team.coach.name
+                , viewStaticField "Elo" <| String.fromInt team.elo
+                , addButton [ onClick Submit ] [ text "Save" ]
                 ]
 
         Nothing ->
             text ""
 
 
-viewStaticField : String -> String -> String -> Html msg
-viewStaticField id lblText entry =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel id)
-            [ text lblText ]
-        , input
-            (Custom.Attributes.formInput id
-                [ readonly True
-                , value entry
-                ]
-            )
-            []
-        ]
+viewStaticField : String -> String -> Html msg
+viewStaticField lblText entry =
+    Custom.Html.disabledTextInput
+        [ value entry ]
+        [ text lblText ]

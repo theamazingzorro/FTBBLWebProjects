@@ -23,4 +23,8 @@ body {
     width:80%;
     max-width:800px;
     margin: 4em auto;
+    padding: 1em;
+}
+.round-corners {
+    border-radius: 20px;
 }
