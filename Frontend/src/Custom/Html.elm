@@ -399,31 +399,31 @@ narrowRow attributes children =
 
 colHalf : List (Attribute msg) -> List (Html msg) -> Html msg
 colHalf attributes children =
-    div (class "w3-half w3-container" :: attributes)
+    div (class "w3-half" :: attributes)
         children
 
 
 colThird : List (Attribute msg) -> List (Html msg) -> Html msg
 colThird attributes children =
-    div (class "w3-third w3-container" :: attributes)
+    div (class "w3-third" :: attributes)
         children
 
 
 colTwoThird : List (Attribute msg) -> List (Html msg) -> Html msg
 colTwoThird attributes children =
-    div (class "w3-twothird w3-container" :: attributes)
+    div (class "w3-twothird" :: attributes)
         children
 
 
 colQuarter : List (Attribute msg) -> List (Html msg) -> Html msg
 colQuarter attributes children =
-    div (class "w3-quarter w3-container" :: attributes)
+    div (class "w3-quarter" :: attributes)
         children
 
 
 colThreeQuarter : List (Attribute msg) -> List (Html msg) -> Html msg
 colThreeQuarter attributes children =
-    div (class "w3-threequarter w3-container" :: attributes)
+    div (class "w3-threequarter" :: attributes)
         children
 
 
