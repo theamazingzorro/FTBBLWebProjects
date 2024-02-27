@@ -172,7 +172,7 @@ view model =
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    optionButton [ onClick Refresh, rightAlign ] [ text "Refresh Accolades" ]
+    optionButton [ onClick Refresh, floatRight ] [ text "Refresh Accolades" ]
 
 
 viewAccoladesOrError : Model -> Html Msg
@@ -236,7 +236,7 @@ viewHeader session =
 viewAddButton : Html Msg
 viewAddButton =
     addButton
-        [ onClick AddAccoladeButtonClick, rightAlign ]
+        [ onClick AddAccoladeButtonClick, floatRight ]
         [ text "Add Accolade" ]
 
 
@@ -267,5 +267,5 @@ viewAccolade model accolade =
 viewDeleteButton : Accolade -> Html Msg
 viewDeleteButton accolade =
     warnButton
-        [onClick (DeleteAccoladeButtonClick accolade.id)]
+        [ onClick (DeleteAccoladeButtonClick accolade.id) ]
         [ text "Delete" ]

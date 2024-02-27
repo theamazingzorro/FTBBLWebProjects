@@ -2,10 +2,9 @@ module Page.ViewCoach exposing (Model, Msg, init, update, view)
 
 import Api exposing (Endpoint(..))
 import Auth exposing (requiresAuth)
-import Custom.Attributes
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, div, span, text)
 import Html.Events exposing (onClick)
 import Http
 import LineChart
@@ -189,10 +188,10 @@ view model =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
+            emphasisText [] [ text "Loading..." ]
 
         RemoteData.Success coach ->
-            div []
+            row []
                 [ requiresAuth model.session viewToolBar
                 , viewErrorMessage model.deleteError
                 , viewCoach model coach
@@ -208,8 +207,8 @@ viewLoadError errorMessage =
         errorHeading =
             "Couldn't fetch data at this time."
     in
-    div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text errorHeading ]
+    errorText []
+        [ emphasisText [] [ text errorHeading ]
         , text <| "Error: " ++ errorMessage
         ]
 
@@ -218,8 +217,7 @@ viewErrorMessage : Maybe String -> Html Msg
 viewErrorMessage message =
     case message of
         Just m ->
-            div [ Custom.Attributes.errorMessage ]
-                [ text <| "Error: " ++ m ]
+            errorText [] [ text <| "Error: " ++ m ]
 
         Nothing ->
             text ""
@@ -227,17 +225,15 @@ viewErrorMessage message =
 
 viewToolBar : Html Msg
 viewToolBar =
-    div [ Custom.Attributes.rightSideButtons ]
-        [ button
-            [ Custom.Attributes.addButton
-            , onClick AddAccoladeButtonClick
-            ]
+    row [ floatRight ]
+        [ addButton
+            [ onClick AddAccoladeButtonClick ]
             [ text "Add Accolade" ]
-        , button
-            (onClick EditCoachButtonClick :: Custom.Attributes.editButton)
+        , optionButton
+            [ onClick EditCoachButtonClick ]
             [ text "Edit" ]
-        , button
-            (onClick DeleteCoachButtonClick :: Custom.Attributes.deleteButton)
+        , warnButton
+            [ onClick DeleteCoachButtonClick ]
             [ text "Delete" ]
         ]
 
@@ -245,8 +241,7 @@ viewToolBar =
 viewCoach : Model -> Coach -> Html Msg
 viewCoach model coach =
     div []
-        [ br [] []
-        , viewCoachDetails model coach
+        [ viewCoachDetails model coach
         , viewTeams model
         , viewCoachEloHistory model
         ]
@@ -262,7 +257,7 @@ viewTeams model =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading Teams..." ]
+            emphasisText [] [ text "Loading Teams..." ]
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -278,7 +273,7 @@ viewCoachEloHistory model =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading Elo History..." ]
+            emphasisText [] [ text "Loading Elo History..." ]
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -286,14 +281,13 @@ viewCoachEloHistory model =
 
 viewCoachDetails : Model -> Coach -> Html Msg
 viewCoachDetails model coach =
-    div [ class "row" ]
-        [ div [ class " col" ]
-            [ h3 [] [ text coach.name ]
-            , br [] []
-            , p [] [ text <| "Current Elo: " ++ String.fromInt coach.elo ]
-            , p [] [ text <| "Max Elo: " ++ viewMaxElo model.coachHistory ]
+    row []
+        [ colTwoThird []
+            [ mainHeader [] [ text coach.name ]
+            , bodyText [] [ text <| "Current Elo: " ++ String.fromInt coach.elo ]
+            , bodyText [] [ text <| "Max Elo: " ++ viewMaxElo model.coachHistory ]
             ]
-        , div [ class "col" ]
+        , colThird []
             [ if coach.accolades /= [] then
                 viewAccolades coach
 
@@ -321,75 +315,59 @@ viewMaxElo historyData =
 
 viewAccolades : Coach -> Html Msg
 viewAccolades coach =
-    table [ Custom.Attributes.table ]
-        [ thead []
-            [ tr []
-                [ th [ scope "col" ]
-                    [ text "" ]
-                , th [ scope "col" ]
-                    [ text "Achievements" ]
-                ]
+    table []
+        [ tableHead []
+            [ ( [], [ text "" ] )
+            , ( [], [ text "Achievements" ] )
             ]
-        , tbody [] <|
+        , tableBody [] <|
             List.map viewAccoladeRow coach.accolades
         ]
 
 
 viewAccoladeRow : Accolade -> Html Msg
 viewAccoladeRow accolade =
-    tr []
-        [ td []
-            [ viewAccolade accolade ]
-        , td []
-            [ text <| accolade.name ++ (Maybe.map (\season -> " Season " ++ String.fromInt season) accolade.season |> Maybe.withDefault "") ]
+    tableRow []
+        [ ( [], [ viewAccolade accolade ] )
+        , ( [], [ text <| accolade.name ++ (Maybe.map (\season -> " Season " ++ String.fromInt season) accolade.season |> Maybe.withDefault "") ] )
         ]
 
 
 viewTeamsTable : List Team -> Html Msg
 viewTeamsTable teams =
-    div []
-        [ br [] []
-        , br [] []
-        , h4 [] [ text "Teams" ]
-        , table [ Custom.Attributes.table ]
-            [ viewTableHeader
-            , tbody [] <|
+    row []
+        [ subHeader [] [ text "Teams" ]
+        , table []
+            [ viewTeamTableHeader
+            , tableBody [] <|
                 List.map viewTableRow teams
             ]
         ]
 
 
-viewTableHeader : Html Msg
-viewTableHeader =
-    thead []
-        [ tr []
-            [ th [ scope "col" ]
-                [ text "Name" ]
-            , th [ scope "col" ]
-                [ text "Race" ]
-            , th [ scope "col" ]
-                [ text "Division" ]
-            , th [ scope "col", Custom.Attributes.textCentered ]
-                [ text "Elo" ]
-            ]
+viewTeamTableHeader : Html Msg
+viewTeamTableHeader =
+    tableHead []
+        [ ( [], [ text "Name" ] )
+        , ( [], [ text "Race" ] )
+        , ( [], [ text "Division" ] )
+        , ( [], [ text "Elo" ] )
         ]
 
 
 viewTableRow : Team -> Html Msg
 viewTableRow team =
-    tr []
-        [ td []
-            [ span
-                (Custom.Attributes.textButton <| ViewTeamClick team.id)
+    tableRow []
+        [ ( []
+          , [ pageLink
+                [ onClick <| ViewTeamClick team.id ]
                 [ text team.name ]
             , viewSmallAccolades team.accolades
             ]
-        , td []
-            [ text team.race.name ]
-        , td []
-            [ viewDivision team.division ]
-        , td [ Custom.Attributes.textCentered ]
-            [ text <| String.fromInt team.elo ]
+          )
+        , ( [], [ text team.race.name ] )
+        , ( [], [ viewDivision team.division ] )
+        , ( [], [ text <| String.fromInt team.elo ] )
         ]
 
 
@@ -409,16 +387,15 @@ viewDivision maybeDiv =
             text ""
 
         Just division ->
-            span
-                (Custom.Attributes.textButton <| ViewDivisionClick division.id)
+            pageLink
+                [ onClick <| ViewDivisionClick division.id ]
                 [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
 
 
 viewCoachEloGraph : List EloHistory -> Html Msg
 viewCoachEloGraph history =
-    div []
-        [ br [] []
-        , h4 [] [ text "Elo History" ]
+    row []
+        [ subHeader [] [ text "Elo History" ]
         , List.map (\h -> ( h.date, toFloat h.elo )) history
             |> LineChart.viewChart
         ]

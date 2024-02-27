@@ -8,9 +8,34 @@ import Html.Attributes exposing (..)
 -- Attributes --
 
 
-rightAlign : Attribute msg
-rightAlign =
+floatRight : Attribute msg
+floatRight =
     class "w3-right"
+
+
+floatCenter : Attribute msg
+floatCenter =
+    class "w3-center"
+
+
+floatLeft : Attribute msg
+floatLeft =
+    class "w3-left"
+
+
+textCenter : Attribute msg
+textCenter =
+    style "text-align" "center"
+
+
+textRight : Attribute msg
+textRight =
+    style "text-align" "right"
+
+
+textLeft : Attribute msg
+textLeft =
+    style "text-align" "left"
 
 
 
@@ -167,6 +192,11 @@ subHeader attributes children =
     h2 (class "w3-text-teal" :: attributes)
         children
 
+smallColorText : List (Attribute msg) -> List (Html msg) -> Html msg
+smallColorText attributes children =
+    h4 (class "w3-text-teal" :: attributes)
+        [b [] children]
+
 
 emphasisText : List (Attribute msg) -> List (Html msg) -> Html msg
 emphasisText attributes children =
@@ -177,6 +207,11 @@ errorText : List (Attribute msg) -> List (Html msg) -> Html msg
 errorText attributes children =
     div (class "w3-text-red" :: attributes)
         children
+
+
+bodyText : List (Attribute msg) -> List (Html msg) -> Html msg
+bodyText attributes children =
+    p attributes children
 
 
 
@@ -321,6 +356,18 @@ colQuarter attributes children =
 colThreeQuarter : List (Attribute msg) -> List (Html msg) -> Html msg
 colThreeQuarter attributes children =
     div (class "w3-threequarter w3-container" :: attributes)
+        children
+
+
+shadedContainer : List (Attribute msg) -> List (Html msg) -> Html msg
+shadedContainer attributes children =
+    div (class "w3-container w3-theme-l3" :: attributes)
+        children
+
+
+floatingCard : List (Attribute msg) -> List (Html msg) -> Html msg
+floatingCard attributes children =
+    div (class "w3-card-4 w3-container w3-white floating-card-container" :: attributes)
         children
 
 

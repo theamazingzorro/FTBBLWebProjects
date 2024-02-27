@@ -265,7 +265,7 @@ view model =
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    optionButton [ onClick FetchCoaches, rightAlign ] [ text "Refresh Coaches" ]
+    optionButton [ onClick FetchCoaches, floatRight ] [ text "Refresh Coaches" ]
 
 
 viewCoachesOrError : Model -> Html Msg
@@ -333,7 +333,7 @@ viewHeader session =
 viewAddButton : Html Msg
 viewAddButton =
     addButton
-        [ onClick AddCoachButtonClick, rightAlign ]
+        [ onClick AddCoachButtonClick, floatRight ]
         [ text "Add Coach" ]
 
 

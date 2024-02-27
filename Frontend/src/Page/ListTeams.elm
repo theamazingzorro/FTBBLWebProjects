@@ -306,7 +306,7 @@ view model =
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    optionButton [ onClick FetchTeams, rightAlign ] [ text "Refresh Teams" ]
+    optionButton [ onClick FetchTeams, floatRight ] [ text "Refresh Teams" ]
 
 
 viewTeamsOrError : Model -> Html Msg
@@ -375,7 +375,7 @@ viewHeader session =
 viewAddButton : Html Msg
 viewAddButton =
     addButton
-        [ onClick AddTeamButtonClick, rightAlign ]
+        [ onClick AddTeamButtonClick, floatRight ]
         [ text "Add Team" ]
 
 

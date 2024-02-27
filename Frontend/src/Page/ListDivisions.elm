@@ -243,7 +243,7 @@ view model =
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    optionButton [ onClick FetchDivisions, rightAlign ] [ text "Refresh Divisions" ]
+    optionButton [ onClick FetchDivisions, floatRight ] [ text "Refresh Divisions" ]
 
 
 viewDivisionsOrError : Model -> Html Msg
@@ -311,7 +311,7 @@ viewHeader session =
 viewAddButton : Html Msg
 viewAddButton =
     addButton
-        [ onClick AddDivisionButtonClick, rightAlign ]
+        [ onClick AddDivisionButtonClick, floatRight ]
         [ text "Add Division" ]
 
 
