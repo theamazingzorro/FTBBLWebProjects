@@ -19,11 +19,11 @@ body {
     max-width: 1200px;
     margin: 0 auto;
 }
-.floating-card-container {
+.floating-card {
     width:80%;
     max-width:800px;
     margin: 4em auto;
-    padding: 1em;
+    border-radius: 5px 20px;
 }
 .round-corners {
     border-radius: 20px;
