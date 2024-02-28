@@ -2,10 +2,9 @@ module Page.ListTeams exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes exposing (textButton, textCentered)
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, div, text)
 import Html.Events exposing (onClick)
 import Http
 import List exposing (drop, length, take)
@@ -298,8 +297,8 @@ lastPage list =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ div Custom.Attributes.row [ viewRefreshButton ]
+    row []
+        [ viewRefreshButton
         , viewErrorMessage model.deleteError
         , viewTeamsOrError model
         ]
@@ -307,13 +306,7 @@ view model =
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    div [ Custom.Attributes.col ]
-        [ button
-            [ onClick FetchTeams
-            , Custom.Attributes.refreshButton
-            ]
-            [ text "Refresh Teams" ]
-        ]
+    optionButton [ onClick FetchTeams, floatRight ] [ text "Refresh Teams" ]
 
 
 viewTeamsOrError : Model -> Html Msg
@@ -323,7 +316,7 @@ viewTeamsOrError model =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
+            emphasisText [] [ text "Loading..." ]
 
         RemoteData.Success teams ->
             viewTeams model.session model.sortingMethod model.page teams
@@ -334,12 +327,8 @@ viewTeamsOrError model =
 
 viewLoadError : String -> Html Msg
 viewLoadError errorMessage =
-    let
-        errorHeading =
-            "Couldn't fetch data at this time."
-    in
-    div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text errorHeading ]
+    errorText []
+        [ emphasisText [] [ text "Couldn't fetch data at this time." ]
         , text <| "Error: " ++ errorMessage
         ]
 
@@ -348,7 +337,7 @@ viewErrorMessage : Maybe String -> Html Msg
 viewErrorMessage message =
     case message of
         Just m ->
-            div [ Custom.Attributes.errorMessage ]
+            errorText []
                 [ text <| "Error: " ++ m ]
 
         Nothing ->
@@ -359,12 +348,13 @@ viewTeams : Session -> SortingMethod -> Int -> List Team -> Html Msg
 viewTeams session sortMethod page teams =
     div []
         [ viewHeader session
-        , table [ Custom.Attributes.table ]
+        , table []
             [ viewTableHeader session sortMethod
-            , sortedTeams sortMethod teams
-                |> pageOfList page
-                |> List.map (viewTeam session)
-                |> tbody []
+            , tableBody []
+                (sortedTeams sortMethod teams
+                    |> pageOfList page
+                    |> List.map (viewTeam session)
+                )
             ]
         , viewPageSelect page (length teams)
         ]
@@ -372,119 +362,119 @@ viewTeams session sortMethod page teams =
 
 viewHeader : Session -> Html Msg
 viewHeader session =
-    div Custom.Attributes.row
-        [ div [ Custom.Attributes.col ] [ h3 [] [ text "Teams" ] ]
-        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
+    row []
+        [ mainHeader [] [ text "Teams" ]
+        , requiresAuth session viewAddButton
         ]
 
 
-viewToolBar : Html Msg
-viewToolBar =
-    div [ Custom.Attributes.rightSideButtons ]
-        [ button
-            [ Custom.Attributes.addButton
-            , onClick AddTeamButtonClick
-            ]
-            [ text "Add Team" ]
-        ]
+viewAddButton : Html Msg
+viewAddButton =
+    addButton
+        [ onClick AddTeamButtonClick, floatRight ]
+        [ text "Add Team" ]
 
 
 viewTableHeader : Session -> SortingMethod -> Html Msg
 viewTableHeader session sortMethod =
-    thead []
-        [ tr []
-            [ th [ scope "col", onClick NameSortClick ]
-                [ case sortMethod of
-                    Name ->
-                        text "Name ▲"
+    tableHead []
+        [ ( [ onClick NameSortClick ]
+          , [ case sortMethod of
+                Name ->
+                    text "Name ▲"
 
-                    NameDesc ->
-                        text "Name ▼"
+                NameDesc ->
+                    text "Name ▼"
 
-                    _ ->
-                        text "Name"
-                ]
-            , th [ scope "col", onClick RaceSortClick ]
-                [ case sortMethod of
-                    Race ->
-                        text "Race ▲"
-
-                    RaceDesc ->
-                        text "Race ▼"
-
-                    _ ->
-                        text "Race"
-                ]
-            , th [ scope "col", onClick CoachSortClick ]
-                [ case sortMethod of
-                    Coach ->
-                        text "Coach ▲"
-
-                    CoachDesc ->
-                        text "Coach ▼"
-
-                    _ ->
-                        text "Coach"
-                ]
-            , th [ scope "col", onClick DivisionSortClick ]
-                [ case sortMethod of
-                    Division ->
-                        text "Division ▲"
-
-                    DivisionDesc ->
-                        text "Division ▼"
-
-                    _ ->
-                        text "Division"
-                ]
-            , th [ scope "col", onClick EloSortClick, textCentered ]
-                [ case sortMethod of
-                    Elo ->
-                        text "Elo ▲"
-
-                    EloDesc ->
-                        text "Elo ▼"
-
-                    _ ->
-                        text "Elo"
-                ]
-            , requiresAuth session <|
-                th [ scope "col" ]
-                    [ text "" ]
+                _ ->
+                    text "Name"
             ]
+          )
+        , ( [ onClick RaceSortClick ]
+          , [ case sortMethod of
+                Race ->
+                    text "Race ▲"
+
+                RaceDesc ->
+                    text "Race ▼"
+
+                _ ->
+                    text "Race"
+            ]
+          )
+        , ( [ onClick CoachSortClick ]
+          , [ case sortMethod of
+                Coach ->
+                    text "Coach ▲"
+
+                CoachDesc ->
+                    text "Coach ▼"
+
+                _ ->
+                    text "Coach"
+            ]
+          )
+        , ( [ onClick DivisionSortClick ]
+          , [ case sortMethod of
+                Division ->
+                    text "Division ▲"
+
+                DivisionDesc ->
+                    text "Division ▼"
+
+                _ ->
+                    text "Division"
+            ]
+          )
+        , ( [ onClick EloSortClick ]
+          , [ case sortMethod of
+                Elo ->
+                    text "Elo ▲"
+
+                EloDesc ->
+                    text "Elo ▼"
+
+                _ ->
+                    text "Elo"
+            ]
+          )
+        , ( [], [ requiresAuth session <| text " " ] )
+
+        {- TODO: likely will show something either way NEED FIX -}
         ]
 
 
 viewTeam : Session -> Team -> Html Msg
 viewTeam session team =
-    tr []
-        [ td []
-            [ span
-                (textButton <| ViewTeamClick team.id)
+    tableRow []
+        [ ( []
+          , [ pageLink
+                [ onClick <| ViewTeamClick team.id ]
                 [ text team.name ]
             , viewAccolades team.accolades
             ]
-        , td []
-            [ text team.race.name ]
-        , td []
-            [ span
-                (textButton <| ViewCoachClick team.coach.id)
+          )
+        , ( [], [ text team.race.name ] )
+        , ( []
+          , [ pageLink
+                [ onClick <| ViewCoachClick team.coach.id ]
                 [ text team.coach.name ]
             , viewAccolades team.coach.accolades
             ]
-        , td []
-            [ viewDivision team ]
-        , td [ textCentered ]
-            [ text <| String.fromInt team.elo ]
-        , requiresAuth session <|
-            td (Custom.Attributes.tableButtonColumn 2)
-                [ viewEditButton team, viewDeleteButton team ]
+          )
+        , ( [], [ viewDivision team ] )
+        , ( []
+          , [ text <| String.fromInt team.elo ]
+          )
+        , ( []
+          , [ requiresAuth session <| viewEditButton team, requiresAuth session <| viewDeleteButton team ]
+          )
         ]
 
 
 viewAccolades : List Accolade -> Html Msg
 viewAccolades accolades =
-    span []
+    accoladeCollection []
         (List.sortWith (\a b -> compare (Maybe.withDefault 0 b.season) (Maybe.withDefault 0 a.season)) accolades
             |> List.take 3
             |> List.map viewAccolade
@@ -495,8 +485,8 @@ viewDivision : Team -> Html Msg
 viewDivision team =
     case team.division of
         Just division ->
-            span
-                (Custom.Attributes.textButton <| ViewDivisionButtonClick division.id)
+            pageLink
+                [ onClick <| ViewDivisionButtonClick division.id ]
                 [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
 
         Nothing ->
@@ -505,15 +495,15 @@ viewDivision team =
 
 viewDeleteButton : Team -> Html Msg
 viewDeleteButton team =
-    button
-        (onClick (DeleteTeamButtonClick team.id) :: Custom.Attributes.deleteButton)
+    warnButton
+        [ onClick (DeleteTeamButtonClick team.id) ]
         [ text "Delete" ]
 
 
 viewEditButton : Team -> Html Msg
 viewEditButton team =
-    button
-        (onClick (EditTeamButtonClick team.id) :: Custom.Attributes.editButton)
+    optionButton
+        [ onClick (EditTeamButtonClick team.id) ]
         [ text "Edit" ]
 
 
@@ -523,10 +513,10 @@ viewPageSelect page teamsCount =
         text ""
 
     else
-        div [ textCentered ]
-            [ button [ class "btn", onClick FirstPageClick ] [ text "<<" ]
-            , button [ class "btn", onClick PrevPageClick ] [ text "<" ]
-            , text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (teamsCount // pageSize + 1)
-            , button [ class "btn", onClick NextPageClick ] [ text ">" ]
-            , button [ class "btn", onClick LastPageClick ] [ text ">>" ]
+        pageBar []
+            [ pageBarButton [ onClick FirstPageClick ] [ text "<<" ]
+            , pageBarButton [ onClick PrevPageClick ] [ text "<" ]
+            , pageBarFiller [] [ text <| String.fromInt (page + 1) ++ " of " ++ String.fromInt (teamsCount // pageSize + 1) ]
+            , pageBarButton [ onClick NextPageClick ] [ text ">" ]
+            , pageBarButton [ onClick LastPageClick ] [ text ">>" ]
             ]

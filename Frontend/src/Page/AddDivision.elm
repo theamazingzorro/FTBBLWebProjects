@@ -1,12 +1,12 @@
 module Page.AddDivision exposing (Model, Msg, init, update, view)
 
 import Api
-import Custom.Attributes
 import Custom.Events exposing (onEnter)
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, text)
+import Html.Attributes exposing (value)
+import Html.Events exposing (onInput)
 import Http
 import Model.Division exposing (Division, defaultDivision, divisionDecoder, newDivisionEncoder)
 import Model.Session exposing (Session)
@@ -93,9 +93,8 @@ submitDivision token div =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h3 [] [ text "Add Division" ]
-        , br [] []
+    row []
+        [ mainHeader [] [ text "Add Division" ]
         , viewSubmitError model.submitError
         , viewForm model
         ]
@@ -105,10 +104,9 @@ viewSubmitError : Maybe String -> Html msg
 viewSubmitError maybeError =
     case maybeError of
         Just error ->
-            div [ Custom.Attributes.errorMessage ]
-                [ h3 [] [ text "Couldn't save a division at this time." ]
+            errorText []
+                [ emphasisText [] [ text "Couldn't save a division at this time." ]
                 , text ("Error: " ++ error)
-                , br [] []
                 ]
 
         Nothing ->
@@ -117,45 +115,27 @@ viewSubmitError maybeError =
 
 viewForm : Model -> Html Msg
 viewForm model =
-    div []
+    inputForm []
         [ viewNameField model.division
         , viewSeasonField model.division
-        , button
-            [ Custom.Attributes.submitButton
-            , onClick Submit
-            ]
-            [ text "Add" ]
+        , submitButton Submit [ text "Add" ]
         ]
 
 
 viewNameField : Division -> Html Msg
 viewNameField division =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "nameInput")
-            [ text "Name" ]
-        , input
-            (Custom.Attributes.formInput "nameInput"
-                [ onInput NameChanged
-                , value division.name
-                ]
-            )
-            []
+    textInput
+        [ onInput NameChanged
+        , value division.name
         ]
+        [ text "Name" ]
 
 
 viewSeasonField : Division -> Html Msg
 viewSeasonField division =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "seasonInput")
-            [ text "Season" ]
-        , input
-            (Custom.Attributes.formInput "seasonInput"
-                [ onInput SeasonChanged
-                , onEnter Submit
-                , value <| String.fromInt division.season
-                ]
-            )
-            []
+    textInput
+        [ onInput SeasonChanged
+        , onEnter Submit
+        , value <| String.fromInt division.season
         ]
+        [ text "Season" ]

@@ -1,12 +1,12 @@
 module Page.EditGame exposing (Model, Msg, init, update, view)
 
 import Api
-import Custom.Attributes
 import Custom.Events exposing (onEnter)
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, text)
+import Html.Attributes exposing (value)
+import Html.Events exposing (onInput)
 import Http
 import Model.Game exposing (Game, GameId, gameDecoder, gameEncoder)
 import Model.Session exposing (Session)
@@ -159,9 +159,8 @@ saveGame token game =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h3 [] [ text "Edit Game" ]
-        , br [] []
+    row []
+        [ mainHeader [] [ text "Edit Game" ]
         , viewSaveError model.saveError
         , viewGameOrError model
         ]
@@ -174,7 +173,7 @@ viewGameOrError model =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
+            emphasisText [] [ text "Loading..." ]
 
         RemoteData.Success game ->
             viewGame game
@@ -187,10 +186,9 @@ viewSaveError : Maybe String -> Html msg
 viewSaveError maybeError =
     case maybeError of
         Just error ->
-            div [ Custom.Attributes.errorMessage ]
-                [ h3 [] [ text "Couldn't save a game at this time." ]
+            errorText []
+                [ emphasisText [] [ text "Couldn't save a game at this time." ]
                 , text ("Error: " ++ error)
-                , br [] []
                 ]
 
         Nothing ->
@@ -199,98 +197,53 @@ viewSaveError maybeError =
 
 viewLoadError : String -> Html Msg
 viewLoadError errorMessage =
-    let
-        errorHeading =
-            "Couldn't fetch data at this time."
-    in
-    div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text errorHeading ]
+    errorText []
+        [ emphasisText [] [ text "Couldn't fetch data at this time." ]
         , text <| "Error: " ++ errorMessage
         ]
 
 
 viewGame : Game -> Html Msg
 viewGame game =
-    div []
-        [ viewStaticField "divisionName" "Division" <| game.division.name ++ " Season " ++ String.fromInt game.division.season
+    inputForm []
+        [ disabledTextInput [ value <| game.division.name ++ " Season " ++ String.fromInt game.division.season ] [ text "Division" ]
         , viewWeekField game.week
-        , viewStaticField "homeTeamName" "Home Team" game.homeTeam.name
+        , disabledTextInput [ value game.homeTeam.name ] [ text "Home Team" ]
         , viewHomeScoreField game.homeScore
-        , viewStaticField "awayTeamName" "Away Team" game.awayTeam.name
+        , disabledTextInput [ value game.awayTeam.name ] [ text "Away Team" ]
         , viewAwayScoreField game.awayScore
-        , button
-            [ Custom.Attributes.submitButton
-            , onClick Submit
-            ]
-            [ text "Save" ]
+        , submitButton Submit [ text "Save" ]
         ]
 
 
 viewWeekField : Int -> Html Msg
 viewWeekField val =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "weekInput")
-            [ text "Week" ]
-        , input
-            (Custom.Attributes.formInput "weekInput"
-                [ onInput WeekChanged
-                , value <| String.fromInt val
-                ]
-            )
-            []
+    textInput
+        [ onInput WeekChanged
+        , value <| String.fromInt val
         ]
+        [ text "Week" ]
 
 
 viewHomeScoreField : Maybe Int -> Html Msg
 viewHomeScoreField val =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "homeScoreInput")
-            [ text "Home Score" ]
-        , input
-            (Custom.Attributes.formInput "homeScoreInput"
-                [ onInput HomeScoreChanged
-                , value <| stringFromMaybeInt val
-                ]
-            )
-            []
+    textInput
+        [ onInput HomeScoreChanged
+        , value <| stringFromMaybeInt val
         ]
+        [ text "Home Score" ]
 
 
 viewAwayScoreField : Maybe Int -> Html Msg
 viewAwayScoreField val =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "awayScoreInput")
-            [ text "Away Score" ]
-        , input
-            (Custom.Attributes.formInput "awayScoreInput"
-                [ onInput AwayScoreChanged
-                , onEnter Submit
-                , value <| stringFromMaybeInt val
-                ]
-            )
-            []
+    textInput
+        [ onInput AwayScoreChanged
+        , onEnter Submit
+        , value <| stringFromMaybeInt val
         ]
+        [ text "Away Score" ]
 
 
 stringFromMaybeInt : Maybe Int -> String
 stringFromMaybeInt i =
     Maybe.andThen (String.fromInt >> Just) i |> Maybe.withDefault ""
-
-
-viewStaticField : String -> String -> String -> Html msg
-viewStaticField id lblText entry =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel id)
-            [ text lblText ]
-        , input
-            (Custom.Attributes.formInput id
-                [ readonly True
-                , value entry
-                ]
-            )
-            []
-        ]

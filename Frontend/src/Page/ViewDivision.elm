@@ -2,10 +2,9 @@ module Page.ViewDivision exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes exposing (centered, padding, textCentered)
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, div, h2, text)
 import Html.Events exposing (onClick)
 import Http
 import Model.Accolade exposing (Accolade, viewAccolade)
@@ -60,6 +59,10 @@ type Msg
     | EditGameButtonClick GameId
     | AddGameButtonClick Int
     | AddWeekButtonClick Int
+    | FirstPageClick
+    | PrevPageClick
+    | NextPageClick
+    | LastPageClick
 
 
 type TeamSortingMethod
@@ -181,6 +184,51 @@ update msg model =
 
         AddWeekButtonClick week ->
             ( model, pushUrl model.session.navkey <| Route.AddGameWeek model.divisionId week )
+
+        FirstPageClick ->
+            ( { model | displayedWeek = 1 }, Cmd.none )
+
+        PrevPageClick ->
+            let
+                newWeek =
+                    if model.displayedWeek <= 1 then
+                        1
+
+                    else
+                        model.displayedWeek - 1
+            in
+            ( { model | displayedWeek = newWeek }, Cmd.none )
+
+        NextPageClick ->
+            let
+                max =
+                    case model.games of
+                        RemoteData.Success games ->
+                            maxWeek games
+
+                        _ ->
+                            model.displayedWeek
+
+                newWeek =
+                    if model.displayedWeek >= max then
+                        max
+
+                    else
+                        model.displayedWeek + 1
+            in
+            ( { model | displayedWeek = newWeek }, Cmd.none )
+
+        LastPageClick ->
+            let
+                newWeek =
+                    case model.games of
+                        RemoteData.Success games ->
+                            maxWeek games
+
+                        _ ->
+                            model.displayedWeek
+            in
+            ( { model | displayedWeek = newWeek }, Cmd.none )
 
 
 newSort : sortMethod -> sortMethod -> sortMethod -> sortMethod
@@ -310,8 +358,8 @@ maxWeek games =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ div Custom.Attributes.row [ viewRefreshButton ]
+    row []
+        [ viewRefreshButton
         , viewErrorMessage model.deleteError
         , viewStandingsOrError model
         ]
@@ -319,13 +367,9 @@ view model =
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    div [ Custom.Attributes.col ]
-        [ button
-            [ onClick RefreshButtonClick
-            , Custom.Attributes.refreshButton
-            ]
-            [ text "Refresh Page" ]
-        ]
+    optionButton
+        [ onClick RefreshButtonClick, floatRight ]
+        [ text "Refresh Page" ]
 
 
 
@@ -334,33 +378,31 @@ viewRefreshButton =
 
 viewStandingsOrError : Model -> Html Msg
 viewStandingsOrError model =
-    case model.standings of
-        RemoteData.NotAsked ->
+    case ( model.standings, model.division ) of
+        ( RemoteData.NotAsked, _ ) ->
             text ""
 
-        RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
+        ( RemoteData.Loading, _ ) ->
+            emphasisText [] [ text "Loading..." ]
 
-        RemoteData.Failure httpError ->
+        ( RemoteData.Failure httpError, _ ) ->
             viewLoadError <| Error.buildErrorMessage httpError
 
-        RemoteData.Success teams ->
-            case model.division of
-                RemoteData.Success division ->
-                    div []
-                        [ viewDivisionHeader division model.session
-                        , viewStandings model division.closed teams
-                        , viewGamesOrError model division
-                        ]
+        ( RemoteData.Success teams, RemoteData.Success division ) ->
+            div []
+                [ viewDivisionHeader division model.session
+                , viewStandings model division.closed teams
+                , viewGamesOrError model division
+                ]
 
-                RemoteData.NotAsked ->
-                    text ""
+        ( _, RemoteData.NotAsked ) ->
+            text ""
 
-                RemoteData.Loading ->
-                    h3 [] [ text "Loading..." ]
+        ( _, RemoteData.Loading ) ->
+            emphasisText [] [ text "Loading..." ]
 
-                RemoteData.Failure httpError ->
-                    viewLoadError <| Error.buildErrorMessage httpError
+        ( _, RemoteData.Failure httpError ) ->
+            viewLoadError <| Error.buildErrorMessage httpError
 
 
 viewGamesOrError : Model -> Division -> Html Msg
@@ -370,14 +412,12 @@ viewGamesOrError model division =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
+            emphasisText [] [ text "Loading..." ]
 
         RemoteData.Success games ->
-            div []
-                [ br [] []
-                , viewGamesHeader division games model.session
-                , br [] []
-                , viewGamesCarousel model division games
+            row []
+                [ viewGamesHeader division games model.session
+                , viewWeekOfGames model games
                 ]
 
         RemoteData.Failure httpError ->
@@ -386,12 +426,8 @@ viewGamesOrError model division =
 
 viewLoadError : String -> Html Msg
 viewLoadError errorMessage =
-    let
-        errorHeading =
-            "Couldn't fetch data at this time."
-    in
-    div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text errorHeading ]
+    errorText []
+        [ emphasisText [] [ text "Couldn't fetch data at this time." ]
         , text <| "Error: " ++ errorMessage
         ]
 
@@ -400,8 +436,7 @@ viewErrorMessage : Maybe String -> Html Msg
 viewErrorMessage message =
     case message of
         Just m ->
-            div [ Custom.Attributes.errorMessage ]
-                [ text <| "Error: " ++ m ]
+            errorText [] [ text <| "Error: " ++ m ]
 
         Nothing ->
             text ""
@@ -413,28 +448,22 @@ viewErrorMessage message =
 
 viewDivisionHeader : Division -> Session -> Html Msg
 viewDivisionHeader division session =
-    div Custom.Attributes.row
-        [ div [ Custom.Attributes.col ]
-            [ h3 [] [ text division.name ]
-            , h6 [] [ text <| "Season " ++ String.fromInt division.season ]
-            ]
+    row []
+        [ mainHeader [] [ text division.name ]
+        , emphasisText [] [ text <| "Season " ++ String.fromInt division.season ]
         , if division.closed then
             text ""
 
           else
-            div [ Custom.Attributes.col ] [ requiresAuth session viewAddTeamButton ]
+            requiresAuth session viewAddTeamButton
         ]
 
 
 viewAddTeamButton : Html Msg
 viewAddTeamButton =
-    div [ Custom.Attributes.rightSideButtons ]
-        [ button
-            [ Custom.Attributes.addButton
-            , onClick AddTeamButtonClick
-            ]
-            [ text "Add Team to Div" ]
-        ]
+    addButton
+        [ floatRight, onClick AddTeamButtonClick ]
+        [ text "Add Team to Div" ]
 
 
 
@@ -443,9 +472,9 @@ viewAddTeamButton =
 
 viewStandings : Model -> Bool -> List Standing -> Html Msg
 viewStandings model divClosed standings =
-    table [ Custom.Attributes.table ]
+    table []
         [ viewTableHeader divClosed model.session model.sortingMethod
-        , tbody [] <|
+        , tableBody [] <|
             List.map (viewStandingTableRow model.session divClosed model.games) <|
                 sortedStandings model.sortingMethod standings
         ]
@@ -453,115 +482,105 @@ viewStandings model divClosed standings =
 
 viewTableHeader : Bool -> Session -> TeamSortingMethod -> Html Msg
 viewTableHeader divClosed session sortMethod =
-    thead []
-        [ tr []
-            [ th [ scope "col", onClick TeamNameSortClick ]
-                [ case sortMethod of
-                    Name ->
-                        text "Name ▲"
+    tableHead []
+        [ ( [ onClick TeamNameSortClick ]
+          , [ case sortMethod of
+                Name ->
+                    text "Name ▲"
 
-                    NameDesc ->
-                        text "Name ▼"
+                NameDesc ->
+                    text "Name ▼"
 
-                    _ ->
-                        text "Name"
-                ]
-            , th [ scope "col", onClick TeamRaceSortClick ]
-                [ case sortMethod of
-                    Race ->
-                        text "Race ▲"
+                _ ->
+                    text "Name"
+            ]
+          )
+        , ( [ onClick TeamRaceSortClick ]
+          , [ case sortMethod of
+                Race ->
+                    text "Race ▲"
 
-                    RaceDesc ->
-                        text "Race ▼"
+                RaceDesc ->
+                    text "Race ▼"
 
-                    _ ->
-                        text "Race"
-                ]
-            , th [ scope "col", onClick TeamCoachSortClick ]
-                [ case sortMethod of
-                    Coach ->
-                        text "Coach ▲"
+                _ ->
+                    text "Race"
+            ]
+          )
+        , ( [ onClick TeamCoachSortClick ]
+          , [ case sortMethod of
+                Coach ->
+                    text "Coach ▲"
 
-                    CoachDesc ->
-                        text "Coach ▼"
+                CoachDesc ->
+                    text "Coach ▼"
 
-                    _ ->
-                        text "Coach"
-                ]
-            , th [ scope "col", onClick TeamEloSortClick, textCentered ]
-                [ case sortMethod of
-                    Elo ->
-                        text "Elo ▲"
+                _ ->
+                    text "Coach"
+            ]
+          )
+        , ( [ onClick TeamEloSortClick ]
+          , [ case sortMethod of
+                Elo ->
+                    text "Elo ▲"
 
-                    EloDesc ->
-                        text "Elo ▼"
+                EloDesc ->
+                    text "Elo ▼"
 
-                    _ ->
-                        text "Elo"
-                ]
-            , th [ scope "col", onClick DefaultSortClick, textCentered ]
-                [ text "Points" ]
-            , th [ scope "col", onClick DefaultSortClick, textCentered ]
-                [ text "Games" ]
-            , requiresAuth session <|
-                th [ scope "col", onClick DefaultSortClick, textCentered ]
-                    [ text "Total" ]
-            , th [ scope "col", onClick DefaultSortClick, textCentered ]
-                [ text "W-D-L" ]
-            , th [ scope "col", onClick DefaultSortClick ]
-                [ text "TDD" ]
-            , if divClosed then
+                _ ->
+                    text "Elo"
+            ]
+          )
+        , ( [ onClick DefaultSortClick ], [ text "Points" ] )
+        , ( [ onClick DefaultSortClick ], [ text "Games" ] )
+        , ( [ onClick DefaultSortClick ], [ requiresAuth session <| text "Total" ] )
+        , ( [ onClick DefaultSortClick ], [ text "W-D-L" ] )
+        , ( [ onClick DefaultSortClick ], [ text "TDD" ] )
+        , ( []
+          , [ if divClosed then
                 text ""
 
               else
-                th [ scope "col", textCentered ]
-                    [ text "Strength of Schedule" ]
-            , requiresAuth session <|
-                th [ scope "col", onClick DefaultSortClick ]
-                    [ text "" ]
+                text "Strength of Schedule"
             ]
+          )
+        , ( [ onClick DefaultSortClick ], [ requiresAuth session <| text " " ] )
         ]
 
 
 viewStandingTableRow : Session -> Bool -> WebData (List Game) -> Standing -> Html Msg
 viewStandingTableRow session divClosed games standing =
-    tr []
-        [ td []
-            [ span
-                (Custom.Attributes.textButton <| ViewTeamClick standing.team.id)
+    tableRow []
+        [ ( []
+          , [ pageLink
+                [ onClick <| ViewTeamClick standing.team.id ]
                 [ text standing.team.name ]
             , viewAccolades standing.team.accolades
             ]
-        , td []
-            [ text standing.team.race.name ]
-        , td []
-            [ span
-                (Custom.Attributes.textButton <| ViewCoachClick standing.team.coach.id)
+          )
+        , ( [], [ text standing.team.race.name ] )
+        , ( []
+          , [ pageLink
+                [ onClick <| ViewCoachClick standing.team.coach.id ]
                 [ text standing.team.coach.name ]
             , viewAccolades standing.team.coach.accolades
             ]
-        , td [ textCentered ]
-            [ text <| String.fromInt standing.team.elo ]
-        , td [ textCentered ]
-            [ text <| String.fromInt <| getPoints standing ]
-        , td [ textCentered ]
-            [ text <| String.fromInt <| getGamesPlayed standing ]
-        , requiresAuth session <|
-            td [ textCentered ]
-                [ text <| String.fromInt <| getTotalGames games standing.team ]
-        , td [ textCentered ]
-            [ text <| String.fromInt standing.wins ++ " - " ++ String.fromInt standing.draws ++ " - " ++ String.fromInt standing.losses ]
-        , td [ textCentered ]
-            [ text <| String.fromInt <| getTDD standing ]
-        , if divClosed then
-            text ""
+          )
+        , ( [], [ text <| String.fromInt standing.team.elo ] )
+        , ( [], [ text <| String.fromInt <| getPoints standing ] )
+        , ( [], [ text <| String.fromInt <| getGamesPlayed standing ] )
+        , ( [], [ requiresAuth session <| text <| String.fromInt <| getTotalGames games standing.team ] )
+        , ( [], [ text <| String.fromInt standing.wins ++ " - " ++ String.fromInt standing.draws ++ " - " ++ String.fromInt standing.losses ] )
+        , ( [], [ text <| String.fromInt <| getTDD standing ] )
+        , ( []
+          , [ if divClosed then
+                text ""
 
-          else
-            td [ textCentered ]
-                [ text (Maybe.andThen (String.fromInt >> Just) standing.avgRemainingElo |> Maybe.withDefault "No games remaining") ]
-        , requiresAuth session <|
-            td (Custom.Attributes.tableButtonColumn 2)
-                [ viewTeamEditButton standing.team, viewTeamDeleteButton standing.team ]
+              else
+                text (Maybe.andThen (String.fromInt >> Just) standing.avgRemainingElo |> Maybe.withDefault "No games remaining")
+            ]
+          )
+        , ( [], [ requiresAuth session <| viewTeamEditButton standing.team, requiresAuth session <| viewTeamDeleteButton standing.team ] )
         ]
 
 
@@ -578,7 +597,7 @@ getTotalGames gamesData team =
 
 viewAccolades : List Accolade -> Html Msg
 viewAccolades accolades =
-    span []
+    accoladeCollection []
         (List.sortWith (\a b -> compare (Maybe.withDefault 0 b.season) (Maybe.withDefault 0 a.season)) accolades
             |> List.take 3
             |> List.map viewAccolade
@@ -587,15 +606,15 @@ viewAccolades accolades =
 
 viewTeamDeleteButton : Team -> Html Msg
 viewTeamDeleteButton team =
-    button
-        (onClick (DeleteTeamButtonClick team.id) :: Custom.Attributes.deleteButton)
+    warnButton
+        [ onClick (DeleteTeamButtonClick team.id) ]
         [ text "Delete" ]
 
 
 viewTeamEditButton : Team -> Html Msg
 viewTeamEditButton team =
-    button
-        (onClick (EditTeamButtonClick team.id) :: Custom.Attributes.editButton)
+    optionButton
+        [ onClick (EditTeamButtonClick team.id) ]
         [ text "Edit" ]
 
 
@@ -605,154 +624,62 @@ viewTeamEditButton team =
 
 viewGamesHeader : Division -> List Game -> Session -> Html Msg
 viewGamesHeader division games session =
-    div Custom.Attributes.row
-        [ div [ Custom.Attributes.col ]
-            [ h3 [ id "week" ] [ text "Scheduled Games" ]
-            ]
+    row []
+        [ subHeader [] [ text "Scheduled Games" ]
         , if division.closed then
             text ""
 
           else
-            div [ Custom.Attributes.col ] [ requiresAuth session <| viewAddWeekButton <| maxWeek games + 1 ]
+            requiresAuth session <| viewAddWeekButton <| maxWeek games + 1
         ]
 
 
 viewAddWeekButton : Int -> Html Msg
 viewAddWeekButton nextWeek =
-    div [ Custom.Attributes.rightSideButtons ]
-        [ button
-            [ Custom.Attributes.addButton
-            , onClick <| AddWeekButtonClick nextWeek
-            ]
-            [ text <| "Add Week " ++ String.fromInt nextWeek ]
+    addButton
+        [ onClick <| AddWeekButtonClick nextWeek
+        , floatRight
         ]
+        [ text <| "Add Week " ++ String.fromInt nextWeek ]
 
 
-viewGamesCarousel : Model -> Division -> List Game -> Html Msg
-viewGamesCarousel model division games =
-    let
-        thisId =
-            "games"
-
-        endWeek =
-            maxWeek games
-    in
-    div
-        (id thisId :: Custom.Attributes.carouselContainer)
-        [ carouselIndicators thisId endWeek model.displayedWeek
-        , viewGames division model.session games endWeek model.displayedWeek
-        , carouselPrev model.displayedWeek
-        , carouselNext model.displayedWeek endWeek
-        ]
-
-
-carouselIndicators : String -> Int -> Int -> Html Msg
-carouselIndicators id endWeek currPage =
-    ol [ Custom.Attributes.carouselIndicators ]
-        (List.range 1 endWeek
-            |> List.map (\week -> carouselIndicator id week currPage)
+viewWeekOfGames : Model -> List Game -> Html Msg
+viewWeekOfGames model games =
+    shadedContainer []
+        (viewWeekTitle model.displayedWeek
+            :: (gamesInWeek model.displayedWeek games
+                    |> List.map (viewGame model.session)
+               )
+            ++ [ requiresAuth model.session <| viewAddGameButton model.displayedWeek
+               , viewPageSelect model.displayedWeek games
+               ]
         )
 
 
-carouselIndicator : String -> Int -> Int -> Html Msg
-carouselIndicator id week currWeek =
-    button
-        [ Custom.Attributes.button
-        , Custom.Attributes.dataBsTarget <| "#" ++ id
-        , onClick <| ChangeWeek week
-        , if week == currWeek then
-            class "active"
-
-          else
-            class ""
-        ]
-        []
-
-
-carouselPrev : Int -> Html Msg
-carouselPrev currWeek =
-    button
-        [ Custom.Attributes.carouselPrevButton
-        , onClick <| ChangeWeek <| Basics.max 1 (currWeek - 1)
-        ]
-        [ span [ Custom.Attributes.carouselPrevIcon ] []
-        , span [ Custom.Attributes.visuallyHidden ] [ text "Previous" ]
-        ]
-
-
-carouselNext : Int -> Int -> Html Msg
-carouselNext currWeek endWeek =
-    button
-        [ Custom.Attributes.carouselNextButton
-        , onClick <| ChangeWeek <| Basics.min endWeek (currWeek + 1)
-        ]
-        [ span [ Custom.Attributes.carouselNextIcon ] []
-        , span [ Custom.Attributes.visuallyHidden ] [ text "Next" ]
-        ]
-
-
-viewGames : Division -> Session -> List Game -> Int -> Int -> Html Msg
-viewGames division session games endWeek currWeek =
-    div [ Custom.Attributes.carouselInner ]
-        (List.range 1 endWeek
-            |> List.map (\week -> viewWeek division session games week currWeek)
-        )
-
-
-viewWeek : Division -> Session -> List Game -> Int -> Int -> Html Msg
-viewWeek division session games thisWeek currWeek =
-    div
-        (if thisWeek == currWeek then
-            class "active" :: Custom.Attributes.carouselItem
-
-         else
-            Custom.Attributes.carouselItem
-        )
-    <|
-        List.append
-            (viewWeekTitle thisWeek
-                :: (List.map (viewGame session) <| gamesInWeek thisWeek games)
-            )
-            [ if division.closed then
-                text ""
-
-              else
-                requiresAuth session <| viewAddGameButton thisWeek
-            ]
-
-
-viewWeekTitle : Int -> Html msg
+viewWeekTitle : Int -> Html Msg
 viewWeekTitle currWeek =
-    div
-        [ Custom.Attributes.textCentered ]
-        [ h5 [] [ text <| "Week " ++ String.fromInt currWeek ]
-        , br [] []
-        ]
+    h2 [ floatCenter ] [ text <| "Week " ++ String.fromInt currWeek ]
 
 
 viewGame : Session -> Game -> Html Msg
 viewGame session game =
-    div
-        Custom.Attributes.carouselItemEntry
+    floatingCard []
         [ viewGameDetails game
-        , viewOdds game
         , requiresAuth session <| viewGameButtons game
         ]
 
 
 viewGameDetails : Game -> Html Msg
 viewGameDetails game =
-    div [ class "row", padding "0.5em" ]
-        [ div [ class "col" ]
-            [ h6 [] [ text game.homeTeam.name ]
-            , p [] [ text game.homeTeam.coach.name ]
+    narrowRow []
+        [ colThird [ textRight ]
+            [ smallColorText [] [ text game.homeTeam.name ]
+            , bodyText [] [ text game.homeTeam.coach.name ]
             ]
-        , div [ class "col col-auto", centered ]
-            [ viewScore game
-            ]
-        , div [ class "col" ]
-            [ h6 [] [ text game.awayTeam.name ]
-            , p [] [ text game.awayTeam.coach.name ]
+        , colThird [ textCenter ] [ viewScore game, viewOdds game ]
+        , colThird [ textLeft ]
+            [ smallColorText [] [ text game.awayTeam.name ]
+            , bodyText [] [ text game.awayTeam.coach.name ]
             ]
         ]
 
@@ -763,7 +690,7 @@ viewOdds game =
         Just homeOdds ->
             case game.awayOdds of
                 Just awayOdds ->
-                    p [] [ text <| Game.oddsToString homeOdds ++ " - " ++ Game.oddsToString awayOdds ]
+                    bodyText [ floatCenter ] [ text <| Game.oddsToString homeOdds ++ " - " ++ Game.oddsToString awayOdds ]
 
                 Nothing ->
                     text ""
@@ -778,18 +705,18 @@ viewScore game =
         Just homeScore ->
             case game.awayScore of
                 Just awayScore ->
-                    text <| String.fromInt homeScore ++ " - " ++ String.fromInt awayScore
+                    emphasisText [ floatCenter ] [ text <| String.fromInt homeScore ++ " - " ++ String.fromInt awayScore ]
 
                 Nothing ->
-                    text "vs"
+                    emphasisText [ floatCenter ] [ text "vs." ]
 
         Nothing ->
-            text "vs"
+            emphasisText [ floatCenter ] [ text "vs." ]
 
 
 viewGameButtons : Game -> Html Msg
 viewGameButtons game =
-    div []
+    narrowRow [ floatCenter ]
         [ viewGameEditButton game
         , viewGameDeleteButton game
         ]
@@ -797,25 +724,37 @@ viewGameButtons game =
 
 viewGameDeleteButton : Game -> Html Msg
 viewGameDeleteButton game =
-    button
-        (onClick (DeleteGameButtonClick game.id) :: Custom.Attributes.deleteButton)
+    warnButton
+        [ onClick (DeleteGameButtonClick game.id) ]
         [ text "Delete" ]
 
 
 viewGameEditButton : Game -> Html Msg
 viewGameEditButton game =
-    button
-        (onClick (EditGameButtonClick game.id) :: Custom.Attributes.editButton)
+    optionButton
+        [ onClick (EditGameButtonClick game.id) ]
         [ text "Edit" ]
 
 
 viewAddGameButton : Int -> Html Msg
 viewAddGameButton week =
-    div [ Custom.Attributes.textCentered ]
-        [ button
-            [ Custom.Attributes.addButton
-            , Custom.Attributes.centered
-            , onClick <| AddGameButtonClick week
-            ]
+    row [ floatCenter ]
+        [ addButton
+            [ onClick <| AddGameButtonClick week ]
             [ text "Add Game" ]
+        ]
+
+
+
+-- Pagination --
+
+
+viewPageSelect : Int -> List Game -> Html Msg
+viewPageSelect week games =
+    pageBar []
+        [ pageBarButton [ onClick FirstPageClick ] [ text "<<" ]
+        , pageBarButton [ onClick PrevPageClick ] [ text "<" ]
+        , pageBarFiller [] [ text <| String.fromInt week ++ " of " ++ String.fromInt (maxWeek games) ]
+        , pageBarButton [ onClick NextPageClick ] [ text ">" ]
+        , pageBarButton [ onClick LastPageClick ] [ text ">>" ]
         ]

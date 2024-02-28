@@ -1,12 +1,11 @@
 module Page.AddGame exposing (Model, Msg, init, update, view)
 
 import Api
-import Custom.Attributes
-import Custom.Events exposing (onEnter)
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Attribute, Html, text)
+import Html.Attributes exposing (selected, value)
+import Html.Events exposing (onInput)
 import Http
 import Model.Division as Division exposing (Division, DivisionId, divisionsDecoder)
 import Model.Game exposing (Game, defaultGame, gameDecoder, newGameEncoder)
@@ -36,8 +35,6 @@ type Msg
     | Submit
     | GameSubmitted (Result Http.Error Game)
     | WeekChanged String
-    | HomeScoreChanged String
-    | AwayScoreChanged String
     | DivisionSelected String
     | HomeTeamSelected String
     | AwayTeamSelected String
@@ -102,20 +99,6 @@ update msg model =
                     { game | week = String.toInt week |> Maybe.withDefault 0 }
             in
             ( { model | game = reWeek model.game newWeek }, Cmd.none )
-
-        HomeScoreChanged newScore ->
-            let
-                reHomeScore game score =
-                    { game | homeScore = String.toInt score }
-            in
-            ( { model | game = reHomeScore model.game newScore }, Cmd.none )
-
-        AwayScoreChanged newScore ->
-            let
-                reAwayScore game score =
-                    { game | awayScore = String.toInt score }
-            in
-            ( { model | game = reAwayScore model.game newScore }, Cmd.none )
 
         DivisionSelected newDiv ->
             let
@@ -202,9 +185,8 @@ saveGame token game =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h3 [] [ text "Add Game" ]
-        , br [] []
+    row []
+        [ mainHeader [] [ text "Add Game" ]
         , viewSaveError model.saveError
         , viewGame model model.game
         ]
@@ -214,10 +196,9 @@ viewSaveError : Maybe String -> Html msg
 viewSaveError maybeError =
     case maybeError of
         Just error ->
-            div [ Custom.Attributes.errorMessage ]
-                [ h3 [] [ text "Couldn't save a game at this time." ]
+            errorText []
+                [ emphasisText [] [ text "Couldn't save a game at this time." ]
                 , text ("Error: " ++ error)
-                , br [] []
                 ]
 
         Nothing ->
@@ -226,18 +207,12 @@ viewSaveError maybeError =
 
 viewGame : Model -> Game -> Html Msg
 viewGame model game =
-    div []
+    inputForm []
         [ viewDropdown game model.divisionOptions divisionDropdown
         , viewWeekField game.week
         , viewDropdown game (filterWebData (\team -> team.id /= game.awayTeam.id) model.teamOptions) homeTeamDropdown
-        , viewHomeScoreField game.homeScore
         , viewDropdown game (filterWebData (\team -> team.id /= game.homeTeam.id) model.teamOptions) awayTeamDropdown
-        , viewAwayScoreField game.awayScore
-        , button
-            [ Custom.Attributes.submitButton
-            , onClick Submit
-            ]
-            [ text "Save" ]
+        , submitButton Submit [ text "Save" ]
         ]
 
 
@@ -253,11 +228,10 @@ viewDropdown game data dropDownFunction =
             dropDownFunction game []
 
         RemoteData.Loading ->
-            h4 [] [ text "Loading Options..." ]
+            emphasisText [] [ text "Loading Options..." ]
 
         RemoteData.Failure httpError ->
-            h4 [ Custom.Attributes.errorMessage ]
-                [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
+            errorText [] [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
 
         RemoteData.Success d ->
             dropDownFunction game <| List.sortBy .name d
@@ -265,127 +239,62 @@ viewDropdown game data dropDownFunction =
 
 divisionDropdown : Game -> List Division -> Html Msg
 divisionDropdown game divs =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "divDropdown")
-            [ text "Division" ]
-        , select
-            (Custom.Attributes.formDropdown "divDropdown"
-                [ onInput DivisionSelected ]
-            )
-            (defaultOption :: List.map (divOption game) divs)
+    inputSection []
+        [ dropdownInput [ onInput DivisionSelected ]
+            (List.map (divOption game) divs)
+        , inputLabel [] [ text "Division" ]
         ]
 
 
-divOption : Game -> Division -> Html msg
+divOption : Game -> Division -> ( List (Attribute msg), List (Html msg) )
 divOption game division =
-    option
-        [ value <| Division.idToString division.id
-        , selected (division.id == game.division.id)
-        ]
-        [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
+    ( [ value <| Division.idToString division.id
+      , selected (division.id == game.division.id)
+      ]
+    , [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
+    )
 
 
 homeTeamDropdown : Game -> List Team -> Html Msg
 homeTeamDropdown game teams =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "homeTeamDropdown")
-            [ text "Home Team" ]
-        , select
-            (Custom.Attributes.formDropdown "homeTeamDropdown"
-                [ onInput HomeTeamSelected ]
-            )
-            (defaultOption :: List.map (homeTeamOption game) teams)
+    inputSection []
+        [ dropdownInput [ onInput HomeTeamSelected ]
+            (List.map (homeTeamOption game) teams)
+        , inputLabel [] [ text "Home Team" ]
         ]
 
 
-homeTeamOption : Game -> Team -> Html msg
+homeTeamOption : Game -> Team -> ( List (Attribute msg), List (Html msg) )
 homeTeamOption game team =
-    option
-        [ value <| Team.idToString team.id
-        , selected (team.id == game.homeTeam.id)
-        ]
-        [ text team.name ]
+    ( [ value <| Team.idToString team.id
+      , selected (team.id == game.homeTeam.id)
+      ]
+    , [ text team.name ]
+    )
 
 
 awayTeamDropdown : Game -> List Team -> Html Msg
 awayTeamDropdown game teams =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "awayTeamDropdown")
-            [ text "Away Team" ]
-        , select
-            (Custom.Attributes.formDropdown "awayTeamDropdown"
-                [ onInput AwayTeamSelected ]
-            )
-            (defaultOption :: List.map (awayTeamOption game) teams)
+    inputSection []
+        [ dropdownInput [ onInput AwayTeamSelected ]
+            (List.map (awayTeamOption game) teams)
+        , inputLabel [] [ text "Home Team" ]
         ]
 
 
-awayTeamOption : Game -> Team -> Html msg
+awayTeamOption : Game -> Team -> ( List (Attribute msg), List (Html msg) )
 awayTeamOption game team =
-    option
-        [ value <| Team.idToString team.id
-        , selected (team.id == game.awayTeam.id)
-        ]
-        [ text team.name ]
-
-
-defaultOption : Html Msg
-defaultOption =
-    option [ value "0" ] [ text "-" ]
+    ( [ value <| Team.idToString team.id
+      , selected (team.id == game.awayTeam.id)
+      ]
+    , [ text team.name ]
+    )
 
 
 viewWeekField : Int -> Html Msg
 viewWeekField val =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "weekInput")
-            [ text "Week" ]
-        , input
-            (Custom.Attributes.formInput "weekInput"
-                [ onInput WeekChanged
-                , value <| String.fromInt val
-                ]
-            )
-            []
+    textInput
+        [ onInput WeekChanged
+        , value <| String.fromInt val
         ]
-
-
-viewHomeScoreField : Maybe Int -> Html Msg
-viewHomeScoreField val =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "homeScoreInput")
-            [ text "Home Score" ]
-        , input
-            (Custom.Attributes.formInput "homeScoreInput"
-                [ onInput HomeScoreChanged
-                , value <| stringFromMaybeInt val
-                ]
-            )
-            []
-        ]
-
-
-viewAwayScoreField : Maybe Int -> Html Msg
-viewAwayScoreField val =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "awayScoreInput")
-            [ text "Away Score" ]
-        , input
-            (Custom.Attributes.formInput "awayScoreInput"
-                [ onInput AwayScoreChanged
-                , onEnter Submit
-                , value <| stringFromMaybeInt val
-                ]
-            )
-            []
-        ]
-
-
-stringFromMaybeInt : Maybe Int -> String
-stringFromMaybeInt i =
-    Maybe.andThen (String.fromInt >> Just) i |> Maybe.withDefault ""
+        [ text "Week" ]

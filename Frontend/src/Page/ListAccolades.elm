@@ -2,10 +2,9 @@ module Page.ListAccolades exposing (Model, Msg, init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Attributes exposing (textCentered)
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, div, text)
 import Html.Events exposing (onClick)
 import Http
 import Model.Accolade as Accolade exposing (Accolade, AccoladeId, accoladesDecoder)
@@ -164,8 +163,8 @@ deleteAccoladeRequest token id =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ div Custom.Attributes.row [ viewRefreshButton ]
+    row []
+        [ viewRefreshButton
         , viewErrorMessage model.deleteError
         , viewAccoladesOrError model
         ]
@@ -173,13 +172,7 @@ view model =
 
 viewRefreshButton : Html Msg
 viewRefreshButton =
-    div [ Custom.Attributes.col ]
-        [ button
-            [ onClick Refresh
-            , Custom.Attributes.refreshButton
-            ]
-            [ text "Refresh Accolades" ]
-        ]
+    optionButton [ onClick Refresh, floatRight ] [ text "Refresh Accolades" ]
 
 
 viewAccoladesOrError : Model -> Html Msg
@@ -189,7 +182,7 @@ viewAccoladesOrError model =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
+            emphasisText [] [ text "Loading..." ]
 
         RemoteData.Success accolades ->
             viewAccolades model accolades
@@ -200,12 +193,8 @@ viewAccoladesOrError model =
 
 viewLoadError : String -> Html Msg
 viewLoadError errorMessage =
-    let
-        errorHeading =
-            "Couldn't fetch data at this time."
-    in
-    div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text errorHeading ]
+    errorText []
+        [ emphasisText [] [ text "Couldn't fetch data at this time." ]
         , text <| "Error: " ++ errorMessage
         ]
 
@@ -214,8 +203,7 @@ viewErrorMessage : Maybe String -> Html Msg
 viewErrorMessage message =
     case message of
         Just m ->
-            div [ Custom.Attributes.errorMessage ]
-                [ text <| "Error: " ++ m ]
+            errorText [] [ text <| "Error: " ++ m ]
 
         Nothing ->
             text ""
@@ -225,9 +213,9 @@ viewAccolades : Model -> List Accolade -> Html Msg
 viewAccolades model accolades =
     div []
         [ viewHeader model.session
-        , table [ Custom.Attributes.table ]
+        , table []
             [ viewTableHeader
-            , tbody [] <|
+            , tableBody [] <|
                 List.map (viewAccolade model) accolades
             ]
         ]
@@ -235,64 +223,45 @@ viewAccolades model accolades =
 
 viewHeader : Session -> Html Msg
 viewHeader session =
-    div Custom.Attributes.row
-        [ div [ Custom.Attributes.col ] [ h3 [] [ text "Accolades" ] ]
-        , div [ Custom.Attributes.col ] [ requiresAuth session viewToolBar ]
+    row []
+        [ mainHeader [] [ text "Accolades" ]
+        , requiresAuth session viewAddButton
         ]
 
 
-viewToolBar : Html Msg
-viewToolBar =
-    div [ Custom.Attributes.rightSideButtons ]
-        [ button
-            [ Custom.Attributes.addButton
-            , onClick AddAccoladeButtonClick
-            ]
-            [ text "Add Accolade" ]
-        ]
+viewAddButton : Html Msg
+viewAddButton =
+    addButton
+        [ onClick AddAccoladeButtonClick, floatRight ]
+        [ text "Add Accolade" ]
 
 
 viewTableHeader : Html Msg
 viewTableHeader =
-    thead []
-        [ tr []
-            [ th [ scope "col" ]
-                [ text "Team" ]
-            , th [ scope "col" ]
-                [ text "Coach" ]
-            , th [ scope "col" ]
-                [ text "Display" ]
-            , th [ scope "col" ]
-                [ text "Name" ]
-            , th [ scope "col", textCentered ]
-                [ text "Season" ]
-            , th [ scope "col" ]
-                [ text "" ]
-            ]
+    tableHead []
+        [ ( [], [ text "Team" ] )
+        , ( [], [ text "Coach" ] )
+        , ( [], [ text "Display" ] )
+        , ( [], [ text "Name" ] )
+        , ( [], [ text "Season" ] )
+        , ( [], [ text "" ] )
         ]
 
 
 viewAccolade : Model -> Accolade -> Html Msg
 viewAccolade model accolade =
-    tr []
-        [ td []
-            [ text (getTeam model.teams accolade.teamId |> Maybe.andThen (.name >> Just) |> Maybe.withDefault "") ]
-        , td []
-            [ text (getCoach model.coaches accolade.coachId |> Maybe.andThen (.name >> Just) |> Maybe.withDefault "") ]
-        , td []
-            [ Accolade.viewAccolade accolade ]
-        , td []
-            [ text accolade.name ]
-        , td [ textCentered ]
-            [ text <| Maybe.withDefault "" <| Maybe.andThen (String.fromInt >> Just) accolade.season ]
-        , requiresAuth model.session <|
-            td (Custom.Attributes.tableButtonColumn 1)
-                [ viewDeleteButton accolade ]
+    tableRow []
+        [ ( [], [ text (getTeam model.teams accolade.teamId |> Maybe.andThen (.name >> Just) |> Maybe.withDefault "") ] )
+        , ( [], [ text (getCoach model.coaches accolade.coachId |> Maybe.andThen (.name >> Just) |> Maybe.withDefault "") ] )
+        , ( [], [ Accolade.viewAccolade accolade ] )
+        , ( [], [ text accolade.name ] )
+        , ( [], [ text <| Maybe.withDefault "" <| Maybe.andThen (String.fromInt >> Just) accolade.season ] )
+        , ( [], [ requiresAuth model.session <| viewDeleteButton accolade ] )
         ]
 
 
 viewDeleteButton : Accolade -> Html Msg
 viewDeleteButton accolade =
-    button
-        (onClick (DeleteAccoladeButtonClick accolade.id) :: Custom.Attributes.deleteButton)
+    warnButton
+        [ onClick (DeleteAccoladeButtonClick accolade.id) ]
         [ text "Delete" ]

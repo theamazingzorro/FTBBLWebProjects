@@ -1,10 +1,10 @@
 module Page.AddAccolade exposing (Model, Msg, init, update, view)
 
 import Api
-import Custom.Attributes
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Attribute, Html, text)
+import Html.Attributes exposing (checked, selected, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Accolade exposing (Accolade, accoladeDecoder, defaultAccolade, newAccoladeEncoder)
@@ -209,9 +209,8 @@ saveAccolade token accolade =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h3 [] [ text "Add Accolade" ]
-        , br [] []
+    row []
+        [ mainHeader [] [ text "Add Accolade" ]
         , viewSaveError model.saveError
         , viewAccolade model model.accolade
         ]
@@ -221,10 +220,9 @@ viewSaveError : Maybe String -> Html msg
 viewSaveError maybeError =
     case maybeError of
         Just error ->
-            div [ Custom.Attributes.errorMessage ]
-                [ h3 [] [ text "Couldn't save a accolade at this time." ]
+            errorText []
+                [ emphasisText [] [ text "Couldn't save a accolade at this time." ]
                 , text ("Error: " ++ error)
-                , br [] []
                 ]
 
         Nothing ->
@@ -233,7 +231,7 @@ viewSaveError maybeError =
 
 viewAccolade : Model -> Accolade -> Html Msg
 viewAccolade model accolade =
-    div []
+    inputForm []
         [ viewDropdown accolade model.teams teamDropdown
         , viewDropdown accolade model.coaches coachDropdown
         , viewNameField accolade.name
@@ -241,11 +239,7 @@ viewAccolade model accolade =
         , viewIsChampField accolade.isChamp
         , viewIsRunnerUpField accolade.isRunnerUp
         , viewIsSidecupField accolade.isSidecup
-        , button
-            [ Custom.Attributes.submitButton
-            , onClick Submit
-            ]
-            [ text "Save" ]
+        , submitButton Submit [ text "Save" ]
         ]
 
 
@@ -256,11 +250,10 @@ viewDropdown accolade data dropDownFunction =
             dropDownFunction accolade []
 
         RemoteData.Loading ->
-            h4 [] [ text "Loading Options..." ]
+            emphasisText [] [ text "Loading Options..." ]
 
         RemoteData.Failure httpError ->
-            h4 [ Custom.Attributes.errorMessage ]
-                [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
+            errorText [] [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
 
         RemoteData.Success d ->
             dropDownFunction accolade <| List.sortBy .name d
@@ -268,130 +261,80 @@ viewDropdown accolade data dropDownFunction =
 
 teamDropdown : Accolade -> List Team -> Html Msg
 teamDropdown accolade teams =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "teamDropdown")
-            [ text "Team" ]
-        , select
-            (Custom.Attributes.formDropdown "teamDropdown"
-                [ onInput TeamSelected ]
-            )
-            (defaultOption :: List.map (teamOption accolade) teams)
+    inputSection []
+        [ dropdownInput [ onInput TeamSelected ]
+            (List.map (teamOption accolade) teams)
+        , inputLabel [] [ text "Team" ]
         ]
 
 
-teamOption : Accolade -> Team -> Html msg
+teamOption : Accolade -> Team -> ( List (Attribute msg), List (Html msg) )
 teamOption accolade team =
-    option
-        [ value <| Team.idToString team.id
-        , selected (team.id == Maybe.withDefault defaultTeamId accolade.teamId)
-        ]
-        [ text team.name ]
+    ( [ value <| Team.idToString team.id
+      , selected (team.id == Maybe.withDefault defaultTeamId accolade.teamId)
+      ]
+    , [ text team.name ]
+    )
 
 
 coachDropdown : Accolade -> List Coach -> Html Msg
 coachDropdown accolade coaches =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "coachDropdown")
-            [ text "Coach" ]
-        , select
-            (Custom.Attributes.formDropdown "coachDropdown"
-                [ onInput CoachSelected ]
-            )
-            (defaultOption :: List.map (coachOption accolade) coaches)
+    inputSection []
+        [ dropdownInput [ onInput TeamSelected ]
+            (List.map (coachOption accolade) coaches)
+        , inputLabel [] [ text "Coach" ]
         ]
 
 
-coachOption : Accolade -> Coach -> Html msg
+coachOption : Accolade -> Coach -> ( List (Attribute msg), List (Html msg) )
 coachOption accolade coach =
-    option
-        [ value <| Coach.idToString coach.id
-        , selected (coach.id == accolade.coachId)
-        ]
-        [ text coach.name ]
-
-
-defaultOption : Html Msg
-defaultOption =
-    option [ value "0" ] [ text "-" ]
+    ( [ value <| Coach.idToString coach.id
+      , selected (coach.id == accolade.coachId)
+      ]
+    , [ text coach.name ]
+    )
 
 
 viewSeasonField : Maybe Int -> Html Msg
 viewSeasonField val =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "seasonInput")
-            [ text "Season" ]
-        , input
-            (Custom.Attributes.formInput "seasonInput"
-                [ onInput SeasonChanged
-                , value <| Maybe.withDefault "" <| Maybe.map String.fromInt val
-                ]
-            )
-            []
+    textInput
+        [ onInput SeasonChanged
+        , value <| Maybe.withDefault "" <| Maybe.map String.fromInt val
         ]
+        [ text "Season" ]
 
 
 viewNameField : String -> Html Msg
 viewNameField val =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "nameInput")
-            [ text "Name" ]
-        , input
-            (Custom.Attributes.formInput "nameInput"
-                [ onInput NameChanged
-                , value val
-                ]
-            )
-            []
+    textInput
+        [ onInput NameChanged
+        , value val
         ]
+        [ text "Name" ]
 
 
 viewIsChampField : Bool -> Html Msg
 viewIsChampField val =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "champInput")
-            [ text "Taurus Champion?" ]
-        , input
-            (Custom.Attributes.formCheckbox "champInput"
-                [ onClick ChampBoxChecked
-                , checked val
-                ]
-            )
-            []
+    checkboxInput
+        [ onClick ChampBoxChecked
+        , checked val
         ]
+        [ text "Taurus Champion?" ]
 
 
 viewIsRunnerUpField : Bool -> Html Msg
 viewIsRunnerUpField val =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "runnerUpInput")
-            [ text "Runner up?" ]
-        , input
-            (Custom.Attributes.formCheckbox "runnerUpInput"
-                [ onClick RunnerupBoxChecked
-                , checked val
-                ]
-            )
-            []
+    checkboxInput
+        [ onClick RunnerupBoxChecked
+        , checked val
         ]
+        [ text "Runner up?" ]
 
 
 viewIsSidecupField : Bool -> Html Msg
 viewIsSidecupField val =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "sidecupInput")
-            [ text "Sidecup?" ]
-        , input
-            (Custom.Attributes.formCheckbox "sidecupInput"
-                [ onClick SidecupBoxChecked
-                , checked val
-                ]
-            )
-            []
+    checkboxInput
+        [ onClick SidecupBoxChecked
+        , checked val
         ]
+        [ text "Sidecup?" ]

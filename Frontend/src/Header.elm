@@ -1,10 +1,10 @@
 module Header exposing (Model, Msg, OutMsg(..), init, update, view)
 
 import Api
-import Custom.Attributes
+import Auth exposing (requiresAuth)
+import Custom.Html exposing (..)
 import Env exposing (leagueName)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Attribute, Html, text)
 import Html.Events exposing (onClick)
 import Http
 import Model.Division exposing (Division, DivisionId, compareDivisions, divisionsDecoder)
@@ -20,6 +20,7 @@ import Route exposing (Route(..), pushUrl)
 type alias Model =
     { session : Session
     , divisions : WebData (List Division)
+    , shouldDisplaySidebar : Bool
     }
 
 
@@ -34,6 +35,8 @@ type Msg
     | HeadToHeadClicked
     | SpecificDivisionClicked DivisionId
     | DivisionsRecieved (WebData (List Division))
+    | ToggleSidebar
+    | HideSidebar
 
 
 type OutMsg
@@ -46,7 +49,12 @@ type OutMsg
 
 init : Session -> ( Model, Cmd Msg )
 init session =
-    ( { session = session, divisions = RemoteData.Loading }, getDivisionsRequest session.token )
+    ( { session = session
+      , divisions = RemoteData.Loading
+      , shouldDisplaySidebar = False
+      }
+    , getDivisionsRequest session.token
+    )
 
 
 
@@ -93,6 +101,12 @@ update msg model =
         DivisionsRecieved response ->
             ( { model | divisions = response }, Cmd.none, Nothing )
 
+        ToggleSidebar ->
+            ( { model | shouldDisplaySidebar = not model.shouldDisplaySidebar }, Cmd.none, Nothing )
+
+        HideSidebar ->
+            ( { model | shouldDisplaySidebar = False }, Cmd.none, Nothing )
+
 
 cleanupDivList : List Division -> List Division
 cleanupDivList divs =
@@ -115,124 +129,92 @@ getDivisionsRequest token =
 -- View --
 
 
-view : Model -> Html Msg
+view : Model -> List (Html Msg)
 view model =
-    nav [ Custom.Attributes.mainNavBar ]
-        [ styleTag
-        , a
-            [ Custom.Attributes.navBarBrand
-            , onClick HomeClicked
-            ]
-            [ text leagueName ]
-        , toggleBarButton
-        , div [ Custom.Attributes.navBarCollapsable, id "navbarNav" ]
-            [ ul [ Custom.Attributes.navBarLinkList ]
-                [ linkElement "Teams" TeamIndexClicked
-                , linkElement "Coaches" CoachIndexClicked
-                , viewDivisionsLink model.divisions
-                , linkElement "Matchups" HeadToHeadClicked
-                , viewAccoladesLink model.session.token
-                , viewSignInOutLink model.session.token
-                ]
+    [ viewNavbar
+    , viewSidebar model
+    , sideBarShadow [ onClick HideSidebar, displayStyle model.shouldDisplaySidebar ]
+    ]
+
+
+viewNavbar : Html Msg
+viewNavbar =
+    navBar []
+        [ toggleBarButton
+        , importantNavButton [ onClick HomeClicked ] [ text leagueName ]
+        , navLink "Teams" TeamIndexClicked
+        , navLink "Coaches" CoachIndexClicked
+        , navLink "Divisions" DivisionIndexClicked
+        ]
+
+
+viewSidebar : Model -> Html Msg
+viewSidebar model =
+    sideBar [ displayStyle model.shouldDisplaySidebar ]
+        [ closeSideBarButton []
+        , sideBarTitle [] [ text "Menu" ]
+        , list []
+            [ sidebarLink "Teams" TeamIndexClicked
+            , sidebarLink "Coaches" CoachIndexClicked
+            , sidebarLink "Divisions" DivisionIndexClicked
+            , viewDivisionsLinks model.divisions
+            , sidebarLink "Head to Head" HeadToHeadClicked
+            , requiresAuth model.session <| sidebarLink "Accolades" AccoladeIndexClicked
+            , viewSignInOutLink model.session.token
             ]
         ]
+
+
+displayStyle : Bool -> Attribute msg
+displayStyle shouldDisplay =
+    if shouldDisplay then
+        visible
+
+    else
+        hidden
 
 
 viewSignInOutLink : Maybe String -> Html Msg
 viewSignInOutLink token =
     case token of
         Just _ ->
-            linkElement "Sign Out" SignoutClicked
+            sidebarLink "Sign Out" SignoutClicked
 
         Nothing ->
-            linkElement "Sign In" SigninClicked
+            sidebarLink "Sign In" SigninClicked
 
 
-viewAccoladesLink : Maybe String -> Html Msg
-viewAccoladesLink token =
-    case token of
-        Just _ ->
-            linkElement "Accolades" AccoladeIndexClicked
-
-        Nothing ->
-            text ""
-
-
-viewDivisionsLink : WebData (List Division) -> Html Msg
-viewDivisionsLink divisions =
+viewDivisionsLinks : WebData (List Division) -> Html Msg
+viewDivisionsLinks divisions =
     case divisions of
         RemoteData.Success divs ->
-            dropdownLink "Divisions" DivisionIndexClicked <|
-                List.map
-                    (\div -> dropdownEntry (div.name ++ " Season " ++ String.fromInt div.season) <| SpecificDivisionClicked div.id)
+            list []
+                (List.map
+                    (\div -> smallSidebarLink (div.name ++ " Season " ++ String.fromInt div.season) <| SpecificDivisionClicked div.id)
                     (List.sortWith compareDivisions divs
                         |> List.filter (\div -> not div.closed)
                     )
+                )
 
         _ ->
-            linkElement "Divisions" DivisionIndexClicked
+            text ""
 
 
 toggleBarButton : Html Msg
 toggleBarButton =
-    button
-        [ class "navbar-toggler"
-        , type_ "button"
-        , attribute "data-toggle" "collapse"
-        , attribute "data-target" "#navbarNav"
-        ]
-        [ span [ class "navbar-toggler-icon" ] [] ]
+    menuIcon [ onClick ToggleSidebar ]
 
 
-linkElement : String -> Msg -> Html Msg
-linkElement title msg =
-    li [ Custom.Attributes.navItem ]
-        [ a
-            [ Custom.Attributes.navLink
-            , onClick msg
-            , href "#"
-            ]
-            [ text title ]
-        ]
+navLink : String -> Msg -> Html Msg
+navLink title msg =
+    navButton [ onClick msg ] [ text title ]
 
 
-dropdownLink : String -> Msg -> List (Html Msg) -> Html Msg
-dropdownLink title clickEvent submenu =
-    li [ Custom.Attributes.navDropDownContainer ]
-        [ a
-            (onClick clickEvent
-                :: Custom.Attributes.navDropDownTitleLink
-            )
-            [ text title ]
-        , ul [ Custom.Attributes.navDropDownMenu ]
-            submenu
-        ]
+sidebarLink : String -> Msg -> Html Msg
+sidebarLink title msg =
+    sideBarLink [ onClick msg ] [ text title ]
 
 
-dropdownEntry : String -> Msg -> Html Msg
-dropdownEntry label clickEvent =
-    li
-        [ Custom.Attributes.navDropDownItem
-        , onClick clickEvent
-        ]
-        [ text label ]
-
-
-
-{- Direct css to make the hover function in both dev and live. -}
-
-
-styleTag : Html Msg
-styleTag =
-    let
-        styles =
-            """
-        @media all and (min-width: 992px) {
-            .navbar .nav-item .dropdown-menu{ display: none; }
-            .navbar .nav-item:hover .nav-link{   }
-            .navbar .nav-item:hover .dropdown-menu{ display: block; }
-            .navbar .nav-item .dropdown-menu{ margin-top:0; }
-        }
-      """
-    in
-    node "style" [] [ text styles ]
+smallSidebarLink : String -> Msg -> Html Msg
+smallSidebarLink title msg =
+    smallSideBarLink [ onClick msg ] [ text title ]

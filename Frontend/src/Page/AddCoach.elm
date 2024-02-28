@@ -1,12 +1,12 @@
 module Page.AddCoach exposing (Model, Msg, init, update, view)
 
 import Api
-import Custom.Attributes
 import Custom.Events exposing (onEnter)
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, text)
+import Html.Attributes exposing (value)
+import Html.Events exposing (onInput)
 import Http
 import Model.Coach exposing (Coach, coachDecoder, defaultCoach, newCoachEncoder)
 import Model.Session exposing (Session)
@@ -86,9 +86,8 @@ submitCoach token coach =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h3 [] [ text "Add Coach" ]
-        , br [] []
+    row []
+        [ mainHeader [] [ text "Add Coach" ]
         , viewError model.submitError
         , viewForm model.coach
         ]
@@ -98,10 +97,9 @@ viewError : Maybe String -> Html msg
 viewError maybeError =
     case maybeError of
         Just error ->
-            div [ Custom.Attributes.errorMessage ]
-                [ h3 [] [ text "Couldn't save a coach at this time." ]
+            errorText []
+                [ emphasisText [] [ text "Couldn't save a coach at this time." ]
                 , text ("Error: " ++ error)
-                , br [] []
                 ]
 
         Nothing ->
@@ -110,23 +108,12 @@ viewError maybeError =
 
 viewForm : Coach -> Html Msg
 viewForm coach =
-    div []
-        [ div [ Custom.Attributes.formEntry ]
-            [ label
-                (Custom.Attributes.formLabel "nameInput")
-                [ text "Name" ]
-            , input
-                (Custom.Attributes.formInput "nameInput"
-                    [ onInput NameChanged
-                    , onEnter Submit
-                    , value coach.name
-                    ]
-                )
-                []
+    inputForm []
+        [ textInput
+            [ onInput NameChanged
+            , onEnter Submit
+            , value coach.name
             ]
-        , button
-            [ Custom.Attributes.submitButton
-            , onClick Submit
-            ]
-            [ text "Add" ]
+            [ text "Name" ]
+        , submitButton Submit [ text "Add" ]
         ]

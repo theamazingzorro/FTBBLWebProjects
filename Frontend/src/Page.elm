@@ -1,6 +1,7 @@
 module Page exposing (Model, Msg, OutMsg(..), init, update, view)
 
-import Html exposing (..)
+import Custom.Html exposing (emphasisText, mainHeader, row)
+import Html exposing (Html, text)
 import Html.Attributes exposing (..)
 import Model.Session exposing (Session)
 import Page.AddAccolade as AddAccolade
@@ -503,4 +504,7 @@ view model =
 
 notFoundView : Html msg
 notFoundView =
-    h3 [] [ text "Oops! The page you requested was not found!" ]
+    row []
+        [ mainHeader [] [ text "Oops!" ]
+        , emphasisText [] [ text "The page you requested was not found!" ]
+        ]

@@ -139,6 +139,6 @@ viewChart model =
         , g [ transform [ Translate (padding - 1) padding ] ]
             [ yAxis yScale ]
         , g [ transform [ Translate padding padding ], class [ "series" ] ]
-            [ Path.element (line xScale yScale model) [ stroke <| Paint <| Color.rgb 1 0 0, strokeWidth 3, fill PaintNone ]
+            [ Path.element (line xScale yScale model) [ stroke <| Paint <| Color.rgb255 0 150 136, strokeWidth 3, fill PaintNone ]
             ]
         ]

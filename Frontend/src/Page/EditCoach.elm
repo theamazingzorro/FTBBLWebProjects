@@ -1,12 +1,12 @@
 module Page.EditCoach exposing (Model, Msg, init, update, view)
 
 import Api
-import Custom.Attributes
 import Custom.Events exposing (onEnter)
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, text)
+import Html.Attributes exposing (value)
+import Html.Events exposing (onInput)
 import Http
 import Model.Coach exposing (Coach, CoachId, coachDecoder, coachEncoder)
 import Model.Session exposing (Session)
@@ -116,9 +116,8 @@ saveCoach token coach =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h3 [] [ text "Edit Coach" ]
-        , br [] []
+    row []
+        [ mainHeader [] [ text "Edit Coach" ]
         , viewSaveError model.saveError
         , viewCoachOrError model
         ]
@@ -131,7 +130,7 @@ viewCoachOrError model =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
+            emphasisText [] [ text "Loading..." ]
 
         RemoteData.Success coach ->
             viewCoach coach
@@ -144,10 +143,9 @@ viewSaveError : Maybe String -> Html msg
 viewSaveError maybeError =
     case maybeError of
         Just error ->
-            div [ Custom.Attributes.errorMessage ]
-                [ h3 [] [ text "Couldn't save a coach at this time." ]
+            errorText []
+                [ emphasisText [] [ text "Couldn't save a coach at this time." ]
                 , text ("Error: " ++ error)
-                , br [] []
                 ]
 
         Nothing ->
@@ -156,57 +154,28 @@ viewSaveError maybeError =
 
 viewLoadError : String -> Html Msg
 viewLoadError errorMessage =
-    let
-        errorHeading =
-            "Couldn't fetch data at this time."
-    in
-    div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text errorHeading ]
+    errorText []
+        [ emphasisText [] [ text "Couldn't fetch data at this time." ]
         , text <| "Error: " ++ errorMessage
         ]
 
 
 viewCoach : Coach -> Html Msg
 viewCoach coach =
-    div []
+    inputForm []
         [ viewNameField coach.name
-        , viewStaticField "eloField" "Elo" <| String.fromInt coach.elo
-        , button
-            [ Custom.Attributes.submitButton
-            , onClick Submit
-            ]
-            [ text "Save" ]
+        , disabledTextInput
+            [ value <| String.fromInt coach.elo ]
+            [ text "Elo" ]
+        , submitButton Submit [ text "Save" ]
         ]
 
 
 viewNameField : String -> Html Msg
 viewNameField name =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "nameInput")
-            [ text "Name" ]
-        , input
-            (Custom.Attributes.formInput "nameInput"
-                [ onInput NameChanged
-                , onEnter Submit
-                , value name
-                ]
-            )
-            []
+    textInput
+        [ onInput NameChanged
+        , onEnter Submit
+        , value name
         ]
-
-
-viewStaticField : String -> String -> String -> Html msg
-viewStaticField id lblText entry =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel id)
-            [ text lblText ]
-        , input
-            (Custom.Attributes.formInput id
-                [ readonly True
-                , value entry
-                ]
-            )
-            []
-        ]
+        [ text "Name" ]

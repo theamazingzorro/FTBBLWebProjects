@@ -2,10 +2,11 @@ module Main exposing (Msg, main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav
-import Custom.Attributes
+import Custom.Html
 import Env exposing (leagueName)
 import Header
-import Html exposing (..)
+import Html exposing (Html, a, h4, p, text)
+import Html.Attributes exposing (href, tabindex, target)
 import Model.Session exposing (..)
 import Page
 import Page.Signin as SigninPage
@@ -175,18 +176,30 @@ view : Model -> Document Msg
 view model =
     { title = leagueName
     , body =
-        [ div [ Custom.Attributes.mainContainer ]
-            [ navView model
-            , currentPageView model
-            ]
-        ]
+        navView model
+            ++ [ Custom.Html.mainContainer []
+                    [ Custom.Html.pageContent [] [ currentPageView model ]
+                    , viewFooter
+                    ]
+               ]
     }
 
 
-navView : Model -> Html Msg
+viewFooter : Html msg
+viewFooter =
+    Custom.Html.footer []
+        [ h4 [] [ text "©2024 FTBBL" ] ]
+        [ p []
+            [ text "Powered by "
+            , a [ href "https://www.w3schools.com/w3css/default.asp", target "_blank", tabindex -1 ] [ text "w3.css" ]
+            ]
+        ]
+
+
+navView : Model -> List (Html Msg)
 navView model =
     Header.view model.headerModel
-        |> Html.map HeaderMsg
+        |> List.map (Html.map HeaderMsg)
 
 
 currentPageView : Model -> Html Msg

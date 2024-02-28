@@ -1,11 +1,11 @@
 module Page.AddGameWeek exposing (Model, Msg, init, update, view)
 
 import Api
-import Custom.Attributes
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Attribute, Html, text)
+import Html.Attributes exposing (selected, value)
+import Html.Events exposing (onInput)
 import Http
 import Model.Division exposing (Division, DivisionId, divisionDecoder)
 import Model.Game exposing (Game, defaultGame, gameDecoder, newGameEncoder)
@@ -204,10 +204,9 @@ view : Model -> Html Msg
 view model =
     case model.division of
         RemoteData.Success division ->
-            div []
-                [ h3 [] [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
-                , h5 [] [ text <| "Week " ++ String.fromInt model.week ]
-                , br [] []
+            row []
+                [ mainHeader [] [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
+                , emphasisText [] [ text <| "Week " ++ String.fromInt model.week ]
                 , viewSubmitErrors model.submitErrors
                 , viewForm model
                 ]
@@ -216,20 +215,18 @@ view model =
             text ""
 
         RemoteData.Loading ->
-            h4 [] [ text "Loading..." ]
+            emphasisText [] [ text "Loading..." ]
 
         RemoteData.Failure httpError ->
-            h4 [ Custom.Attributes.errorMessage ]
-                [ text <| "Cannot load Division. " ++ Error.buildErrorMessage httpError ]
+            errorText [] [ text <| "Cannot load Division. " ++ Error.buildErrorMessage httpError ]
 
 
 viewSubmitErrors : List String -> Html msg
 viewSubmitErrors errors =
     if List.length errors > 0 then
-        div [ Custom.Attributes.errorMessage ]
-            [ h3 [] [ text "Couldn't save a team at this time." ]
+        errorText []
+            [ emphasisText [] [ text "Couldn't save a team at this time." ]
             , text <| "Error: " ++ List.foldl (\a b -> a ++ " " ++ b) "" errors
-            , br [] []
             ]
 
     else
@@ -238,30 +235,17 @@ viewSubmitErrors errors =
 
 viewForm : Model -> Html Msg
 viewForm model =
-    div [] <|
+    inputForm [] <|
         List.append
             (List.map2 (viewGame model) model.games <| List.range 0 <| List.length model.games)
-            [ submitButton ]
-
-
-submitButton : Html Msg
-submitButton =
-    button
-        [ Custom.Attributes.submitButton
-        , onClick Submit
-        ]
-        [ text "Add Games" ]
+            [ submitButton Submit [ text "Add Games" ] ]
 
 
 viewGame : Model -> Game -> Int -> Html Msg
 viewGame model game gameIndex =
-    div []
-        [ div Custom.Attributes.row
-            [ viewDropdown game model.teams <| homeTeamDropdown gameIndex
-            , text " vs. "
-            , viewDropdown game model.teams <| awayTeamDropdown gameIndex
-            ]
-        , br [] []
+    narrowRow []
+        [ viewDropdown game model.teams <| homeTeamDropdown gameIndex
+        , viewDropdown game model.teams <| awayTeamDropdown gameIndex
         ]
 
 
@@ -272,11 +256,10 @@ viewDropdown game data dropDownFunction =
             dropDownFunction game []
 
         RemoteData.Loading ->
-            h4 [] [ text "Loading Options..." ]
+            emphasisText [] [ text "Loading Options..." ]
 
         RemoteData.Failure httpError ->
-            h4 [ Custom.Attributes.errorMessage ]
-                [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
+            errorText [] [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
 
         RemoteData.Success d ->
             dropDownFunction game <| List.sortBy .name d
@@ -284,44 +267,30 @@ viewDropdown game data dropDownFunction =
 
 homeTeamDropdown : Int -> Game -> List Team -> Html Msg
 homeTeamDropdown gameIndex game teams =
-    div [ Custom.Attributes.col ]
-        [ select
-            (Custom.Attributes.formDropdown "homeTeamDropdown"
-                [ onInput <| HomeTeamSelected gameIndex ]
-            )
-            (defaultOption :: (List.map (homeTeamOption game) <| List.filter (\team -> team.id /= game.awayTeam.id) teams))
+    colHalf []
+        [ inputSection []
+            [ dropdownInput [ onInput <| HomeTeamSelected gameIndex ]
+                (List.map (teamOption game.homeTeam) <| List.filter (\team -> team.id /= game.awayTeam.id) teams)
+            , inputLabel [] [ text <| "Home #" ++ String.fromInt (gameIndex + 1) ]
+            ]
         ]
-
-
-homeTeamOption : Game -> Team -> Html msg
-homeTeamOption game team =
-    option
-        [ value <| Team.idToString team.id
-        , selected (team.id == game.homeTeam.id)
-        ]
-        [ text team.name ]
 
 
 awayTeamDropdown : Int -> Game -> List Team -> Html Msg
 awayTeamDropdown gameIndex game teams =
-    div [ Custom.Attributes.col ]
-        [ select
-            (Custom.Attributes.formDropdown "awayTeamDropdown"
-                [ onInput <| AwayTeamSelected gameIndex ]
-            )
-            (defaultOption :: (List.map (awayTeamOption game) <| List.filter (\team -> team.id /= game.homeTeam.id) teams))
+    colHalf []
+        [ inputSection []
+            [ dropdownInput [ onInput <| AwayTeamSelected gameIndex ]
+                (List.map (teamOption game.awayTeam) <| List.filter (\team -> team.id /= game.homeTeam.id) teams)
+            , inputLabel [] [ text <| "Away #" ++ String.fromInt (gameIndex + 1) ]
+            ]
         ]
 
 
-awayTeamOption : Game -> Team -> Html msg
-awayTeamOption game team =
-    option
-        [ value <| Team.idToString team.id
-        , selected (team.id == game.awayTeam.id)
-        ]
-        [ text team.name ]
-
-
-defaultOption : Html Msg
-defaultOption =
-    option [ value "0" ] [ text "-" ]
+teamOption : Team -> Team -> ( List (Attribute msg), List (Html msg) )
+teamOption selectedTeam team =
+    ( [ value <| Team.idToString team.id
+      , selected (team.id == selectedTeam.id)
+      ]
+    , [ text team.name ]
+    )

@@ -1,12 +1,12 @@
 module Page.AddTeam exposing (Model, Msg, init, update, view)
 
 import Api
-import Custom.Attributes
 import Custom.Events exposing (onEnter)
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Attribute, Html, text)
+import Html.Attributes exposing (selected, value)
+import Html.Events exposing (onInput)
 import Http
 import Model.Coach as Coach exposing (Coach, coachsDecoder)
 import Model.Race as Race exposing (Race, racesDecoder)
@@ -152,9 +152,8 @@ getCoachesRequest token =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h3 [] [ text "Add Team" ]
-        , br [] []
+    row []
+        [ mainHeader [] [ text "Add Team" ]
         , viewSubmitError model.submitError
         , viewForm model
         ]
@@ -164,10 +163,9 @@ viewSubmitError : Maybe String -> Html msg
 viewSubmitError maybeError =
     case maybeError of
         Just error ->
-            div [ Custom.Attributes.errorMessage ]
-                [ h3 [] [ text "Couldn't save a team at this time." ]
+            errorText []
+                [ emphasisText [] [ text "Couldn't save a team at this time." ]
                 , text ("Error: " ++ error)
-                , br [] []
                 ]
 
         Nothing ->
@@ -176,33 +174,22 @@ viewSubmitError maybeError =
 
 viewForm : Model -> Html Msg
 viewForm model =
-    div []
+    inputForm []
         [ viewNameField model.team
         , viewRaceField model.team model.raceOptions
         , viewCoachField model.team model.coachOptions
-        , button
-            [ Custom.Attributes.submitButton
-            , onClick Submit
-            ]
-            [ text "Add" ]
+        , submitButton Submit [ text "Add" ]
         ]
 
 
 viewNameField : Team -> Html Msg
 viewNameField team =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "nameInput")
-            [ text "Name" ]
-        , input
-            (Custom.Attributes.formInput "nameInput"
-                [ onInput NameChanged
-                , onEnter Submit
-                , value team.name
-                ]
-            )
-            []
+    textInput
+        [ onInput NameChanged
+        , onEnter Submit
+        , value team.name
         ]
+        [ text "Name" ]
 
 
 viewRaceField : Team -> WebData (List Race) -> Html Msg
@@ -212,28 +199,13 @@ viewRaceField team data =
             text ""
 
         RemoteData.Loading ->
-            h4 [] [ text "Loading Options..." ]
+            emphasisText [] [ text "Loading Options..." ]
 
         RemoteData.Failure httpError ->
-            h4 [ Custom.Attributes.errorMessage ]
-                [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
+            errorText [] [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
 
         RemoteData.Success races ->
             raceDropdown team <| List.sortBy .name races
-
-
-raceDropdown : Team -> List Race -> Html Msg
-raceDropdown team races =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "raceDropdown")
-            [ text "Race" ]
-        , select
-            (Custom.Attributes.formDropdown "raceDropdown"
-                [ onInput RaceSelected ]
-            )
-            (defaultOption :: List.map (raceOption team) races)
-        ]
 
 
 viewCoachField : Team -> WebData (List Coach) -> Html Msg
@@ -243,48 +215,46 @@ viewCoachField team data =
             text ""
 
         RemoteData.Loading ->
-            h4 [] [ text "Loading Options..." ]
+            emphasisText [] [ text "Loading Options..." ]
 
         RemoteData.Failure httpError ->
-            h4 [ Custom.Attributes.errorMessage ]
-                [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
+            errorText [] [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
 
         RemoteData.Success coaches ->
             coachDropdown team <| List.sortBy .name coaches
 
 
+raceDropdown : Team -> List Race -> Html Msg
+raceDropdown team races =
+    inputSection []
+        [ dropdownInput [ onInput RaceSelected ]
+            (List.map (raceOption team) races)
+        , inputLabel [] [ text "Race" ]
+        ]
+
+
 coachDropdown : Team -> List Coach -> Html Msg
 coachDropdown team coaches =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "coachDropdown")
-            [ text "Coach" ]
-        , select
-            (Custom.Attributes.formDropdown "coachDropdown"
-                [ onInput CoachSelected ]
-            )
-            (defaultOption :: List.map (coachOption team) coaches)
+    inputSection []
+        [ dropdownInput [ onInput CoachSelected ]
+            (List.map (coachOption team) coaches)
+        , inputLabel [] [ text "Coach" ]
         ]
 
 
-defaultOption : Html Msg
-defaultOption =
-    option [ value "0" ] [ text "-" ]
-
-
-raceOption : Team -> Race -> Html msg
+raceOption : Team -> Race -> ( List (Attribute msg), List (Html msg) )
 raceOption team race =
-    option
-        [ value <| Race.idToString race.id
-        , selected (race.id == team.race.id)
-        ]
-        [ text race.name ]
+    ( [ value <| Race.idToString race.id
+      , selected (race.id == team.race.id)
+      ]
+    , [ text race.name ]
+    )
 
 
-coachOption : Team -> Coach -> Html msg
+coachOption : Team -> Coach -> ( List (Attribute msg), List (Html msg) )
 coachOption team coach =
-    option
-        [ value <| Coach.idToString coach.id
-        , selected (coach.id == team.coach.id)
-        ]
-        [ text coach.name ]
+    ( [ value <| Coach.idToString coach.id
+      , selected (coach.id == team.coach.id)
+      ]
+    , [ text coach.name ]
+    )

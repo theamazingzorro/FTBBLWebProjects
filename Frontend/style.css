@@ -1,0 +1,42 @@
+body {
+    font-family: "Lato", sans-serif
+}
+.w3-sidebar {
+    z-index: 3;
+    width: 250px;
+    top: 48px;
+    bottom: 0;
+    height: inherit;
+}
+.flex-wrapper {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.main-page-content {
+    padding: 2em;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.floating-card {
+    width:80%;
+    max-width:800px;
+    margin: 4em auto;
+    border-radius: 5px 20px;
+}
+.round-corners {
+    border-radius: 20px;
+}
+input:read-only {
+    background-color: rgba(150, 150, 150, 0.1);
+}
+.fake-link {
+    cursor: pointer;
+}
+.fake-link:hover {
+    color:#009688;
+}
+a:hover {
+    color:#009688;
+}

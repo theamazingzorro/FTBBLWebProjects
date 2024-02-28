@@ -1,12 +1,12 @@
 module Page.EditDivision exposing (Model, Msg, init, update, view)
 
 import Api
-import Custom.Attributes
 import Custom.Events exposing (onEnter)
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, text)
+import Html.Attributes exposing (value)
+import Html.Events exposing (onInput)
 import Http
 import Model.Division exposing (Division, DivisionId, divisionDecoder, divisionEncoder)
 import Model.Session exposing (Session)
@@ -135,9 +135,8 @@ saveDivision token division =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h3 [] [ text "Edit Division" ]
-        , br [] []
+    row []
+        [ mainHeader [] [ text "Edit Division" ]
         , viewSaveError model.saveError
         , viewCoachOrError model
         ]
@@ -150,7 +149,7 @@ viewCoachOrError model =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading..." ]
+            emphasisText [] [ text "Loading..." ]
 
         RemoteData.Success coach ->
             viewDivision coach
@@ -163,10 +162,9 @@ viewSaveError : Maybe String -> Html msg
 viewSaveError maybeError =
     case maybeError of
         Just error ->
-            div [ Custom.Attributes.errorMessage ]
-                [ h3 [] [ text "Couldn't save a division at this time." ]
-                , text ("Error: " ++ error)
-                , br [] []
+            errorText []
+                [ emphasisText [] [ text "Couldn't save a division at this time." ]
+                , text <| "Error: " ++ error
                 ]
 
         Nothing ->
@@ -175,57 +173,35 @@ viewSaveError maybeError =
 
 viewLoadError : String -> Html Msg
 viewLoadError errorMessage =
-    let
-        errorHeading =
-            "Couldn't fetch data at this time."
-    in
-    div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text errorHeading ]
+    errorText []
+        [ emphasisText [] [ text "Couldn't fetch data at this time." ]
         , text <| "Error: " ++ errorMessage
         ]
 
 
 viewDivision : Division -> Html Msg
 viewDivision division =
-    div []
+    inputForm []
         [ viewNameField division.name
         , viewSeasonField division.season
-        , button
-            [ Custom.Attributes.submitButton
-            , onClick Submit
-            ]
-            [ text "Save" ]
+        , submitButton Submit [ text "Save" ]
         ]
 
 
 viewNameField : String -> Html Msg
 viewNameField name =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "nameInput")
-            [ text "Name" ]
-        , input
-            (Custom.Attributes.formInput "nameInput"
-                [ onInput NameChanged
-                , value name
-                ]
-            )
-            []
+    textInput
+        [ onInput NameChanged
+        , value name
         ]
+        [ text "Name" ]
 
 
 viewSeasonField : Int -> Html Msg
 viewSeasonField name =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "seasonInput")
-            [ text "Season" ]
-        , input
-            (Custom.Attributes.formInput "seasonInput"
-                [ onInput SeasonChanged
-                , onEnter Submit
-                , value <| String.fromInt name
-                ]
-            )
-            []
+    textInput
+        [ onInput SeasonChanged
+        , onEnter Submit
+        , value <| String.fromInt name
         ]
+        [ text "Season" ]
