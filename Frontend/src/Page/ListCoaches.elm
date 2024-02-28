@@ -4,7 +4,7 @@ import Api
 import Auth exposing (requiresAuth)
 import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (Html, div, span, text)
+import Html exposing (Html, div, text)
 import Html.Events exposing (onClick)
 import Http
 import List exposing (drop, length, take)
@@ -412,7 +412,7 @@ viewRecentSeason coach =
 
 viewAccolades : Coach -> Html Msg
 viewAccolades coach =
-    span []
+    accoladeCollection []
         (List.sortWith (\a b -> compare (Maybe.withDefault 0 b.season) (Maybe.withDefault 0 a.season)) coach.accolades
             |> List.take 5
             |> List.map viewAccolade

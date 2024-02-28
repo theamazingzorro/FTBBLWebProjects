@@ -270,6 +270,6 @@ viewSelectedTeam maybeTeam =
 
 viewStaticField : String -> String -> Html msg
 viewStaticField lblText entry =
-    Custom.Html.disabledTextInput
+    disabledTextInput
         [ value entry ]
         [ text lblText ]

@@ -2,7 +2,7 @@ module Header exposing (Model, Msg, OutMsg(..), init, update, view)
 
 import Api
 import Auth exposing (requiresAuth)
-import Custom.Html exposing (hidden, importantNavButton, visible)
+import Custom.Html exposing (..)
 import Env exposing (leagueName)
 import Html exposing (Attribute, Html, text)
 import Html.Events exposing (onClick)
@@ -133,13 +133,13 @@ view : Model -> List (Html Msg)
 view model =
     [ viewNavbar
     , viewSidebar model
-    , Custom.Html.sideBarShadow [ onClick HideSidebar, displayStyle model.shouldDisplaySidebar ]
+    , sideBarShadow [ onClick HideSidebar, displayStyle model.shouldDisplaySidebar ]
     ]
 
 
 viewNavbar : Html Msg
 viewNavbar =
-    Custom.Html.navBar []
+    navBar []
         [ toggleBarButton
         , importantNavButton [ onClick HomeClicked ] [ text leagueName ]
         , navLink "Teams" TeamIndexClicked
@@ -150,10 +150,10 @@ viewNavbar =
 
 viewSidebar : Model -> Html Msg
 viewSidebar model =
-    Custom.Html.sideBar [ displayStyle model.shouldDisplaySidebar ]
-        [ Custom.Html.closeSideBarButton []
-        , Custom.Html.sideBarTitle [] [ text "Menu" ]
-        , Custom.Html.list []
+    sideBar [ displayStyle model.shouldDisplaySidebar ]
+        [ closeSideBarButton []
+        , sideBarTitle [] [ text "Menu" ]
+        , list []
             [ sidebarLink "Teams" TeamIndexClicked
             , sidebarLink "Coaches" CoachIndexClicked
             , sidebarLink "Divisions" DivisionIndexClicked
@@ -188,7 +188,7 @@ viewDivisionsLinks : WebData (List Division) -> Html Msg
 viewDivisionsLinks divisions =
     case divisions of
         RemoteData.Success divs ->
-            Custom.Html.list []
+            list []
                 (List.map
                     (\div -> smallSidebarLink (div.name ++ " Season " ++ String.fromInt div.season) <| SpecificDivisionClicked div.id)
                     (List.sortWith compareDivisions divs
@@ -202,19 +202,19 @@ viewDivisionsLinks divisions =
 
 toggleBarButton : Html Msg
 toggleBarButton =
-    Custom.Html.menuIcon [ onClick ToggleSidebar ]
+    menuIcon [ onClick ToggleSidebar ]
 
 
 navLink : String -> Msg -> Html Msg
 navLink title msg =
-    Custom.Html.navButton [ onClick msg ] [ text title ]
+    navButton [ onClick msg ] [ text title ]
 
 
 sidebarLink : String -> Msg -> Html Msg
 sidebarLink title msg =
-    Custom.Html.sideBarLink [ onClick msg ] [ text title ]
+    sideBarLink [ onClick msg ] [ text title ]
 
 
 smallSidebarLink : String -> Msg -> Html Msg
 smallSidebarLink title msg =
-    Custom.Html.smallSideBarLink [ onClick msg ] [ text title ]
+    smallSideBarLink [ onClick msg ] [ text title ]

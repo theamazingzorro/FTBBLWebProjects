@@ -85,7 +85,7 @@ importantNavButton attributes children =
 navButton : List (Attribute msg) -> List (Html msg) -> Html msg
 navButton attributes children =
     a
-        ([ class "w3-bar-item w3-button w3-padding-large w3-hide-small"
+        ([ class "w3-bar-item w3-button w3-padding-large w3-hide-large"
          , href "#"
          ]
             ++ attributes
@@ -95,7 +95,7 @@ navButton attributes children =
 
 navDropdown : List (Attribute msg) -> List (Html msg) -> Html msg
 navDropdown attributes children =
-    div (class "w3-dropdown-hover w3-hide-small" :: attributes)
+    div (class "w3-dropdown-hover w3-hide-large" :: attributes)
         children
 
 
@@ -223,6 +223,11 @@ errorText attributes children =
 bodyText : List (Attribute msg) -> List (Html msg) -> Html msg
 bodyText attributes children =
     p attributes children
+
+
+accoladeCollection : List (Attribute msg) -> List (Html msg) -> Html msg
+accoladeCollection attributes children =
+    span (class "w3-hide-medium w3-hide-small" :: attributes) children
 
 
 

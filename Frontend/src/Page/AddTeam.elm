@@ -184,7 +184,7 @@ viewForm model =
 
 viewNameField : Team -> Html Msg
 viewNameField team =
-    Custom.Html.textInput
+    textInput
         [ onInput NameChanged
         , onEnter Submit
         , value team.name

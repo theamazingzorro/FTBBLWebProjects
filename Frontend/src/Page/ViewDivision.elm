@@ -4,7 +4,7 @@ import Api
 import Auth exposing (requiresAuth)
 import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (Html, div, h2, span, text)
+import Html exposing (Html, div, h2, text)
 import Html.Events exposing (onClick)
 import Http
 import Model.Accolade exposing (Accolade, viewAccolade)
@@ -601,7 +601,7 @@ getTotalGames gamesData team =
 
 viewAccolades : List Accolade -> Html Msg
 viewAccolades accolades =
-    span []
+    accoladeCollection []
         (List.sortWith (\a b -> compare (Maybe.withDefault 0 b.season) (Maybe.withDefault 0 a.season)) accolades
             |> List.take 3
             |> List.map viewAccolade
@@ -720,7 +720,7 @@ viewScore game =
 
 viewGameButtons : Game -> Html Msg
 viewGameButtons game =
-    row [ floatCenter ]
+    narrowRow [ floatCenter ]
         [ viewGameEditButton game
         , viewGameDeleteButton game
         ]
