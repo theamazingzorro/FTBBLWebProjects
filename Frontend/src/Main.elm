@@ -6,7 +6,7 @@ import Custom.Html
 import Env exposing (leagueName)
 import Header
 import Html exposing (Html, a, h4, p, text)
-import Html.Attributes exposing (href, target)
+import Html.Attributes exposing (href, tabindex, target)
 import Model.Session exposing (..)
 import Page
 import Page.Signin as SigninPage
@@ -191,7 +191,7 @@ viewFooter =
         [ h4 [] [ text "©2024 FTBBL" ] ]
         [ p []
             [ text "Powered by "
-            , a [ href "https://www.w3schools.com/w3css/default.asp", target "_blank" ] [ text "w3.css" ]
+            , a [ href "https://www.w3schools.com/w3css/default.asp", target "_blank", tabindex -1 ] [ text "w3.css" ]
             ]
         ]
 

@@ -1,11 +1,11 @@
 module Page.ViewHeadToHead exposing (Model, Msg, init, update, view)
 
 import Api
-import Custom.Attributes
+import Custom.Html exposing (..)
 import Error
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html exposing (Attribute, Html, div, text)
+import Html.Attributes exposing (selected, value)
+import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Coach as Coach exposing (Coach, CoachId, coachsDecoder, defaultCoach)
 import Model.Division exposing (Division, DivisionId, compareDivisions)
@@ -370,39 +370,58 @@ getRecordForCoaches games coach1Id coach2Id =
 view : Model -> Html Msg
 view model =
     if model.useTeams then
-        div []
-            [ div [] [ viewSwitchTeamCoachButton "View Coaches" ]
-            , br [] []
+        row []
+            [ narrowRow [ floatRight ] [ viewSwitchTeamCoachButton "View Coaches" ]
+            , narrowRow [] [ mainHeader [ textCenter ] [ text "Versus" ] ]
             , viewTeamSelector model.teams model.team1Id model.team2Id
-            , br [] []
+            , viewTeamsIfSelected model.teams model.team1Id model.team2Id
             , viewTeamHeadToHead model.teams model.games model.team1Id model.team2Id
-            , br [] []
             , viewGames model.games
             ]
 
     else
-        div []
-            [ div [] [ viewSwitchTeamCoachButton "View Teams" ]
-            , br [] []
+        row []
+            [ narrowRow [ floatRight ] [ viewSwitchTeamCoachButton "View Teams" ]
+            , narrowRow [] [ mainHeader [ textCenter ] [ text "Versus" ] ]
             , viewCoachSelector model.coaches model.coach1Id model.coach2Id
-            , br [] []
+            , viewCoachesIfSelected model.coaches model.coach1Id model.coach2Id
             , viewCoachHeadToHead model.coaches model.games model.coach1Id model.coach2Id
-            , br [] []
             , viewGames model.games
             ]
 
 
 viewSwitchTeamCoachButton : String -> Html Msg
 viewSwitchTeamCoachButton buttonText =
-    span
-        (Custom.Attributes.textButton TeamsCoachSwitch)
+    optionButton
+        [ onClick TeamsCoachSwitch ]
         [ text buttonText ]
+
+
+viewDivisionButton : Division -> Html Msg
+viewDivisionButton division =
+    pageLink
+        [ onClick <| ViewDivisionClick division.id ]
+        [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
+
+
+viewCoachButton : Coach -> Html Msg
+viewCoachButton coach =
+    pageLink
+        [ onClick <| ViewCoachClick coach.id ]
+        [ text coach.name ]
+
+
+viewTeamButton : Team -> Html Msg
+viewTeamButton team =
+    pageLink
+        [ onClick <| ViewTeamClick team.id ]
+        [ text team.name ]
 
 
 viewLoadError : String -> Html Msg
 viewLoadError errorMessage =
-    div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text "Couldn't fetch data at this time." ]
+    errorText []
+        [ emphasisText [] [ text "Couldn't fetch data at this time." ]
         , text <| "Error: " ++ errorMessage
         ]
 
@@ -411,8 +430,150 @@ viewErrorMessage : Maybe String -> Html Msg
 viewErrorMessage message =
     case message of
         Just m ->
-            div [ Custom.Attributes.errorMessage ]
-                [ text <| "Error: " ++ m ]
+            errorText [] [ text <| "Error: " ++ m ]
+
+        Nothing ->
+            text ""
+
+
+
+-- View Drop Downs --
+
+
+viewTeamSelector : WebData (List Team) -> Maybe TeamId -> Maybe TeamId -> Html Msg
+viewTeamSelector teamData team1Id team2Id =
+    row []
+        [ colThird [] [ viewDropdown team1Id teamData <| teamDropdown Team1Selected ]
+        , colThird [] [ emphasisText [ textCenter ] [ text "vs." ] ]
+        , colThird [] [ viewDropdown team2Id teamData <| teamDropdown Team2Selected ]
+        ]
+
+
+viewCoachSelector : WebData (List Coach) -> Maybe CoachId -> Maybe CoachId -> Html Msg
+viewCoachSelector coachData coach1 coach2 =
+    row []
+        [ colThird [] [ viewDropdown coach1 coachData <| coachDropdown Coach1Selected ]
+        , colThird [] [ emphasisText [ textCenter ] [ text "vs." ] ]
+        , colThird [] [ viewDropdown coach2 coachData <| coachDropdown Coach2Selected ]
+        ]
+
+
+viewDropdown : Maybe id -> WebData (List { obj | id : id, name : comparable }) -> (Maybe id -> List { obj | id : id, name : comparable } -> Html Msg) -> Html Msg
+viewDropdown idData data dropDownFunction =
+    case data of
+        RemoteData.NotAsked ->
+            dropDownFunction Nothing []
+
+        RemoteData.Loading ->
+            emphasisText [] [ text "Loading Options..." ]
+
+        RemoteData.Failure httpError ->
+            errorText [] [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
+
+        RemoteData.Success d ->
+            dropDownFunction idData <| List.sortBy .name d
+
+
+teamDropdown : (String -> Msg) -> Maybe TeamId -> List Team -> Html Msg
+teamDropdown selectionEvent selectedTeam teams =
+    inputSection []
+        [ dropdownInput [ onInput selectionEvent ]
+            (List.map (teamOption selectedTeam) teams)
+        , inputLabel [] [ text "" ]
+        ]
+
+
+coachDropdown : (String -> Msg) -> Maybe CoachId -> List Coach -> Html Msg
+coachDropdown selectionEvent selectedCoach coaches =
+    inputSection []
+        [ dropdownInput [ onInput selectionEvent ]
+            (List.map (coachOption selectedCoach) coaches)
+        , inputLabel [] [ text "" ]
+        ]
+
+
+teamOption : Maybe TeamId -> Team -> ( List (Attribute msg), List (Html msg) )
+teamOption currentTeam team =
+    ( [ value <| Team.idToString team.id
+      , selected (team.id == Maybe.withDefault defaultTeam.id currentTeam)
+      ]
+    , [ text team.name ]
+    )
+
+
+coachOption : Maybe CoachId -> Coach -> ( List (Attribute msg), List (Html msg) )
+coachOption currentCoach coach =
+    ( [ value <| Coach.idToString coach.id
+      , selected (coach.id == Maybe.withDefault defaultCoach.id currentCoach)
+      ]
+    , [ text coach.name ]
+    )
+
+
+
+-- View Team / Coach Specifics --
+
+
+viewTeamsIfSelected : WebData (List Team) -> Maybe TeamId -> Maybe TeamId -> Html Msg
+viewTeamsIfSelected teamData team1Id team2Id =
+    case teamData of
+        RemoteData.Success teams ->
+            viewTeams (getTeam teams team1Id) (getTeam teams team2Id)
+
+        _ ->
+            text ""
+
+
+viewCoachesIfSelected : WebData (List Coach) -> Maybe CoachId -> Maybe CoachId -> Html Msg
+viewCoachesIfSelected coachData coach1Id coach2Id =
+    case coachData of
+        RemoteData.Success coaches ->
+            viewCoaches (getCoach coaches coach1Id) (getCoach coaches coach2Id)
+
+        _ ->
+            text ""
+
+
+viewTeams : Maybe Team -> Maybe Team -> Html Msg
+viewTeams team1 team2 =
+    shadedContainer []
+        [ colHalf [] [ viewTeam team1 ]
+        , colHalf [] [ viewTeam team2 ]
+        ]
+
+
+viewCoaches : Maybe Coach -> Maybe Coach -> Html Msg
+viewCoaches coach1 coach2 =
+    shadedContainer []
+        [ colHalf [] [ viewCoach coach1 ]
+        , colHalf [] [ viewCoach coach2 ]
+        ]
+
+
+viewTeam : Maybe Team -> Html Msg
+viewTeam tData =
+    case tData of
+        Just team ->
+            floatingCard []
+                [ subHeader [] [ text team.name ]
+                , bodyText [] [ text "Coach: ", viewCoachButton team.coach ]
+                , bodyText [] [ text <| "Race: " ++ team.race.name ]
+                , bodyText [] [ text <| "Current Elo: " ++ String.fromInt team.elo ]
+                , bodyText [] [ text "Most Recent Division: ", Maybe.map viewDivisionButton team.division |> Maybe.withDefault (text "N/A") ]
+                ]
+
+        Nothing ->
+            text ""
+
+
+viewCoach : Maybe Coach -> Html Msg
+viewCoach cData =
+    case cData of
+        Just coach ->
+            floatingCard []
+                [ subHeader [] [ text coach.name ]
+                , bodyText [] [ text <| "Current Elo: " ++ String.fromInt coach.elo ]
+                ]
 
         Nothing ->
             text ""
@@ -429,10 +590,10 @@ viewTeamHeadToHead teamData gameData team1 team2 =
             viewTeamMatchupRecord teams games team1 team2
 
         ( _, RemoteData.Loading ) ->
-            h3 [] [ text "Loading Teams..." ]
+            emphasisText [] [ text "Loading Teams..." ]
 
         ( RemoteData.Loading, _ ) ->
-            h3 [] [ text "Loading Games..." ]
+            emphasisText [] [ text "Loading Games..." ]
 
         ( _, RemoteData.Failure httpError ) ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -454,10 +615,10 @@ viewCoachHeadToHead coachData gameData coach1 coach2 =
             viewCoachMatchupRecord coaches games coach1 coach2
 
         ( _, RemoteData.Loading ) ->
-            h3 [] [ text "Loading Coaches..." ]
+            emphasisText [] [ text "Loading Coaches..." ]
 
         ( RemoteData.Loading, _ ) ->
-            h3 [] [ text "Loading Games..." ]
+            emphasisText [] [ text "Loading Games..." ]
 
         ( _, RemoteData.Failure httpError ) ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -477,19 +638,18 @@ viewTeamMatchupRecord teams games team1 team2 =
     case ( team1, team2 ) of
         ( Just team1Id, Just team2Id ) ->
             div []
-                [ h3 [ Custom.Attributes.textCentered ] [ text "Record" ]
-                , br [] []
-                , div Custom.Attributes.row
-                    [ div [ Custom.Attributes.col ]
-                        [ h5 [ Custom.Attributes.textRight ]
+                [ mainHeader [ textCenter ] [ text "Record" ]
+                , row []
+                    [ colThird []
+                        [ subHeader [ textRight ]
                             [ text <| (getTeam teams team1 |> Maybe.map .name |> Maybe.withDefault "") ]
                         ]
-                    , div [ Custom.Attributes.col ]
-                        [ h5 [ Custom.Attributes.textCentered ]
+                    , colThird []
+                        [ emphasisText [ textCenter ]
                             [ viewRecord <| getRecordForTeams games team1Id team2Id ]
                         ]
-                    , div [ Custom.Attributes.col ]
-                        [ h5 [ Custom.Attributes.textLeft ]
+                    , colThird []
+                        [ subHeader [ textLeft ]
                             [ text <| (getTeam teams team2 |> Maybe.map .name |> Maybe.withDefault "") ]
                         ]
                     ]
@@ -504,19 +664,18 @@ viewCoachMatchupRecord coaches games coach1 coach2 =
     case ( coach1, coach2 ) of
         ( Just coach1Id, Just coach2Id ) ->
             div []
-                [ h3 [ Custom.Attributes.textCentered ] [ text "Record" ]
-                , br [] []
-                , div Custom.Attributes.row
-                    [ div [ Custom.Attributes.col ]
-                        [ h5 [ Custom.Attributes.textRight ]
+                [ mainHeader [ textCenter ] [ text "Record" ]
+                , row []
+                    [ colThird []
+                        [ subHeader [ textRight ]
                             [ text <| (getCoach coaches coach1 |> Maybe.map .name |> Maybe.withDefault "") ]
                         ]
-                    , div [ Custom.Attributes.col ]
-                        [ h5 [ Custom.Attributes.textCentered ]
+                    , colThird []
+                        [ emphasisText [ textCenter ]
                             [ viewRecord <| getRecordForCoaches games coach1Id coach2Id ]
                         ]
-                    , div [ Custom.Attributes.col ]
-                        [ h5 [ Custom.Attributes.textLeft ]
+                    , colThird []
+                        [ subHeader [ textLeft ]
                             [ text <| (getCoach coaches coach2 |> Maybe.map .name |> Maybe.withDefault "") ]
                         ]
                     ]
@@ -540,9 +699,8 @@ viewGames gameData =
     case gameData of
         RemoteData.Success games ->
             div []
-                [ h3 [ Custom.Attributes.textCentered ]
-                    [ text "History" ]
-                , div []
+                [ subHeader [ textCenter ] [ text "History" ]
+                , shadedContainer []
                     (List.map viewGameDetails games)
                 ]
 
@@ -550,7 +708,7 @@ viewGames gameData =
             text ""
 
         RemoteData.Loading ->
-            h3 [] [ text "Loading Games..." ]
+            emphasisText [] [ text "Loading Games..." ]
 
         RemoteData.Failure httpError ->
             viewLoadError <| Error.buildErrorMessage httpError
@@ -558,43 +716,21 @@ viewGames gameData =
 
 viewGameDetails : Game -> Html Msg
 viewGameDetails game =
-    div Custom.Attributes.carouselItemEntry
-        [ div [ class "row" ]
-            [ h6 [] [ viewDivisionButton game.division ] ]
-        , div [ class "row" ]
-            [ div [ class "col" ]
-                [ h6 [] [ viewTeamButton game.homeTeam ]
-                , p [] [ viewCoachButton game.homeTeam.coach ]
+    floatingCard []
+        [ narrowRow [ textCenter ] [ emphasisText [] [ viewDivisionButton game.division ] ]
+        , narrowRow []
+            [ colThird [ textRight ]
+                [ smallColorText [] [ viewTeamButton game.homeTeam ]
+                , bodyText [] [ viewCoachButton game.homeTeam.coach ]
                 ]
-            , div [ class "col col-auto", Custom.Attributes.centered ]
-                [ viewScore game ]
-            , div [ class "col" ]
-                [ h6 [] [ viewTeamButton game.awayTeam ]
-                , p [] [ viewCoachButton game.awayTeam.coach ]
+            , colThird [ textCenter ]
+                [ row [] [ viewScore game ] ]
+            , colThird [ textLeft ]
+                [ smallColorText [] [ viewTeamButton game.awayTeam ]
+                , bodyText [] [ viewCoachButton game.awayTeam.coach ]
                 ]
             ]
         ]
-
-
-viewDivisionButton : Division -> Html Msg
-viewDivisionButton division =
-    span
-        (Custom.Attributes.textButton <| ViewDivisionClick division.id)
-        [ text <| division.name ++ " Season " ++ String.fromInt division.season ]
-
-
-viewCoachButton : Coach -> Html Msg
-viewCoachButton coach =
-    span
-        (Custom.Attributes.textButton <| ViewCoachClick coach.id)
-        [ text coach.name ]
-
-
-viewTeamButton : Team -> Html Msg
-viewTeamButton team =
-    span
-        (Custom.Attributes.textButton <| ViewTeamClick team.id)
-        [ text team.name ]
 
 
 viewScore : Game -> Html Msg
@@ -605,127 +741,3 @@ viewScore game =
 
         _ ->
             text "vs."
-
-
-
--- View Team / Coach Specifics --
-
-
-viewTeam : Maybe Team -> Html Msg
-viewTeam teamData =
-    case teamData of
-        Just team ->
-            div [ Custom.Attributes.col ]
-                [ br [] []
-                , p []
-                    [ text "Coach: "
-                    , viewCoachButton team.coach
-                    ]
-                , p [] [ text <| "Race: " ++ team.race.name ]
-                , p [] [ text <| "Current Elo: " ++ String.fromInt team.elo ]
-                , p [] [ text "Most Recent Division: ", Maybe.map viewDivisionButton team.division |> Maybe.withDefault (text "N/A") ]
-                ]
-
-        Nothing ->
-            div [ Custom.Attributes.col ]
-                [ text "" ]
-
-
-viewCoach : Maybe Coach -> Html Msg
-viewCoach coachData =
-    case coachData of
-        Just coach ->
-            div [ Custom.Attributes.col ]
-                [ br [] []
-                , p [] [ text <| "Current Elo: " ++ String.fromInt coach.elo ]
-                ]
-
-        Nothing ->
-            div [ Custom.Attributes.col ]
-                [ text "" ]
-
-
-
--- View Drop Downs --
-
-
-viewTeamSelector : WebData (List Team) -> Maybe TeamId -> Maybe TeamId -> Html Msg
-viewTeamSelector teamData team1Id team2Id =
-    div Custom.Attributes.row
-        [ viewDropdown team1Id teamData <| teamDropdown "team1Dropdown" Team1Selected
-        , text "vs."
-        , viewDropdown team2Id teamData <| teamDropdown "team2Dropdown" Team2Selected
-        ]
-
-
-viewCoachSelector : WebData (List Coach) -> Maybe CoachId -> Maybe CoachId -> Html Msg
-viewCoachSelector coachData coach1 coach2 =
-    div Custom.Attributes.row
-        [ viewDropdown coach1 coachData <| coachDropdown "coach1Dropdown" Coach1Selected
-        , text "vs."
-        , viewDropdown coach2 coachData <| coachDropdown "coach2Dropdown" Coach2Selected
-        ]
-
-
-viewDropdown : Maybe id -> WebData (List { obj | id : id, name : comparable }) -> (Maybe id -> List { obj | id : id, name : comparable } -> Html Msg) -> Html Msg
-viewDropdown idData data dropDownFunction =
-    case data of
-        RemoteData.NotAsked ->
-            dropDownFunction Nothing []
-
-        RemoteData.Loading ->
-            h4 [] [ text "Loading Options..." ]
-
-        RemoteData.Failure httpError ->
-            h4 [ Custom.Attributes.errorMessage ]
-                [ text <| "Cannot load Options. " ++ Error.buildErrorMessage httpError ]
-
-        RemoteData.Success d ->
-            dropDownFunction idData <| List.sortBy .name d
-
-
-teamDropdown : String -> (String -> Msg) -> Maybe TeamId -> List Team -> Html Msg
-teamDropdown selectorId selectionEvent selectedTeam teams =
-    div [ Custom.Attributes.col ]
-        [ select
-            (Custom.Attributes.formDropdown selectorId
-                [ onInput selectionEvent ]
-            )
-            (defaultOption :: List.map (teamOption selectedTeam) teams)
-        , viewTeam <| getTeam teams selectedTeam
-        ]
-
-
-coachDropdown : String -> (String -> Msg) -> Maybe CoachId -> List Coach -> Html Msg
-coachDropdown selectorId selectionEvent selectedCoach coaches =
-    div [ Custom.Attributes.col ]
-        [ select
-            (Custom.Attributes.formDropdown selectorId
-                [ onInput selectionEvent ]
-            )
-            (defaultOption :: List.map (coachOption selectedCoach) coaches)
-        , viewCoach <| getCoach coaches selectedCoach
-        ]
-
-
-teamOption : Maybe TeamId -> Team -> Html msg
-teamOption currentTeam team =
-    option
-        [ value <| Team.idToString team.id
-        , selected (team.id == Maybe.withDefault defaultTeam.id currentTeam)
-        ]
-        [ text team.name ]
-
-
-coachOption : Maybe CoachId -> Coach -> Html msg
-coachOption currentCoach coach =
-    option
-        [ value <| Coach.idToString coach.id
-        , selected (coach.id == Maybe.withDefault defaultCoach.id currentCoach)
-        ]
-        [ text coach.name ]
-
-
-defaultOption : Html Msg
-defaultOption =
-    option [ value "0" ] [ text "-" ]

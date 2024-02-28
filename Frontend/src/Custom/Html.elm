@@ -1,7 +1,9 @@
 module Custom.Html exposing (..)
 
+import Custom.Events exposing (onEnter)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 
 
 
@@ -46,6 +48,11 @@ textRight =
 textLeft : Attribute msg
 textLeft =
     style "text-align" "left"
+
+
+fakeLink : Attribute msg
+fakeLink =
+    class "fake-link"
 
 
 
@@ -271,22 +278,31 @@ tableRow attributes children =
 
 addButton : List (Attribute msg) -> List (Html msg) -> Html msg
 addButton attributes children =
-    a
+    span
         ([ class "w3-button w3-green round-corners"
          , style "margin" "2px"
-         , href "#"
+         , tabindex 0
          ]
             ++ attributes
         )
         children
 
 
+submitButton : msg -> List (Html msg) -> Html msg
+submitButton event children =
+    addButton
+        [ onClick event
+        , onEnter event
+        ]
+        children
+
+
 optionButton : List (Attribute msg) -> List (Html msg) -> Html msg
 optionButton attributes children =
-    a
+    span
         ([ class "w3-button w3-theme round-corners"
          , style "margin" "2px"
-         , href "#"
+         , tabindex 0
          ]
             ++ attributes
         )
@@ -295,10 +311,10 @@ optionButton attributes children =
 
 warnButton : List (Attribute msg) -> List (Html msg) -> Html msg
 warnButton attributes children =
-    a
+    span
         ([ class "w3-button w3-red round-corners"
          , style "margin" "2px"
-         , href "#"
+         , tabindex 0
          ]
             ++ attributes
         )
@@ -307,10 +323,10 @@ warnButton attributes children =
 
 circleButton : List (Attribute msg) -> List (Html msg) -> Html msg
 circleButton attributes children =
-    a
+    span
         ([ class "w3-button w3-circle w3-large w3-card-4"
          , style "margin" "2px"
-         , href "#"
+         , tabindex 0
          ]
             ++ attributes
         )
@@ -355,6 +371,34 @@ textInput attributes children =
         ]
 
 
+passwordInput : List (Attribute msg) -> List (Html msg) -> Html msg
+passwordInput attributes children =
+    inputSection []
+        [ input
+            ([ class "w3-input"
+             , type_ "password"
+             ]
+                ++ attributes
+            )
+            []
+        , inputLabel [] children
+        ]
+
+
+checkboxInput : List (Attribute msg) -> List (Html msg) -> Html msg
+checkboxInput attributes children =
+    inputSection []
+        [ input
+            ([ class "w3-check"
+             , type_ "checkbox"
+             ]
+                ++ attributes
+            )
+            []
+        , inputLabel [] children
+        ]
+
+
 disabledTextInput : List (Attribute msg) -> List (Html msg) -> Html msg
 disabledTextInput attributes children =
     inputSection []
@@ -362,7 +406,6 @@ disabledTextInput attributes children =
             ([ class "w3-input"
              , type_ "text"
              , readonly True
-             , disabled True
              ]
                 ++ attributes
             )

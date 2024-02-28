@@ -6,7 +6,7 @@ import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (selected, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onInput)
 import Http
 import Model.Coach as Coach exposing (Coach, coachsDecoder)
 import Model.Race as Race exposing (Race, racesDecoder)
@@ -178,7 +178,7 @@ viewForm model =
         [ viewNameField model.team
         , viewRaceField model.team model.raceOptions
         , viewCoachField model.team model.coachOptions
-        , addButton [ onClick Submit ] [ text "Add" ]
+        , submitButton Submit [ text "Add" ]
         ]
 
 

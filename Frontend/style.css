@@ -28,3 +28,15 @@ body {
 .round-corners {
     border-radius: 20px;
 }
+input:read-only {
+    background-color: rgba(150, 150, 150, 0.1);
+}
+.fake-link {
+    cursor: pointer;
+}
+.fake-link:hover {
+    color:#009688;
+}
+a:hover {
+    color:#009688;
+}

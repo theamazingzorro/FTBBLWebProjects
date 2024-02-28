@@ -1,6 +1,6 @@
 module Auth exposing (..)
 
-import Html exposing (..)
+import Html exposing (Html, text)
 import Model.Session exposing (Session)
 
 

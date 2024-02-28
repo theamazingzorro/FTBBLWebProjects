@@ -5,7 +5,7 @@ import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
 import Html exposing (Attribute, Html, div, text)
 import Html.Attributes exposing (selected, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onInput)
 import Http
 import Model.Division exposing (Division, DivisionId, divisionDecoder)
 import Model.Session exposing (Session)
@@ -217,12 +217,8 @@ viewSaveError maybeError =
 
 viewLoadError : String -> Html Msg
 viewLoadError errorMessage =
-    let
-        errorHeading =
-            "Couldn't fetch data at this time."
-    in
     errorText []
-        [ emphasisText [] [ text errorHeading ]
+        [ emphasisText [] [ text "Couldn't fetch data at this time." ]
         , text <| "Error: " ++ errorMessage
         ]
 
@@ -261,7 +257,7 @@ viewSelectedTeam maybeTeam =
                 [ viewStaticField "Race" team.race.name
                 , viewStaticField "Coach" team.coach.name
                 , viewStaticField "Elo" <| String.fromInt team.elo
-                , addButton [ onClick Submit ] [ text "Save" ]
+                , submitButton Submit [ text "Save" ]
                 ]
 
         Nothing ->

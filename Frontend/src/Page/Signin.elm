@@ -1,12 +1,12 @@
 module Page.Signin exposing (Model, Msg, OutMsg(..), init, update, view)
 
 import Api
-import Custom.Attributes
 import Custom.Events exposing (onEnter)
+import Custom.Html exposing (..)
 import Error exposing (buildErrorMessage)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, text)
+import Html.Attributes exposing (value)
+import Html.Events exposing (onInput)
 import Http
 import Model.Session exposing (Session)
 import Model.UserPassword exposing (..)
@@ -104,9 +104,8 @@ signinAttempt token userPassword =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h3 [] [ text "Sign in" ]
-        , br [] []
+    row []
+        [ mainHeader [] [ text "Sign in" ]
         , viewSigninError model.signinError
         , viewWrongPassword model.wrongPassword
         , viewForm model
@@ -117,10 +116,9 @@ viewSigninError : Maybe String -> Html msg
 viewSigninError maybeError =
     case maybeError of
         Just error ->
-            div [ Custom.Attributes.errorMessage ]
-                [ h3 [] [ text "Couldn't sign in at this time." ]
+            errorText []
+                [ emphasisText [] [ text "Couldn't sign in at this time." ]
                 , text ("Error: " ++ error)
-                , br [] []
                 ]
 
         Nothing ->
@@ -130,9 +128,7 @@ viewSigninError maybeError =
 viewWrongPassword : Bool -> Html Msg
 viewWrongPassword wrongPassword =
     if wrongPassword then
-        div [ Custom.Attributes.errorMessage ]
-            [ text "Incorrect Username or Password."
-            ]
+        errorText [] [ text "Incorrect Username or Password." ]
 
     else
         text ""
@@ -140,46 +136,28 @@ viewWrongPassword wrongPassword =
 
 viewForm : Model -> Html Msg
 viewForm model =
-    div []
+    inputForm []
         [ viewUsernameField model.userPassword
         , viewPasswordField model.userPassword
-        , button
-            [ Custom.Attributes.submitButton
-            , onClick Submit
-            ]
-            [ text "Sign in" ]
+        , submitButton Submit [ text "Sign in" ]
         ]
 
 
 viewUsernameField : UserPassword -> Html Msg
 viewUsernameField userPassword =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "usernameInput")
-            [ text "User Name" ]
-        , input
-            (Custom.Attributes.formInput "usernameInput"
-                [ onInput UsernameChanged
-                , onEnter Submit
-                , value userPassword.username
-                ]
-            )
-            []
+    textInput
+        [ onInput UsernameChanged
+        , onEnter Submit
+        , value userPassword.username
         ]
+        [ text "Username" ]
 
 
 viewPasswordField : UserPassword -> Html Msg
 viewPasswordField userPassword =
-    div [ Custom.Attributes.formEntry ]
-        [ label
-            (Custom.Attributes.formLabel "passwordInput")
-            [ text "Password" ]
-        , input
-            (Custom.Attributes.formPasswordInput "passwordInput"
-                [ onInput PasswordChanged
-                , onEnter Submit
-                , value userPassword.password
-                ]
-            )
-            []
+    passwordInput
+        [ onInput PasswordChanged
+        , onEnter Submit
+        , value userPassword.password
         ]
+        [ text "Password" ]
