@@ -264,12 +264,8 @@ viewDivisionsOrError model =
 
 viewLoadError : String -> Html Msg
 viewLoadError errorMessage =
-    let
-        errorHeading =
-            "Couldn't fetch data at this time."
-    in
     errorText []
-        [ emphasisText [] [ text errorHeading ]
+        [ emphasisText [] [ text "Couldn't fetch data at this time." ]
         , text <| "Error: " ++ errorMessage
         ]
 

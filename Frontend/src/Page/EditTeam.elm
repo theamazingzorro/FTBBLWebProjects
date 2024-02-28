@@ -161,12 +161,8 @@ viewSaveError maybeError =
 
 viewLoadError : String -> Html Msg
 viewLoadError errorMessage =
-    let
-        errorHeading =
-            "Couldn't fetch data at this time."
-    in
     div [ Custom.Attributes.errorMessage ]
-        [ h3 [] [ text errorHeading ]
+        [ h3 [] [ text "Couldn't fetch data at this time." ]
         , text <| "Error: " ++ errorMessage
         ]
 
