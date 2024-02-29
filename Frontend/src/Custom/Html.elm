@@ -69,12 +69,8 @@ navBar attributes children =
 
 menuIcon : List (Attribute msg) -> Html msg
 menuIcon attributes =
-    a
-        ([ class "w3-bar-item w3-button w3-padding-large w3-hide-large w3-right"
-         , href "#"
-         ]
-            ++ attributes
-        )
+    span
+        (class "w3-bar-item w3-button w3-padding-large w3-hide-large w3-right" :: attributes)
         [ i [ class "fa fa-bars" ] [] ]
 
 
@@ -144,9 +140,8 @@ sideBar attributes children =
 
 closeSideBarButton : List (Attribute msg) -> Html msg
 closeSideBarButton attributes =
-    a
+    span
         ([ class "w3-right w3-xlarge w3-padding-large w3-hover-black w3-hide-large"
-         , href "#"
          , title "Close Menu"
          ]
             ++ attributes
@@ -162,23 +157,15 @@ sideBarTitle attributes children =
 
 sideBarLink : List (Attribute msg) -> List (Html msg) -> Html msg
 sideBarLink attributes children =
-    a
-        ([ class "w3-bar-item w3-button w3-hover-black w3-medium"
-         , href "#"
-         ]
-            ++ attributes
-        )
+    span
+        (class "w3-bar-item w3-button w3-hover-black w3-medium" :: attributes)
         children
 
 
 smallSideBarLink : List (Attribute msg) -> List (Html msg) -> Html msg
 smallSideBarLink attributes children =
-    a
-        ([ class "w3-bar-item w3-button w3-hover-black w3-small"
-         , href "#"
-         ]
-            ++ attributes
-        )
+    span
+        (class "w3-bar-item w3-button w3-hover-black w3-small" :: attributes)
         children
 
 
